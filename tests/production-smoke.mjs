@@ -9,7 +9,7 @@ const server=createServer(async(req,res)=>{
 await new Promise(resolve=>server.listen(3108,'127.0.0.1',resolve));
 const browser=await chromium.launch();
 try{
- const context=await browser.newContext();const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const context=await browser.newContext({timezoneId:'Pacific/Honolulu'});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:3108/nature-lens/');await page.getByRole('button',{name:'먼저 예제 3건으로 둘러보기'}).click();await page.getByRole('button',{name:'겹겹이 펼쳐진 초록 편집'}).waitFor();
  await page.evaluate(()=>navigator.serviceWorker.ready);await context.setOffline(true);await page.reload();await page.getByRole('button',{name:'겹겹이 펼쳐진 초록 편집'}).click();
  await page.getByLabel('사진과 기록의 출판 권한·동의를 확인했습니다.').check();await page.getByLabel('사진에 인물과 개인정보가 없습니다.').check();await page.getByRole('button',{name:'검수 완료로 저장'}).click();await page.getByRole('button',{name:'기록집 만들기'}).click();await page.locator('.book-page').waitFor();
