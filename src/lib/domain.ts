@@ -1,8 +1,10 @@
 import { z } from 'zod';
+import { publicGridSchema, regionLabelSchema } from './location';
 const text = (max:number) => z.string().max(max);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>{const d=new Date(v+'T00:00:00Z');return !isNaN(d.getTime())&&d.toISOString().slice(0,10)===v;},'올바른 관찰일을 입력해 주세요.');
 export const collectionSchema=z.object({id:text(100).min(1),name:text(80).min(1)}).strict();
 export const observationSchema=z.object({
+ taxonGroup:z.enum(['plant','insect','other']).optional(),region:regionLabelSchema.optional(),publicGrid:publicGridSchema.optional(),
  id:text(100).min(1),title:text(120).min(1),species:text(100),scientificName:text(140),date,
  notes:text(4000),habitat:text(150),protection:z.enum(['unknown','protected','common']),
  consent:z.boolean(),noPeople:z.boolean(),aiAssisted:z.boolean(),status:z.enum(['draft','reviewed']),
@@ -14,7 +16,7 @@ const backupSchema=z.object({version:z.literal(1),observations:z.array(observati
 export type Backup=z.infer<typeof backupSchema>;
 export function publicationIssues(o:Pick<Observation,'title'|'species'|'scientificName'|'notes'|'habitat'|'consent'|'noPeople'>):string[]{
  const issues:string[]=[];
- if(!o.species.trim()) issues.push('식물 이름을 확인해 주세요.');
+ if(!o.species.trim()) issues.push('생물 이름을 확인해 주세요.');
  if(!o.notes.trim()) issues.push('관찰 메모를 작성해 주세요.');
  if(!o.consent) issues.push('사진과 기록의 출판 동의를 확인해 주세요.');
  if(!o.noPeople) issues.push('인물이 없는 사진인지 확인해 주세요.');

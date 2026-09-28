@@ -1,3 +1,5 @@
+> 2026-09-29 확장: 아래 내용은 초기 운영자용 MVP 기준입니다. 공동 관찰 홈·좋아요·월간 저널·선택형 GPS의 최신 요구사항은 [COMMUNITY-PRD.md](COMMUNITY-PRD.md)가 우선합니다.
+
 ---
 title: Nature Lens v3 제품 요구사항 명세
 status: draft

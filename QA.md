@@ -22,3 +22,12 @@
 - production offline cache에 `/mobile/`을 추가, 네트워크 차단 상태에서 기존 기록을 모바일 화면에서도 읽는 smoke test 추가.
 - expect-cli 추가 실행도 3분 시간 초과. Playwright/axe로 별도 검증.
 - 실제 iPhone/Android 하드웨어, HEIC, 모바일 OS 강제 종료 복구, 네이티브 카메라·앱스토어 패키지 검증은 미실시. beforeunload 확인은 브라우저가 제공할 때 동작하며 OS 강제 종료를 막지 못한다.
+
+## 2026-09-29 community/journal skeleton
+
+- 15 unit tests: period boundaries, duplicate/future reaction handling, coarse location schema, precise coordinate isolation, photo replacement and location deletion.
+- 11 Chromium browser tests passed: community sorting/likes persistence/filter, mobile capture, GPS allow/deny, existing publication/backup flow and axe WCAG checks.
+- Production base-path build, offline navigation, original two-page recordbook and six-page monthly journal PDF passed with zero page errors.
+- Community photos, authors, stories and reactions are explicitly fictional examples. No backend community, scheduled publication or real device camera/GPS accuracy verification yet.
+- expect-cli v0.0.19 invoked separately; its current CLI lacks the skill's --cookies/--base-url flags, so environment URL and default cookies were used. Result recorded after completion below.
+- expect-cli returned no test report and timed out after 3 minutes. It is not counted as a passed check; the explicit Playwright/axe and production checks above passed.

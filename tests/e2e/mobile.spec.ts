@@ -3,7 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 for (const width of [390, 412]) {
  test(`mobile skeleton ${width}: photo, quick draft, library and persistence`, async ({page}) => {
   await page.setViewportSize({width,height:844}); await page.goto('/mobile/');
-  await expect(page.getByRole('heading',{name:'오늘은 어떤 자연을 만났나요?'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'좋아하는 마음이 생명을 돌보는 기록으로.'})).toBeVisible();
   await page.getByRole('button',{name:'촬영',exact:true}).click();
   await expect(page.getByLabel('카메라로 촬영')).toHaveAttribute('capture','environment');
   await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
@@ -29,7 +29,7 @@ test('invalid photo, retry, discard confirmation and all tabs',async({page})=>{
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
  page.once('dialog',d=>d.dismiss());await page.getByRole('button',{name:'촬영 닫기'}).click();await expect(page.getByRole('button',{name:'내 기록에 저장'})).toBeVisible();
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'촬영 닫기'}).click();
- await page.getByRole('button',{name:'모아보기',exact:true}).click();await expect(page.getByRole('heading',{name:'발견을 차곡차곡'})).toBeVisible();
+ await page.getByRole('button',{name:'저널',exact:true}).click();await expect(page.getByRole('heading',{name:'월간 생명 저널'})).toBeVisible();
  await page.getByRole('button',{name:'설정',exact:true}).click();await expect(page.getByRole('heading',{name:'내 손안의 관찰실'})).toBeVisible();
 });
 test('browser back warns before abandoning a captured draft',async({page})=>{
