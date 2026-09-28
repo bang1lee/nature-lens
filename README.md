@@ -53,3 +53,6 @@ NEXT_PUBLIC_BASE_PATH=/nature-lens npm run build
 실제 운영자 로그인·공동 참여를 추가하기 전 Supabase 프로젝트/보안 정책 검수, 소유자 분리 RLS 실DB 테스트, Storage 접근 제어, 참가 토큰 만료/레이트리밋을 구현해야 합니다. Pl@ntNet·Claude 키는 서버/Edge Function에만 두고 정확도 테스트 및 비용 한도를 검증해야 합니다. 현재 로컬 전용 MVP에 서버 권한 검증이 된 것처럼 표시하지 않습니다.
 
 PRD 진본과 전략 브리프는 뉴리프 위키에서 관리합니다. 이 저장소에는 서비스 소스와 운영 문서만 단방향 발행합니다.
+
+## 모바일 UI 스켈레톤
+[모바일 관찰 화면](https://bang1lee.github.io/nature-lens/mobile/)에서 카메라/앨범 → 선택 이름·메모 → 로컬 초안 저장 흐름을 먼저 확인할 수 있습니다. iPhone/Android 앱 형태의 PWA 화면이며 네이티브 앱스토어 패키징은 아직 없습니다. 화면 구성과 후속 실기기 검증 범위는 [MOBILE-UI.md](MOBILE-UI.md)를 참고하세요.
