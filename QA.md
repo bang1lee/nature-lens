@@ -31,3 +31,11 @@
 - Community photos, authors, stories and reactions are explicitly fictional examples. No backend community, scheduled publication or real device camera/GPS accuracy verification yet.
 - expect-cli v0.0.19 invoked separately; its current CLI lacks the skill's --cookies/--base-url flags, so environment URL and default cookies were used. Result recorded after completion below.
 - expect-cli returned no test report and timed out after 3 minutes. It is not counted as a passed check; the explicit Playwright/axe and production checks above passed.
+
+## 세 방향 연결 준비 증분
+- Sonnet 5.5 Magpie quick synthetic coding: 6 checks passed. Large implementation run interrupted first by sandbox dependency network access, later by prompt-length/429; no successful Opus review claimed. Main agent completed remaining implementation.
+- Unit tests: 21 passed; TypeScript passed. Coverage includes private GPS exclusion, failed restore atomicity, cloud payload allowlist/consent, public-key config validation and AI contracts. Backup photo encoder is injected in unit tests; actual image re-encoding is exercised by browser roundtrip.
+- Supabase project absent by user confirmation. SQL migration/pgTAP scenarios provided but not executed; no actual login email, multi-user RLS, remote photo upload or AI identification performed. Production enablement requires SUPABASE-SETUP.md checks.
+- Browser checks: existing 11 passed; new mobile backup/download/invalid restore/new-browser restore/duplicate restore/no-cloud-state/axe/mobile width scenario passed after narrowing its alert locator (12 total scenarios). No iPhone hardware claim.
+- Production base-path build and smoke passed: offline reload, local review, recordbook/monthly PDF, zero page errors.
+- expect-cli v0.0.19 was invoked with localhost-only scope and no cookies. It failed with `Agent produced no output for 180s` (AcpStreamError); not counted as passing. Playwright/axe and production smoke are the successful browser evidence.

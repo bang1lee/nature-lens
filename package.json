@@ -11,6 +11,7 @@
     "test:production": "node tests/production-smoke.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.117.2",
     "idb": "latest",
     "lucide-react": "latest",
     "next": "latest",

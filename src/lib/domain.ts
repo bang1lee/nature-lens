@@ -14,14 +14,16 @@ export type Observation=z.infer<typeof observationSchema>;
 export type Collection=z.infer<typeof collectionSchema>;
 const backupSchema=z.object({version:z.literal(1),observations:z.array(observationSchema).max(500),collections:z.array(collectionSchema).max(100)}).strict();
 export type Backup=z.infer<typeof backupSchema>;
+export function containsForbiddenClaim(text:string):boolean{
+ return /식용|약용|먹을|먹어|섭취|복용|효능|치료|독성없|edible|medicinal|cures?/i.test(text.normalize('NFKC').replace(/[\s\p{Cf}\p{P}]/gu,''));
+}
 export function publicationIssues(o:Pick<Observation,'title'|'species'|'scientificName'|'notes'|'habitat'|'consent'|'noPeople'>):string[]{
  const issues:string[]=[];
  if(!o.species.trim()) issues.push('생물 이름을 확인해 주세요.');
  if(!o.notes.trim()) issues.push('관찰 메모를 작성해 주세요.');
  if(!o.consent) issues.push('사진과 기록의 출판 동의를 확인해 주세요.');
  if(!o.noPeople) issues.push('인물이 없는 사진인지 확인해 주세요.');
- const publicText=[o.title,o.species,o.scientificName,o.notes,o.habitat].join(' ').normalize('NFKC').replace(/[\s\p{Cf}\p{P}]/gu,'');
- if(/식용|약용|먹을|먹어|섭취|복용|효능|치료|독성없|edible|medicinal|cures?/i.test(publicText)) issues.push('식용·약용·효능 정보는 출판할 수 없습니다. 해당 내용을 삭제해 주세요.');
+ if(containsForbiddenClaim([o.title,o.species,o.scientificName,o.notes,o.habitat].join(' '))) issues.push('식용·약용·효능 정보는 출판할 수 없습니다. 해당 내용을 삭제해 주세요.');
  return issues;
 }
 export function canPublish(o:Observation){return o.status==='reviewed'&&publicationIssues(o).length===0;}
