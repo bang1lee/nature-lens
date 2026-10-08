@@ -1,0 +1,17 @@
+{
+  "$schema":"https://schema.tauri.app/config/2",
+  "productName":"Nature Lens",
+  "version":"0.1.0",
+  "identifier":"org.newleaf.naturelens",
+  "build":{
+    "beforeDevCommand":"npm run native:web:dev",
+    "beforeBuildCommand":"npm run native:web:build",
+    "devUrl":"http://localhost:3108",
+    "frontendDist":"../out"
+  },
+  "app":{
+    "windows":[{"label":"main","title":"Nature Lens · 자연 기록장","url":"mobile/index.html","width":1180,"height":820,"minWidth":360,"minHeight":600}],
+    "security":{"csp":"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'"}
+  },
+  "bundle":{"active":true,"targets":["app","dmg"],"icon":["icons/32x32.png","icons/128x128.png","icons/128x128@2x.png","icons/icon.icns","icons/icon.ico"],"category":"Education","shortDescription":"사진으로 남기는 자연 관찰 노트","macOS":{"minimumSystemVersion":"12.0"},"android":{"minSdkVersion":26}}
+}

@@ -34,3 +34,8 @@ it('removes stale GPS on photo replacement and permits deleting all location dat
  await saveObservation({...changed,region:'경기 안성',publicGrid:item.publicGrid},changed.updatedAt,precise);await removeObservationLocation(item.id);
  const removed=(await readLibrary()).observations.find(o=>o.id===item.id)!;expect(removed.region).toBeUndefined();expect(removed.publicGrid).toBeUndefined();expect(removed.status).toBe('draft');expect(await readPrivateLocation(item.id)).toBeUndefined();
 });
+it('returns the persisted timestamp so a newly captured record can be edited immediately',async()=>{
+ const item={...record,id:'immediate-ai-apply'};
+ const saved=await saveObservation(item,null);
+ expect(saved).toEqual((await readLibrary()).observations.find(o=>o.id===item.id));
+});

@@ -6,3 +6,25 @@ out/
 test-results/
 playwright-report/
 .DS_Store
+
+# Native build outputs and local gateway ledger
+src-tauri/target/
+src-tauri/gen/schemas/
+src-tauri/gen/android/.gradle/
+src-tauri/gen/android/.idea/
+src-tauri/gen/android/**/build/
+src-tauri/gen/android/local.properties
+*.sqlite*
+
+.next-app-test/
+
+.next-native/
+
+release/
+
+# Cloudflare local state and secrets
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+.next-frontend/

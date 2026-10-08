@@ -1,0 +1,86 @@
+.m-capture.lens-capture {
+ --lens-paper:#f4f2ec; --lens-ink:#1d2520; --lens-forest:#315e45;
+ --lens-moss:#81946a; --lens-pollen:#d6a84a;
+ background:var(--lens-paper); color:var(--lens-ink); width:100%; min-width:0;
+ min-height:100dvh; padding-bottom:env(safe-area-inset-bottom,0px); word-break:keep-all; overflow-wrap:anywhere;
+}
+.lens-capture .m-flow-header { padding:20px 24px; min-height:86px; border-bottom:1px solid #d9ddd1; }
+.lens-capture .m-flow-header .lens-flow-title { font-family:var(--serif,Georgia,serif); font-size:22px; font-weight:500; letter-spacing:-.6px; }
+.lens-capture .m-flow-header .m-step { color:#53634f; font-size:12px; }
+.lens-capture .m-flow-header .m-icon { color:var(--lens-forest); background:transparent; border:1px solid #c2cbbb; border-radius:50%; width:44px; height:44px; }
+.lens-capture .m-web-camera { margin:24px 24px 0; overflow:hidden; border-radius:22px; background:var(--lens-ink); color:var(--lens-paper); }
+.lens-capture .m-web-camera .m-viewfinder { margin:0; padding:32px 22px; height:clamp(300px,60dvh,620px); min-height:0; border-radius:0; background:#26382e; isolation:isolate; overflow:hidden; }
+.lens-capture .m-viewfinder>svg { color:#bac8a5; margin-bottom:28px; }
+.lens-capture .m-viewfinder h1 { font-family:var(--serif,Georgia,serif); font-weight:400; font-size:clamp(26px,3.4vw,36px); line-height:1.55; letter-spacing:-.8px; margin:0 0 20px; color:var(--lens-paper); }
+.lens-capture .m-viewfinder p { color:#d4dccc; font-size:13px; line-height:1.9; margin:0; max-width:44ch; }
+.lens-capture .m-web-camera video { position:absolute; inset:0; width:100%; height:100%; max-height:none; object-fit:contain; background:var(--lens-ink); border-radius:0; }
+.lens-focus-frame { position:absolute; inset:15% 13% 20%; pointer-events:none; }
+.lens-focus-frame i { position:absolute; width:38px; height:38px; border:2px solid #f4f2ecb8; }
+.lens-focus-frame i:nth-child(1) { top:0; left:0; border-right:0; border-bottom:0; border-top-left-radius:16px; }
+.lens-focus-frame i:nth-child(2) { top:0; right:0; border-left:0; border-bottom:0; border-top-right-radius:16px; }
+.lens-focus-frame i:nth-child(3) { bottom:0; left:0; border-right:0; border-top:0; border-bottom-left-radius:16px; }
+.lens-focus-frame i:nth-child(4) { bottom:0; right:0; border-left:0; border-top:0; border-bottom-right-radius:16px; }
+.lens-capture .m-viewfinder .lens-focus-hint { position:absolute; left:16px; right:16px; bottom:20px; margin:auto; width:fit-content; max-width:calc(100% - 32px); padding:6px 12px; font-size:14px; border-radius:8px; background:#1d2520d9; color:#f4f2ec; }
+.lens-capture .m-live-controls { min-height:116px; padding:20px 28px; gap:20px; border-top:1px solid #50604f; background:var(--lens-ink); }
+.lens-capture .m-live-controls .m-secondary { min-width:0; width:auto; min-height:48px; padding:12px 18px; margin:0; border:1px solid #81946a; border-radius:12px; background:transparent; color:#f4f2ec; font-size:13px; line-height:1.5; }
+.lens-capture .lens-controls-live { display:grid; grid-template-columns:minmax(0,1fr) 80px minmax(0,1fr); }
+.lens-capture .lens-controls-live .m-secondary { display:flex; flex-direction:column; gap:6px; justify-content:center; align-items:center; border-color:transparent; padding:8px 0; }
+.lens-capture .m-shutter { width:72px; height:72px; margin:auto; outline:1px solid var(--lens-pollen); outline-offset:4px; border:3px solid #1d2520; color:#1d2520; background:var(--lens-pollen); cursor:pointer; }
+.lens-capture .m-shutter:hover:not(:disabled) { background:#e2bb63; }
+.lens-capture .m-shutter:active:not(:disabled) { transform:scale(.96); }
+.lens-capture .m-live-controls [role=status] { display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; line-height:1.7; margin:0; }
+.lens-capture .m-live-controls .m-secondary:disabled,.lens-capture .m-shutter:disabled { opacity:.55; cursor:not-allowed; }
+.lens-shot-guide { padding:0 24px 22px; display:flex; gap:20px; flex-wrap:wrap; justify-content:center; font-size:13px; color:#d4dccc; }
+.lens-shot-guide span { display:inline-flex; align-items:center; gap:6px; }
+.lens-shot-guide p { margin:0; width:100%; text-align:center; font-size:13px; line-height:1.8; color:#c1cbb9; }
+.lens-capture .m-camera-fallback { padding:22px 24px 12px; gap:12px; }
+.lens-capture .m-camera-fallback .m-secondary { background:#fffdf7; border:1px solid #aab7a1; color:var(--lens-forest); border-radius:12px; min-height:48px; min-width:0; padding:12px 18px; margin:0; font-size:13px; }
+.lens-capture .m-camera-help { font-size:12px; line-height:1.9; text-align:center; color:#53634f; padding:0 24px 28px; margin:8px 0 0; }
+.lens-capture .m-web-camera .m-error { color:#713324; background:#fff0e6; border:1px solid #be9d88; margin:16px 20px; }
+.lens-capture :focus-visible { outline:3px solid var(--lens-forest); outline-offset:4px; }
+.lens-capture .m-web-camera :focus-visible { outline-color:#e2bb63; }
+.lens-capture .m-quick-form { padding:28px 24px; gap:32px; }
+.lens-capture .m-photo-review { margin:0; border-radius:18px; overflow:hidden; background:#e5e8dc; }
+.lens-capture .m-photo-review img { display:block; height:clamp(280px,55dvh,600px); min-width:0; border-radius:0; object-fit:contain; background:#e5e8dc; }
+.lens-capture .m-photo-review button { bottom:16px; right:16px; background:#fffdf7; border:1px solid #8fa183; border-radius:10px; color:var(--lens-forest); padding:10px 14px; font-size:12px; }
+.lens-capture .m-quick-fields { min-width:0; padding:0; }
+.lens-capture .m-quick-fields h1 { font-family:var(--serif,Georgia,serif); font-size:29px; font-weight:500; line-height:1.5; letter-spacing:-.7px; margin:12px 0; }
+.lens-capture .m-quick-fields>p,.lens-capture .m-quick-fields .m-muted { color:#53634f; font-size:13px; line-height:1.9; }
+.lens-capture .m-quick-fields>label { display:block; color:var(--lens-ink); font-size:14px; margin-top:24px; }
+.lens-capture .m-quick-fields>label>span { color:#53634f; }
+.lens-capture .m-quick-fields input,.lens-capture .m-quick-fields textarea,.lens-capture .m-quick-fields select { min-width:0; max-width:100%; background:#fffdf8; color:var(--lens-ink); border:1px solid #a5b29b; border-radius:10px; font-size:16px; padding:13px 14px; }
+.lens-capture .m-quick-fields input::placeholder,.lens-capture .m-quick-fields textarea::placeholder { color:#66715e; }
+.lens-capture .m-location { margin-top:24px; padding:24px 0 0; border-top:1px solid #d1d7c9; }
+.lens-capture .m-location h2 { font-family:var(--serif,Georgia,serif); font-size:22px; font-weight:500; }
+.lens-capture .m-location p { color:#53634f; font-size:13px; line-height:1.9; }
+.lens-capture .m-location .m-secondary { background:#fffdf7; color:var(--lens-forest); border:1px solid #a5b29b; }
+.lens-capture .m-location-check { color:var(--lens-ink); }
+.lens-capture .m-location-check input { padding:0; accent-color:var(--lens-forest); }
+.lens-capture .m-quick-fields .m-private-note { border-radius:10px; background:#e4eadb; color:#3c5136; font-size:12px; padding:14px 16px; margin:24px 0; }
+.lens-capture .m-quick-fields>.m-primary { background:var(--lens-forest); color:#fffdf7; border-radius:12px; min-height:54px; font-size:15px; }
+@media(min-width:1024px) {
+ .lens-capture .m-quick-form { grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); padding:32px; gap:40px; }
+ .lens-capture .m-photo-review { top:24px; }
+ .lens-capture .m-photo-review img { height:clamp(380px,65dvh,680px); }
+}
+@media(max-width:639px) {
+ .lens-capture .m-flow-header { padding:16px; padding-top:calc(16px + env(safe-area-inset-top,0px)); min-height:76px; }
+ .lens-capture .m-web-camera { margin:12px 12px 0; border-radius:18px; }
+ .lens-capture .m-web-camera .m-viewfinder { height:clamp(280px,60dvh,560px); padding:28px 18px; }
+ .lens-capture .m-viewfinder h1 { font-size:27px; }
+ .lens-capture .m-viewfinder p { font-size:13px; }
+ .lens-capture .m-live-controls { padding:18px 16px; gap:10px; }
+ .lens-capture .lens-controls-live .m-secondary { font-size:13px; }
+ .lens-capture .m-camera-fallback { padding:20px 16px 10px; gap:10px; }
+ .lens-capture .m-camera-fallback .m-secondary { padding:12px; font-size:12px; }
+ .lens-capture .m-quick-form { display:block; padding:18px 16px 28px; }
+ .lens-capture .m-photo-review img { height:clamp(260px,46dvh,460px); }
+ .lens-capture .m-quick-fields { padding-top:24px; }
+ .lens-capture .m-quick-fields { padding-bottom:calc(112px + env(safe-area-inset-bottom,0px)); }
+ .lens-capture .m-quick-fields h1 { font-size:27px; }
+ .lens-capture .m-quick-fields>.m-primary { position:fixed; z-index:30; left:max(16px,calc((100vw - 480px)/2 + 16px)); right:max(16px,calc((100vw - 480px)/2 + 16px)); bottom:0; width:auto; margin:0; padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px)); box-shadow:0 -8px 24px #20392c24; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .lens-capture *, .lens-capture *::before, .lens-capture *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+ .lens-capture .m-shutter:active { transform:none; }
+}

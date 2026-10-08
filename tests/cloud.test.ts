@@ -18,11 +18,11 @@ it('requires consent and emits allowlisted payload without coordinates',()=>{
  expect(aliasSchema.safeParse('admin').success).toBe(false);expect(aliasSchema.safeParse('a@b.com').success).toBe(false);
 });
 it('AI contract rejects unconsented/extra data and unchecked results',()=>{
- const r={observationId:'a',photo:'data:image/jpeg;base64,YQ==',taxonGroup:'plant',transmissionConsent:true};
+ const r={requestId:crypto.randomUUID(),noPeople:true,observationId:'a',photo:'data:image/jpeg;base64,YQ==',taxonGroup:'plant',transmissionConsent:true};
  expect(identificationRequestSchema.safeParse(r).success).toBe(true);
  expect(identificationRequestSchema.safeParse({...r,transmissionConsent:false}).success).toBe(false);
  expect(identificationRequestSchema.safeParse({...r,latitude:37}).success).toBe(false);
- expect(identificationRequestSchema.safeParse({...r,taxonGroup:'insect'}).success).toBe(false);
+ expect(identificationRequestSchema.safeParse({...r,taxonGroup:'insect'}).success).toBe(true);
  expect(identificationResultSchema.safeParse({state:'candidates',provider:'plantnet',modelVersion:'v1',candidates:[],needsHumanReview:true}).success).toBe(false);
  expect(identificationResultSchema.safeParse({state:'uncertain',provider:'plantnet',modelVersion:'v1',candidates:[],needsHumanReview:true}).success).toBe(true);
 });

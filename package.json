@@ -8,7 +8,26 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
-    "test:production": "node tests/production-smoke.mjs"
+    "test:production": "node tests/production-smoke.mjs",
+    "identify:server": "node server/start.mjs",
+    "tauri": "tauri",
+    "native:doctor": "tauri info",
+    "native:web:dev": "node scripts/native-web.mjs dev",
+    "native:web:build": "node scripts/native-web.mjs build",
+    "native:mac:dev": "tauri dev",
+    "native:mac:build": "tauri build",
+    "native:android:init": "tauri android init",
+    "native:android:dev": "tauri android dev",
+    "native:android:build": "tauri android build",
+    "test:app": "playwright test -c app.playwright.config.ts",
+    "identify:preflight": "node scripts/identify-preflight.mjs",
+    "build:cloudflare": "NEXT_PUBLIC_BASE_PATH= npm run build",
+    "dev:worker": "wrangler dev --local --test-scheduled",
+    "typecheck:worker": "tsc --noEmit -p worker/tsconfig.json",
+    "test:worker": "node tests/worker-smoke.mjs",
+    "deploy:cloudflare": "npm run build:cloudflare && wrangler deploy",
+    "test:transfer-live": "node tests/transfer-live.mjs",
+    "test:deployed-api": "node tests/deployed-api-smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
@@ -17,17 +36,24 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "sharp": "0.35.5",
     "zod": "latest"
   },
   "devDependencies": {
     "@axe-core/playwright": "latest",
+    "@cloudflare/workers-types": "5.20261007.1",
     "@playwright/test": "latest",
+    "@tauri-apps/cli": "2.12.0",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "fake-indexeddb": "^6.2.5",
     "typescript": "latest",
-    "vitest": "latest"
+    "vitest": "latest",
+    "wrangler": "4.148.0"
   },
-  "type": "module"
+  "type": "module",
+  "overrides": {
+    "sharp": "$sharp"
+  }
 }

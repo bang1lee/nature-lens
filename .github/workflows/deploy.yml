@@ -23,6 +23,7 @@ jobs:
       - run: npm run typecheck
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm run test:app
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /nature-lens

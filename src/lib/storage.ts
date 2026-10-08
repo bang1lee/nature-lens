@@ -1,6 +1,6 @@
 import { openDB } from 'idb';
 import { privateLocationSchema, type PrivateLocation } from './location';
-import { observationSchema, collectionSchema, assertLibraryCapacity, type Observation, type Collection, type Backup } from './domain';
+import { observationSchema, collectionSchema, collectionWriteSchema, assertLibraryCapacity, type Observation, type Collection, type Backup } from './domain';
 const db = () => openDB('nature-lens-v1',2,{upgrade(db,oldVersion){if(oldVersion<1){db.createObjectStore('observations',{keyPath:'id'});db.createObjectStore('collections',{keyPath:'id'});}if(oldVersion<2)db.createObjectStore('privateLocations');}});
 export async function readLibrary():Promise<{observations:Observation[];collections:Collection[]}> {
  const d=await db();try{return {observations:(await d.getAll('observations')).map(x=>observationSchema.parse(x)),collections:(await d.getAll('collections')).map(x=>collectionSchema.parse(x))};}finally{d.close();}
@@ -14,12 +14,12 @@ export async function saveObservation(record:Observation,expectedUpdatedAt:strin
   parsed.updatedAt=new Date(Math.max(Date.now(),existing?Date.parse(existing.updatedAt)+1:0)).toISOString();
   const observations=(await tx.objectStore('observations').getAll()).filter(o=>o.id!==parsed.id);observations.push(parsed);
   const collections=await tx.objectStore('collections').getAll();assertLibraryCapacity({observations,collections});
-  await tx.objectStore('observations').put(parsed);if(precise)await tx.objectStore('privateLocations').put(precise,parsed.id);else if(precise===null || (existing && existing.photo!==parsed.photo))await tx.objectStore('privateLocations').delete(parsed.id);await tx.done;
+  await tx.objectStore('observations').put(parsed);if(precise)await tx.objectStore('privateLocations').put(precise,parsed.id);else if(precise===null || (existing && existing.photo!==parsed.photo))await tx.objectStore('privateLocations').delete(parsed.id);await tx.done;return parsed;
  }catch(e){try{tx.abort();}catch{}await tx.done.catch(()=>{});throw e;}finally{d.close();}
 }
 export async function deleteObservation(id:string){const d=await db();try{const tx=d.transaction(['observations','privateLocations'],'readwrite');await tx.objectStore('observations').delete(id);await tx.objectStore('privateLocations').delete(id);await tx.done;}finally{d.close();}}
 export async function saveCollection(record:Collection){
- const c=collectionSchema.parse(record);const d=await db();const tx=d.transaction(['observations','collections'],'readwrite');
+ const c=collectionWriteSchema.parse(record);const d=await db();const tx=d.transaction(['observations','collections'],'readwrite');
  try{const observations=await tx.objectStore('observations').getAll();const collections=(await tx.objectStore('collections').getAll()).filter(x=>x.id!==c.id);collections.push(c);assertLibraryCapacity({observations,collections});await tx.objectStore('collections').put(c);await tx.done;}catch(e){try{tx.abort();}catch{}await tx.done.catch(()=>{});throw e;}finally{d.close();}
 }
 export async function restoreLibrary(backup:Backup){

@@ -3,6 +3,8 @@ import { publicGridSchema, regionLabelSchema } from './location';
 const text = (max:number) => z.string().max(max);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>{const d=new Date(v+'T00:00:00Z');return !isNaN(d.getTime())&&d.toISOString().slice(0,10)===v;},'올바른 관찰일을 입력해 주세요.');
 export const collectionSchema=z.object({id:text(100).min(1),name:text(80).min(1)}).strict();
+// Validate new edits without making legacy backups or stored collections unreadable.
+export const collectionWriteSchema=collectionSchema.extend({name:z.string().trim().min(1,'컬렉션 이름을 입력해 주세요.').max(80)});
 export const observationSchema=z.object({
  taxonGroup:z.enum(['plant','insect','other']).optional(),region:regionLabelSchema.optional(),publicGrid:publicGridSchema.optional(),
  id:text(100).min(1),title:text(120).min(1),species:text(100),scientificName:text(140),date,

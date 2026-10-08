@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Camera, Check, ImagePlus, Leaf, LoaderCircle, X } from 'lucide-react';
+import WebCamera from './WebCamera';
+import { Check, ImagePlus, LoaderCircle, X } from 'lucide-react';
 import { newObservation, type Observation } from '@/lib/domain';
 import { preparePhoto } from '@/lib/image';
 import { saveObservation } from '@/lib/storage';
 import { REGIONS, coarsePoint, type PrivateLocation } from '@/lib/location';
+import './lens-biophilic.css';
 
 type Props = { onClose: () => void; onSaved: (record: Observation) => void };
 
@@ -60,35 +62,28 @@ export default function QuickCapture({ onClose, onSaved }: Props) {
     setBusy(true); setError('');
     try {
       const record = { ...newObservation(), photo, title: name.trim() || '오늘 만난 자연', species: name.trim(), notes: notes.trim(), taxonGroup, ...(region ? {region} : {}), ...(position && matches ? {publicGrid:coarsePoint(position.latitude, position.longitude)} : {}) };
-      await saveObservation(record, null, position && matches && keepPrecise ? position : null);
-      onSaved(record);
+      const stored = await saveObservation(record, null, position && matches && keepPrecise ? position : null);
+      onSaved(stored);
     } catch (e) { setError(e instanceof Error ? e.message : '저장하지 못했어요. 사진을 유지한 채 다시 시도할 수 있어요.'); }
     finally { setBusy(false); }
   }
 
-  return <section className={`m-capture ${photo ? 'm-capture-review' : ''}`} aria-label="빠른 촬영 기록">
+  return <section className={`m-capture lens-capture ${photo ? 'm-capture-review' : ''}`} aria-label="빠른 촬영 기록">
     <header className="m-flow-header">
       <button className="m-icon" aria-label="촬영 닫기" onClick={close} disabled={busy}><X size={23}/></button>
-      <span>{photo ? '기록 남기기' : '자연 담기'}</span>
+      <span className="lens-flow-title">{photo ? '기록 남기기' : '자연 담기'}</span>
       <span className="m-step">{photo ? '2 / 2' : '1 / 2'}</span>
     </header>
     <input ref={camera} hidden type="file" aria-label="카메라로 촬영" capture="environment" accept="image/jpeg,image/png,image/webp" onChange={e => void select(e.target.files?.[0])}/>
     <input ref={album} hidden type="file" aria-label="앨범 사진 선택" accept="image/jpeg,image/png,image/webp" onChange={e => void select(e.target.files?.[0])}/>
     {!photo ? <>
-      <div className="m-viewfinder">
-        <span className="m-corner m-tl"/><span className="m-corner m-tr"/><span className="m-corner m-bl"/><span className="m-corner m-br"/>
-        <Leaf size={76} strokeWidth={.8}/>
-        <h1>작은 발견을<br/>가까이 담아보세요.</h1>
-        <p>아래 촬영 버튼을 누르면<br/>휴대폰 카메라가 열립니다.</p>
-      </div>
+      <WebCamera onCapture={value=>{setPhoto(value);setMatches(false);setKeepPrecise(false);}}/>
       {error && <p className="m-error" role="alert">{error}</p>}
-      <div className="m-camera-tip">잎이나 꽃이 선명하게 보이도록 찍어주세요.</div>
-      <div className="m-shutter-bar">
-        <button className="m-album-button" onClick={() => album.current?.click()} disabled={busy}><ImagePlus size={24}/><span>앨범</span></button>
-        <button className="m-shutter" aria-label="사진 촬영하기" onClick={() => camera.current?.click()} disabled={busy || locating}>{busy ? <LoaderCircle className="spin"/> : <Camera size={29}/>}</button>
-        <span className="m-camera-mode">사진<br/><small>후면 카메라</small></span>
+      <div className="m-camera-fallback">
+        <button className="m-secondary" onClick={()=>album.current?.click()} disabled={busy}><ImagePlus size={20}/> 사진 선택</button>
+        <button className="m-secondary" onClick={()=>camera.current?.click()} disabled={busy}>기기 카메라로 촬영</button>
       </div>
-      <p className="m-camera-help">기기에 따라 카메라 또는 사진 선택 화면이 열릴 수 있어요.</p>
+      <p className="m-camera-help">사진은 저장 버튼을 누르면 이 브라우저에 보관돼요.<br/>AI로 전송하려면 별도로 동의해야 해요.</p>
     </> : <form onSubmit={e => { e.preventDefault(); void save(); }} className="m-quick-form">
       <div className="m-photo-review"><img src={photo} alt="방금 선택한 자연 사진"/><button type="button" onClick={() => album.current?.click()} disabled={busy}><ImagePlus size={16}/> 사진 바꾸기</button></div>
       <div className="m-quick-fields"><span className="m-muted">{new Date().toLocaleDateString('ko-KR')} · 위치는 선택 사항</span>

@@ -1,0 +1,104 @@
+/* Dembrandt reference observations translated into the Nature Lens fieldbook.
+   Board only: the existing /mobile shell and shared data flows stay independent. */
+.m-stage.m-web-board {
+ --m-paper:#f4f2ec; --m-card:#fffefa; --m-ink:#1d2520; --m-muted:#53634f;
+ --board-primary:#315e45; --board-moss:#81946a; --board-pollen:#d6a84a;
+ --board-forest:#183e30; --board-leaf:#f4f2ec;
+ font-size:16px;
+}
+.m-web-board .m-content { padding-left:32px; padding-right:32px; }
+.m-web-board .m-content>.m-header { min-height:64px; padding:16px 0; margin-bottom:24px; }
+.m-web-board .m-board-breadcrumb,.m-web-board .m-header-state { font-size:14px; }
+.m-web-board .m-board-sidebar { background:var(--board-forest); border-color:var(--board-forest); padding-top:32px; }
+.m-web-board .m-board-brand { color:#fff9e9; }
+.m-web-board .m-board-brand small { color:#d2dfcd; font-size:12px; line-height:1.8; }
+.m-web-board .m-board-nav { margin-top:40px; gap:8px; }
+.m-web-board .m-board-nav button,.m-web-board .m-board-nav a { min-height:52px; padding:14px 16px; font-size:16px; line-height:1.5; border-radius:8px; color:#e4ebdc; }
+.m-web-board .m-board-nav button[aria-current=page] { background:var(--board-leaf); color:#183e30; font-weight:600; }
+.m-web-board .m-board-nav button:hover:not([aria-current]),.m-web-board .m-board-nav a:hover { background:#315d46; color:#fff; }
+.m-web-board .m-board-nav .m-board-studio { border-top-color:#5c8068; border-radius:0; padding-top:24px; }
+.m-web-board .m-board-local,.m-web-board .m-board-sidebar-bottom p { color:#d2dfcd; font-size:14px; line-height:1.8; }
+.m-web-board .m-board-sidebar-bottom p { font-family:var(--serif); font-size:18px; margin-top:24px; }
+.m-web-board .m-board-nav :focus-visible,.m-web-board .m-board-brand:focus-visible { outline-color:var(--board-pollen); }
+.m-web-board .m-page-title h1 { font-size:34px; line-height:1.35; margin-bottom:8px; }
+.m-web-board .m-page-title p { font-size:16px; line-height:1.6; }
+.m-web-board .m-board-heading { gap:24px; margin-bottom:24px; }
+.m-web-board .m-board-heading>.m-primary,.m-web-board .m-board-start-actions>button { min-height:48px; padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600; line-height:1.5; }
+.m-web-board .m-board-filters { padding:16px; gap:16px; border:1px solid #bcc7b2; border-radius:14px; background:var(--m-card); }
+.m-web-board .m-board-filters .m-search { min-height:48px; background:var(--m-paper); border-color:#7b8b71; border-radius:8px; }
+.m-web-board .m-board-filters .m-search input { font-size:16px; min-height:46px; }
+.m-web-board .m-board-filters>label:not(.m-search) { font-size:14px; gap:8px; }
+.m-web-board .m-board-filters select { min-height:48px; padding:10px 32px 10px 12px; background:var(--m-paper); border-color:#7b8b71; border-radius:8px; font-size:14px; }
+.m-web-board .m-board-results { min-height:56px; padding:12px 0; gap:8px 16px; }
+.m-web-board .m-board-results p,.m-web-board .m-board-results button { font-size:14px; line-height:1.6; }
+.m-web-board .m-board-message { border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:14px; line-height:1.5; }
+.m-web-board .m-recent-grid,.m-web-board .m-board-skeleton { grid-template-columns:repeat(auto-fill,minmax(min(264px,100%),1fr)); gap:24px; }
+.m-web-board .m-board-card { border-color:#bcc7b2; border-radius:14px; background:var(--m-card); }
+.m-web-board .m-record-card { border-radius:13px 13px 0 0; }
+.m-web-board .m-record-card>img { border-radius:13px 13px 0 0; aspect-ratio:4/3; }
+.m-web-board .m-record-copy { gap:12px; padding:16px; }
+.m-web-board .m-record-copy strong { font-size:22px; line-height:1.45; }
+.m-web-board .m-record-copy>.m-record-meta { font-size:14px; line-height:1.5; }
+.m-web-board .m-record-status { font-size:12px; line-height:1.5; min-height:28px; padding:5px 8px; border-radius:8px; }
+.m-web-board .m-record-copy>.m-board-note { font-size:16px; line-height:1.6; min-height:3.2em; max-height:3.2em; }
+.m-web-board .m-board-card>footer { min-height:56px; padding-left:16px; padding-right:8px; border-color:#dce2d1; }
+.m-web-board .m-board-card>footer>span { font-size:14px; line-height:1.5; }
+.m-web-board .m-card-menu>button { font-size:14px; min-height:48px; }
+.m-web-board .m-board-skeleton>div { border-radius:14px; }
+.m-web-board .m-board-start { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(170px,1fr); gap:32px; padding:32px; border:1px solid #c1ccb5; border-radius:14px; background:var(--m-card); align-items:center; }
+.m-web-board .m-board-start-copy { min-width:0; text-align:left; }
+.m-web-board .m-board-place { display:block; font-size:14px; line-height:1.5; color:#526353; margin-bottom:12px; }
+.m-web-board .m-board-start h2 { font-family:var(--serif); font-size:30px; line-height:1.4; font-weight:500; letter-spacing:-.8px; margin:0 0 16px; color:var(--m-ink); word-break:keep-all; }
+.m-web-board .m-board-start p { margin:0 0 24px; font-size:16px; line-height:1.8; color:#526353; word-break:keep-all; }
+.m-web-board .m-board-start-steps { display:grid; gap:16px; list-style:none; padding:0; margin:0 0 32px; }
+.m-web-board .m-board-start-steps li { display:flex; align-items:center; gap:16px; }
+.m-web-board .m-board-start-steps svg { flex-shrink:0; color:#365b3a; }
+.m-web-board .m-board-start-steps span { display:grid; gap:4px; }
+.m-web-board .m-board-start-steps strong { font-size:16px; font-weight:600; line-height:1.5; }
+.m-web-board .m-board-start-steps small { font-size:14px; line-height:1.5; color:#526353; word-break:keep-all; }
+.m-web-board .m-board-start-actions { display:flex; flex-wrap:wrap; gap:12px; }
+.m-web-board .m-board-start-actions>button { width:auto; }
+.m-web-board .m-board-start-actions>.m-secondary { border-color:#75846b; }
+.m-web-board .m-board-example-note { display:block; margin-top:16px; max-width:440px; font-size:14px; line-height:1.6; color:#526353; word-break:keep-all; }
+.m-web-board .m-board-botanical { align-self:stretch; display:flex; flex-direction:column; justify-content:center; align-items:center; min-width:0; gap:24px; border-left:1px solid #d8dfcb; padding-left:24px; }
+.m-web-board .m-board-botanical-drawing { position:relative; width:200px; max-width:100%; height:240px; display:flex; align-items:center; justify-content:center; color:var(--board-primary); }
+.m-web-board .m-board-botanical-drawing::after { content:''; position:absolute; bottom:8px; left:8%; right:8%; height:1px; background:#aabb96; }
+.m-web-board .m-board-botanical-drawing>svg:first-child { max-width:100%; width:190px; height:auto; transform:rotate(-9deg); }
+.m-web-board .m-board-botanical-drawing>svg:last-child { position:absolute; right:4px; bottom:40px; transform:rotate(25deg); width:70px; height:70px; color:var(--board-moss); }
+.m-web-board .m-board-botanical>span { color:#526353; font-family:var(--serif); font-size:16px; word-break:keep-all; text-align:center; }
+@media (max-width:1023px) {
+ .m-web-board .m-board-sidebar { padding:8px 24px; }
+ .m-web-board .m-board-nav { margin-top:0; }
+ .m-web-board .m-board-nav button { font-size:14px; }
+ .m-web-board .m-board-start { grid-template-columns:minmax(0,1.6fr) minmax(160px,1fr); gap:24px; padding:24px; }
+}
+@media (max-width:639px) {
+ .m-web-board .m-content { padding-left:16px; padding-right:16px; }
+ .m-web-board .m-content>.m-header { min-height:64px; margin-bottom:20px; }
+ .m-web-board .m-header-state { font-size:12px; }
+ .m-web-board .m-board-heading { gap:16px; }
+ .m-web-board .m-page-title h1 { font-size:30px; }
+ .m-web-board .m-page-title p { font-size:16px; }
+ .m-web-board .m-board-sidebar { padding:8px 8px max(10px,env(safe-area-inset-bottom)); }
+ .m-web-board .m-board-nav { gap:4px; }
+ .m-web-board .m-board-nav button { padding:8px 2px; font-size:12px; gap:6px; }
+ .m-web-board .m-board-filters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 12px; padding:12px; }
+ .m-web-board .m-board-filters>label:not(.m-search) { min-width:0; }
+ .m-web-board .m-board-filters select { padding-right:20px; }
+ .m-web-board .m-board-results p>span { margin-left:8px; padding-left:8px; }
+ .m-web-board .m-board-results { padding:12px 0; }
+ .m-web-board .m-board-start { display:flex; flex-direction:column; align-items:stretch; gap:24px; padding:24px 20px; }
+ .m-web-board .m-board-start h2 { font-size:27px; }
+ .m-web-board .m-board-start p br { display:none; }
+ .m-web-board .m-board-start-steps { margin-bottom:24px; }
+ .m-web-board .m-board-start-actions>button { width:100%; }
+ .m-web-board .m-board-botanical { display:none; }
+ .m-web-board .m-recent-grid,.m-web-board .m-board-skeleton { grid-template-columns:minmax(0,1fr); }
+}
+
+/* User-supplied Nature Lens palette; lighter accents carry no text contrast burden. */
+.m-web-board .m-record-card,.m-web-board .m-board-filters select,.m-web-board .m-search input { color:var(--m-ink); }
+.m-web-board .m-board-heading>.m-primary,.m-web-board .m-board-start-actions>.m-primary { background:var(--board-primary); border-color:var(--board-primary); color:#fff; }
+.m-web-board .m-board-heading>.m-primary:hover,.m-web-board .m-board-start-actions>.m-primary:hover { background:#274b37; border-color:#274b37; }
+.m-web-board .m-record-status.is-reviewed { background:var(--board-pollen); color:var(--m-ink); }
+.m-web-board .m-board-start-steps svg { color:var(--board-primary); }
