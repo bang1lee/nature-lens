@@ -34,6 +34,15 @@ test('mobile observation save stays visible and does not cover the final privacy
  expect(noteBox).not.toBeNull();expect(finalSaveBox).not.toBeNull();expect(noteBox!.y+noteBox!.height).toBeLessThan(finalSaveBox!.y);
  await page.setViewportSize({width:390,height:480});await page.getByLabel('한 줄 메모').focus();await expect(save).toBeInViewport();
 });
+test('mobile camera and album choices fit in the initial capture viewport',async({page})=>{
+ for(const [width,height] of [[390,844],[320,667]]){
+  await page.setViewportSize({width,height});await page.goto('/board/');await page.getByRole('button',{name:'관찰 추가',exact:true}).click();
+  for(const name of ['카메라 켜기','사진 선택','기기 카메라로 촬영']){
+   const box=await page.getByRole('button',{name,exact:true}).boundingBox();expect(box,`${name} at ${width}x${height}`).not.toBeNull();expect(box!.y).toBeGreaterThanOrEqual(0);expect(box!.y+box!.height).toBeLessThanOrEqual(height);
+  }
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+});
 test('denied camera still permits photo upload and closed preview releases stream',async({page})=>{
  await page.addInitScript(()=>{navigator.mediaDevices.getUserMedia=async()=>{throw new DOMException('denied','NotAllowedError');};});
  await page.goto('/board/');await page.getByRole('button',{name:'관찰 추가',exact:true}).click();await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();

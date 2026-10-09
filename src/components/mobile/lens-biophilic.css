@@ -66,12 +66,12 @@
 @media(max-width:639px) {
  .lens-capture .m-flow-header { padding:16px; padding-top:calc(16px + env(safe-area-inset-top,0px)); min-height:76px; }
  .lens-capture .m-web-camera { margin:12px 12px 0; border-radius:18px; }
- .lens-capture .m-web-camera .m-viewfinder { height:clamp(280px,60dvh,560px); padding:28px 18px; }
+ .lens-capture .m-web-camera .m-viewfinder { height:clamp(260px,48dvh,420px); padding:24px 18px; }
  .lens-capture .m-viewfinder h1 { font-size:27px; }
  .lens-capture .m-viewfinder p { font-size:13px; }
- .lens-capture .m-live-controls { padding:18px 16px; gap:10px; }
+ .lens-capture .m-live-controls { padding:12px; gap:8px; }
  .lens-capture .lens-controls-live .m-secondary { font-size:13px; }
- .lens-capture .m-camera-fallback { padding:20px 16px 10px; gap:10px; }
+ .lens-capture .m-camera-fallback { padding:12px 16px 8px; gap:8px; }
  .lens-capture .m-camera-fallback .m-secondary { padding:12px; font-size:12px; }
  .lens-capture .m-quick-form { display:block; padding:18px 16px 28px; }
  .lens-capture .m-photo-review img { height:clamp(260px,46dvh,460px); }
@@ -79,6 +79,12 @@
  .lens-capture .m-quick-fields { padding-bottom:calc(112px + env(safe-area-inset-bottom,0px)); }
  .lens-capture .m-quick-fields h1 { font-size:27px; }
  .lens-capture .m-quick-fields>.m-primary { position:fixed; z-index:30; left:max(16px,calc((100vw - 480px)/2 + 16px)); right:max(16px,calc((100vw - 480px)/2 + 16px)); bottom:0; width:auto; margin:0; padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px)); box-shadow:0 -8px 24px #20392c24; }
+}
+@media(max-width:360px) {
+ .lens-capture .m-web-camera .m-viewfinder { height:clamp(240px,43dvh,300px); padding:18px 12px; }
+ .lens-capture .m-live-controls { padding:10px 8px; gap:6px; }
+ .lens-capture .m-camera-fallback { padding:10px 8px 6px; gap:6px; }
+ .lens-capture .m-camera-fallback .m-secondary { min-width:130px; padding:10px 8px; font-size:11px; }
 }
 @media(prefers-reduced-motion:reduce) {
  .lens-capture *, .lens-capture *::before, .lens-capture *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
