@@ -67,3 +67,7 @@ For the first deployment there will be no earlier version to roll back to. If th
 ## Next smallest verification step
 
 Resolve the platform deployment approval, then deploy this already-built static QA artifact once and verify the returned Cloudflare URL in a real browser. Until then, continue only with local review and synthetic data; no live deployment status or URL is available.
+
+## Local Wrangler QA browser check (2026-10-09)
+
+The static output was served with Wrangler on 127.0.0.1:3107. The existing Playwright suite reused that listener and passed 29/29 tests. The server was stopped after the run. This validates the local static QA build, not a hosted Cloudflare deployment.
