@@ -2,6 +2,8 @@
 
 확인 시각: 2026-10-13 KST. 상태: **설계 제안. 이 저장소에 코드 추가 없음, 구현 승인 전.**
 
+작성: Claude (Claude Code, Anthropic) 세션 https://claude.ai/code/session_016tEFHCFnPnN22Uk8qh7xwt . 이어지는 작업과 근거는 [HANDOFF.md](HANDOFF.md)를 본다.
+
 ## 1. 무엇인가
 Seek의 판별 단계 중 **모델 추론 이후의 판단 로직**을 TypeScript 한 벌로 옮긴 것이다.
 - 원본 위치: [bang1lee/claude-workspace](https://github.com/bang1lee/claude-workspace/pull/3) → `reverse-engineering/naturelens-seek/refimpl-ts/src/lens.ts`

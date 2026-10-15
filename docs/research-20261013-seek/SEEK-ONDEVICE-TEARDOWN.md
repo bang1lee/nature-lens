@@ -2,6 +2,8 @@
 
 확인 시각: 2026-10-13 KST. 대상 커밋은 [README](README.md#분석-대상-고정-커밋) 참고. 앱 코드 변경 없음.
 
+작성: Claude (Claude Code, Anthropic) 세션 https://claude.ai/code/session_016tEFHCFnPnN22Uk8qh7xwt . 이어지는 작업과 근거는 [HANDOFF.md](HANDOFF.md)를 본다.
+
 ## 1. 결론
 Seek의 판별은 서버를 쓰지 않는다. 카메라 프레임을 초당 1장씩 **폰 안의 비전 모델**에 넣는다. 위치는 **H3 해상도 4 셀**(약 1,770km²)로 바꿔 **위치 모델**에 넣는다. 두 점수를 곱한 뒤 **분류 트리로 위로 합산**하고, 확신이 70%를 넘는 가장 깊은 단계(종, 속, 과 …)까지만 보여 준다.
 

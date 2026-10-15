@@ -2,6 +2,8 @@
 
 확인 시각: 2026-10-13 KST. 상태: **조사·설계 제안. 앱 코드 변경 없음, 구현 승인 전.**
 
+작성: Claude (Claude Code, Anthropic) 세션 https://claude.ai/code/session_016tEFHCFnPnN22Uk8qh7xwt . 이어지는 작업과 근거는 [HANDOFF.md](HANDOFF.md)를 본다.
+
 카메라로 자연물을 알아보는 흐름의 레퍼런스로 [inaturalist/SeekReactNative](https://github.com/inaturalist/SeekReactNative)(MIT)의 온디바이스 판별 구조를 리버스 엔지니어링하고, 그 결과를 Nature Lens에 적용할 때의 판단 로직, 평가 방법, 학습 로드맵, 데이터 권리를 정리했다. [mvp-20261007/GITHUB-REFERENCES.md](../mvp-20261007/GITHUB-REFERENCES.md)가 Seek의 화면 흐름을 참고했다면, 이 문서는 **판별 엔진**을 다룬다.
 
 ## 문서
@@ -10,6 +12,7 @@
 | [SEEK-ONDEVICE-TEARDOWN.md](SEEK-ONDEVICE-TEARDOWN.md) | Seek 판별 파이프라인, 근거, 실측, 함정, 리버스 엔지니어링 도구(REA) 평가 |
 | [ONDEVICE-DECISION-CORE.md](ONDEVICE-DECISION-CORE.md) | TypeScript 판단 코어 한 벌과 이 앱의 식별 흐름에 넣는 방법 (제안) |
 | [FINETUNE-ROADMAP.md](FINETUNE-ROADMAP.md) | 한국 종 평가 방법, 모델·데이터 라이선스, 학습 로드맵 P0~P6 |
+| [HANDOFF.md](HANDOFF.md) | Claude↔Codex 인계: 기준 문서 위치와 이 저장소에서 할 수 있는 일 |
 
 ## 수행한 것
 - Seek 소스에서 Android JS 번들을 직접 빌드해 블랙박스 분석하고, 공개 모델 파일(TFLite)의 입출력 구조를 파싱했다. 결론은 공개 네이티브 소스와 대조했다.

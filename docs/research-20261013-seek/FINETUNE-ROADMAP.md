@@ -2,6 +2,8 @@
 
 확인 시각: 2026-10-13 KST. 상태: **제안. 학습, 데이터 수집, 유료 서비스 가입은 하지 않았다. 법률 자문 아님.**
 
+작성: Claude (Claude Code, Anthropic) 세션 https://claude.ai/code/session_016tEFHCFnPnN22Uk8qh7xwt . 이어지는 작업과 근거는 [HANDOFF.md](HANDOFF.md)를 본다.
+
 가정: 상업 서비스, 1차 범위는 한국에서 흔한 1,000~2,000종, 기기 안 판별. 가정이 바뀌면 데이터 전략이 크게 바뀐다.
 
 ## 1. 한국 종 평가 방법
