@@ -1,12 +1,13 @@
 # 인계: 온디바이스 판별 조사 (앱 저장소 쪽)
 
-확인 시각: 2026-10-15 KST. 작성: Claude (Claude Code, Anthropic), 세션 https://claude.ai/code/session_016tEFHCFnPnN22Uk8qh7xwt
+확인 시각: 2026-10-16 KST. 작성: Claude (Claude Code, Anthropic), 세션 https://claude.ai/code/session_016tEFHCFnPnN22Uk8qh7xwt
 
 이 폴더는 코드 작업의 **발행본**이다. 현재 상태, 할 일, 작업 잡기, 세션별 근거 기록은 아래 저장소에 있다. 그곳이 기준이다.
 
 - 기준 문서: [bang1lee/claude-workspace `reverse-engineering/naturelens-seek/HANDOFF.md`](https://github.com/bang1lee/claude-workspace/blob/re/naturelens-seek-teardown/reverse-engineering/naturelens-seek/HANDOFF.md)
 - 작업 규칙: 같은 디렉터리의 `AGENTS.md`
 - 세션 기록(근거): 같은 디렉터리의 `handoff/log/`
+- Codex는 `codex/<작업ID>` 브랜치와 PR로 인계한다. 작업 장부는 claude-workspace `HANDOFF.md` §4 하나다.
 
 ## 이 저장소에서 할 수 있는 일
 | 할 일 | 조건 |
@@ -20,4 +21,5 @@
 |---|---|---|---|
 | 10-13 | Claude | 조사 문서 4개, README 링크 | `b2e5726`, `7552b20` |
 | 10-15 | Claude | 해안·섬 고도 보정 결과 반영 | `e2f4ded` |
-| 10-15 | Claude | 출처 표시, 인계 문서, AGENTS.md 인계 절 | (이 커밋) |
+| 10-15 | Claude | 출처 표시, 인계 문서, AGENTS.md 인계 절 | `eda744a` |
+| 10-16 | Codex·Claude | 한국 평가 1차 요약(수집·실행 Codex, 검수 Claude) | (이 커밋) |

@@ -13,6 +13,7 @@
 | [ONDEVICE-DECISION-CORE.md](ONDEVICE-DECISION-CORE.md) | TypeScript 판단 코어 한 벌과 이 앱의 식별 흐름에 넣는 방법 (제안) |
 | [FINETUNE-ROADMAP.md](FINETUNE-ROADMAP.md) | 한국 종 평가 방법, 모델·데이터 라이선스, 학습 로드맵 P0~P6 |
 | [HANDOFF.md](HANDOFF.md) | Claude↔Codex 인계: 기준 문서 위치와 이 저장소에서 할 수 있는 일 |
+| [KOREA-EVAL-20261016.md](KOREA-EVAL-20261016.md) | 한국 종 평가 1차 결과(99종 197장)와 다음 작업 |
 
 ## 수행한 것
 - Seek 소스에서 Android JS 번들을 직접 빌드해 블랙박스 분석하고, 공개 모델 파일(TFLite)의 입출력 구조를 파싱했다. 결론은 공개 네이티브 소스와 대조했다.
