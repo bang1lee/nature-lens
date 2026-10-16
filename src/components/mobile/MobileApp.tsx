@@ -44,6 +44,8 @@ export default function MobileApp({ webBoard = false }: { webBoard?: boolean }) 
   const deleteCancel = useRef<HTMLButtonElement>(null);
   const detailCaller = useRef<HTMLElement | null>(null);
   const deleteCaller = useRef<HTMLElement | null>(null);
+  const focusReturn = useRef<HTMLElement | null>(null);
+  const [focusRequest, setFocusRequest] = useState(0);
   const search = useRef<HTMLInputElement>(null);
   const captureAction = useRef<HTMLButtonElement>(null);
   const actionLock = useRef(false);
@@ -83,7 +85,13 @@ export default function MobileApp({ webBoard = false }: { webBoard?: boolean }) 
     if (deleting && deleteDialog.current && !deleteDialog.current.open) { deleteDialog.current.showModal(); deleteCancel.current?.focus(); }
   }, [deleting]);
 
-  function restoreFocus(caller: HTMLElement | null) { requestAnimationFrame(() => (caller?.isConnected ? caller : search.current || captureAction.current)?.focus()); }
+  // Runs after the commit that closed the dialog, so a deleted caller is already detached and its fallback is mounted.
+  useEffect(() => {
+    if (!focusRequest) return;
+    const caller = focusReturn.current;
+    (caller?.isConnected ? caller : search.current || captureAction.current)?.focus();
+  }, [focusRequest]);
+  function restoreFocus(caller: HTMLElement | null) { focusReturn.current = caller; setFocusRequest(request => request + 1); }
   function openDetail(record: Observation, caller?: HTMLElement) {
     detailCaller.current = caller || document.activeElement as HTMLElement;
     setDetail(record);
