@@ -35,7 +35,7 @@ export function createGateway(config,{authenticate,ledger,sanitize=sanitizePhoto
   const data=parsed.data;
   if(!groups.includes(data.taxonGroup))return send(503,{error:'not-configured'});
   // Reserve before expensive decode or external work. Failures still consume one slot.
-  let reserved;try{reserved=ledger.reserve(user,data.requestId);}catch{return send(503,{error:'temporarily-unavailable'});}
+  let reserved;try{reserved=await ledger.reserve(user,data.requestId);}catch{return send(503,{error:'temporarily-unavailable'});}
   if(reserved!=='ok')return send(reserved==='duplicate'?409:429,{error:reserved});
   let jpeg;try{jpeg=await sanitize(data.photo);}catch{return send(400,{error:'invalid-image'});}
   try{return send(200,identificationResultSchema.parse(await provider(data.taxonGroup,jpeg,config.keys)));}

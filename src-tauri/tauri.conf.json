@@ -7,7 +7,7 @@
     "beforeDevCommand":"npm run native:web:dev",
     "beforeBuildCommand":"npm run native:web:build",
     "devUrl":"http://localhost:3108",
-    "frontendDist":"../out"
+    "frontendDist":"../.next-native"
   },
   "app":{
     "windows":[{"label":"main","title":"Nature Lens · 자연 기록장","url":"mobile/index.html","width":1180,"height":820,"minWidth":360,"minHeight":600}],

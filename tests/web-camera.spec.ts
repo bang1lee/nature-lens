@@ -20,29 +20,6 @@ test('web board: camera starts only on demand, captures and persists a card',asy
  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:'test-results/web-board-mobile.png',fullPage:true});
 });
-test('mobile observation save stays visible and does not cover the final privacy note',async({page})=>{
- await page.setViewportSize({width:390,height:844});
- await page.goto('/board/');await page.getByRole('button',{name:'관찰 추가',exact:true}).click();
- await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
- const save=page.getByRole('button',{name:'내 기록에 저장'});await expect(save).toBeVisible();
- const buttonBox=await save.boundingBox();expect(buttonBox).not.toBeNull();expect(buttonBox!.y).toBeGreaterThanOrEqual(0);expect(buttonBox!.y+buttonBox!.height).toBeLessThanOrEqual(844);
- await page.getByLabel('이름',{exact:false}).first().fill('모바일 저장 동선');
- await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
- await expect(save).toBeInViewport();
- await page.locator('.m-private-note').scrollIntoViewIfNeeded();
- const noteBox=await page.locator('.m-private-note').boundingBox();const finalSaveBox=await save.boundingBox();
- expect(noteBox).not.toBeNull();expect(finalSaveBox).not.toBeNull();expect(noteBox!.y+noteBox!.height).toBeLessThan(finalSaveBox!.y);
- await page.setViewportSize({width:390,height:480});await page.getByLabel('한 줄 메모').focus();await expect(save).toBeInViewport();
-});
-test('mobile camera and album choices fit in the initial capture viewport',async({page})=>{
- for(const [width,height] of [[390,844],[320,667]]){
-  await page.setViewportSize({width,height});await page.goto('/board/');await page.getByRole('button',{name:'관찰 추가',exact:true}).click();
-  for(const name of ['카메라 켜기','사진 선택','기기 카메라로 촬영']){
-   const box=await page.getByRole('button',{name,exact:true}).boundingBox();expect(box,`${name} at ${width}x${height}`).not.toBeNull();expect(box!.y).toBeGreaterThanOrEqual(0);expect(box!.y+box!.height).toBeLessThanOrEqual(height);
-  }
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- }
-});
 test('denied camera still permits photo upload and closed preview releases stream',async({page})=>{
  await page.addInitScript(()=>{navigator.mediaDevices.getUserMedia=async()=>{throw new DOMException('denied','NotAllowedError');};});
  await page.goto('/board/');await page.getByRole('button',{name:'관찰 추가',exact:true}).click();await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();

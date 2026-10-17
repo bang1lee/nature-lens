@@ -39,3 +39,10 @@ it('returns the persisted timestamp so a newly captured record can be edited imm
  const saved=await saveObservation(item,null);
  expect(saved).toEqual((await readLibrary()).observations.find(o=>o.id===item.id));
 });
+it('keeps analysis across reload but removes it when the photograph changes',async()=>{
+ const decision={state:'abstain' as const,reason:'insufficient_evidence' as const,needsHumanReview:true as const,provenance:{provider:'local-inat-small',modelVersion:'test',policyVersion:'test'}};
+ const saved=await saveObservation({...record,id:'analysis-photo',aiIdentification:{decision,analyzedAt:'2026-10-16T00:00:00Z',elapsedMs:123}},null);
+ expect((await readLibrary()).observations.find(o=>o.id===saved.id)?.aiIdentification?.decision).toEqual(decision);
+ const changed=await saveObservation({...saved,photo:'data:image/jpeg;base64,Yg=='},saved.updatedAt);
+ expect(changed.aiIdentification).toBeUndefined();await deleteObservation(changed.id);
+});

@@ -1,0 +1,23 @@
+/* Lovable forest nameplate palette adapted to the existing app, not a second store. */
+.m-stage{--m-green:#2d4637;--m-ink:#263e31;--m-muted:#596957;background:#e8e7de}
+.m-app{background:#f5f2e9;border-color:#d8d9c9}
+.m-header{background:#f5f2e9e8}
+.m-tabbar{background:#faf8efec;border-color:#d6dbcc;box-shadow:0 -5px 28px #233e3010}
+.f-journey-cover{position:relative;isolation:isolate;margin:0 16px;padding:30px 25px 22px;border-radius:8px;overflow:hidden;color:#fffdf0;background:#243c2b;background-size:cover;background-position:center;min-height:340px}
+.f-journey-cover>span{font-size:10px;letter-spacing:2px}
+.f-journey-cover h2{font-family:var(--serif),serif;font-size:29px;font-weight:500;line-height:1.6;margin:20px 0 12px}
+.f-journey-cover p{font-size:13px;line-height:1.9;color:#f1f4e5}
+.f-journey-cover .m-primary{background:#f4f0df;color:#243e2c;border:1px solid #fff7;margin-top:22px;min-height:48px;width:100%;backdrop-filter:blur(12px)}
+.f-journey-cover a{display:flex;align-items:center;justify-content:center;gap:7px;min-height:48px;color:#fff9e8;font-size:12px;text-decoration:none}
+.f-journey-cover small{display:block;font-size:10px;color:#e5ebdb;text-align:right;margin-top:10px}
+.f-journey-steps{display:grid;grid-template-columns:repeat(4,1fr);list-style:none;padding:18px 12px;margin:0 16px;border-bottom:1px solid #d4d9c8;gap:4px;font-size:10px;color:#4f6250;text-align:center}
+.f-next-note{font-size:13px!important;line-height:1.9!important;color:#596957}
+.f-month-link{margin:20px 0;width:100%}
+.m-detail-copy,.m-personal-month{overflow-wrap:anywhere}
+.m-personal-month .m-text{display:flex;margin-top:12px;text-align:left}
+.m-app button,.m-app a{transition:transform 160ms ease,background-color 180ms ease,box-shadow 180ms ease}
+.m-app button:active{transform:translateY(1px) scale(.985)}
+.m-app :is(button,a,input,select,textarea):focus-visible{outline:2px solid #436a45;outline-offset:4px}
+.m-detail,.m-success,.m-settings,.m-records,.j-library{animation:forest-arrive 240ms ease-out}
+@keyframes forest-arrive{from{transform:translateY(6px)}to{transform:none}}
+@media(prefers-reduced-motion:reduce){.m-app *, .m-app *:before,.m-app *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.m-app button:active{transform:none}}.m-record-copy small{color:#55644f}
