@@ -36,8 +36,8 @@
     ".next/dev/types/**/*.ts",
     ".next-app-test/types/**/*.ts",
     ".next-app-test/dev/types/**/*.ts",
-    ".next-frontend/types/**/*.ts",
-    ".next-frontend/dev/types/**/*.ts"
+    ".next-live/types/**/*.ts",
+    ".next-live/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

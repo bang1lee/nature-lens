@@ -11,7 +11,7 @@ const checks=[
  ['web-gateway-url',https(env.NEXT_PUBLIC_IDENTIFY_URL)],
  ['web-auth-url',https(env.NEXT_PUBLIC_SUPABASE_URL)&&env.NEXT_PUBLIC_SUPABASE_URL===env.SUPABASE_URL],
  ['web-auth-key',Boolean(env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)&&env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY===env.SUPABASE_PUBLISHABLE_KEY],
- ['persistent-ledger-path',Boolean(env.IDENTIFY_LEDGER_PATH)&&env.IDENTIFY_LEDGER_PATH.startsWith('/')],
+ ['persistent-ledger',env.IDENTIFY_LEDGER_BACKEND==='supabase'?Boolean(env.SUPABASE_SERVICE_ROLE_KEY):Boolean(env.IDENTIFY_LEDGER_PATH)&&env.IDENTIFY_LEDGER_PATH.startsWith('/')],
 ];
 console.log(JSON.stringify({ready:checks.every(([,ok])=>ok),checks:checks.map(([name,ok])=>({name,status:ok?'configured':'missing-or-invalid'})),note:'Configuration only; provider contracts, policy content, credentials, TLS and persistent storage still need live verification.'},null,2));
 process.exitCode=checks.every(([,ok])=>ok)?0:1;
