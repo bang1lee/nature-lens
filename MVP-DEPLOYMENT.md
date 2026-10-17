@@ -48,7 +48,8 @@ npm ci
 npm test
 npm run typecheck
 npm run build
-wrangler pages deploy out --config wrangler.pages.jsonc --project-name nature-lens-mvp --branch main
+cd deploy/pages
+wrangler pages deploy ../../out --project-name nature-lens-mvp --branch main
 ```
 
 현재 Next 정적 export를 그대로 사용한다. Pages 업로드 대상은 `out`만이다. `.research`, 평가사진/모델, 비밀키, 로컬 문서·스크린샷·개인 데이터는 업로드하지 않는다. Cloudflare 대시보드의 이전 deployment로 되돌릴 수 있다. 온라인 주소와 localhost는 저장소가 다르므로 기존 로컬 기록은 자동 이동하지 않으며, 필요한 경우 직접 백업·복원한다.
@@ -61,4 +62,4 @@ GitHub에는 앱 소스/테스트/배포 설정만 별도 브랜치로 보낸다
 - 가입 후 검증 필요: 실제 Supabase SQL 적용·RLS·동시요청, Render 배포·인증, Pl@ntNet 실제 응답과 비용. mock 테스트 성공은 이 항목의 성공을 뜻하지 않는다.
 - 다음 단계: 실제 계정으로 식물1장 왕복 확인 → 초기 파일럿5~10명 → 한국 종 품질 평가. 디자인 변경은 사용자 레퍼런스 수신 후 진행.
 
-기존 Worker/D1 배포 설정은 wrangler.jsonc에 보존한다. 신규 Pages는 wrangler.pages.jsonc를 사용하며 기존 Worker 전송 API는 Pages에서 제공하지 않는다. Render는 비활성 모드라도 Supabase 서버 설정이 있어야 시작한다.
+기존 Worker/D1 배포 설정은 wrangler.jsonc에 보존한다. 신규 Pages는 deploy/pages/wrangler.jsonc를 사용하며 기존 Worker 전송 API는 Pages에서 제공하지 않는다. Render는 비활성 모드라도 Supabase 서버 설정이 있어야 시작한다.

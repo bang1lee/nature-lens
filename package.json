@@ -30,7 +30,7 @@
     "test:deployed-api": "node tests/deployed-api-smoke.mjs",
     "identify:local": "node server/local-identification.mjs",
     "test:identify:local": "node tests/live-identification.e2e.mjs",
-    "deploy:pages": "npm run build:cloudflare && wrangler pages deploy out --config wrangler.pages.jsonc --project-name nature-lens-mvp --branch main"
+    "deploy:pages": "npm run build:cloudflare && cd deploy/pages && wrangler pages deploy ../../out --project-name nature-lens-mvp --branch main"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
