@@ -18,6 +18,8 @@
 .m-detail-copy,.m-personal-month{overflow-wrap:anywhere}.m-personal-month .m-text{display:flex;margin-top:12px;text-align:left}
 .m-loading{padding:40px 24px;min-height:180px;color:#53634f;font-size:14px}
 .m-app button,.m-app a{transition:transform 120ms var(--forest-ease),background-color 180ms ease,box-shadow 180ms ease}
+/* Keep toggle text and its selected background in sync throughout the state change. */
+.m-app .c-groups button,.m-app .c-period button,.m-app .c-heart{transition:none}
 .m-app button:active:not(:disabled){transform:scale(.975)}
 .m-app :is(button,a,input,select,textarea):focus-visible{outline:3px solid #436a45;outline-offset:4px}
 .m-app .f-journey-cover :is(button,a):focus-visible{outline-color:#fff}

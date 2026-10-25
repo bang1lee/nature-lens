@@ -3,6 +3,8 @@ import AxeBuilder from '@axe-core/playwright';
 test('community ranking, local reactions, filters and monthly journal',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/mobile/');
  await expect(page.locator('.c-feed-card').first()).toHaveAttribute('data-story-id','butterfly');
+ // The foreground switches immediately; an animated selected background would lose contrast.
+ expect(await page.locator('.c-groups button').first().evaluate(button=>getComputedStyle(button).transitionDuration)).toBe('0s');
  await page.getByRole('button',{name:'월간',exact:true}).click();
  await expect(page.locator('.c-feed-card').first()).toHaveAttribute('data-story-id','flower');
  const like=page.getByRole('button',{name:'한 걸음 늦추니, 꽃이 보였다 좋아요'});await like.click();await expect(like).toHaveAttribute('aria-pressed','true');

@@ -11,8 +11,9 @@ test('mobile backup roundtrip, invalid restore and unconfigured community',async
  await expect(page.locator('.m-error[role=alert]')).toContainText('올바른 Nature Lens');
  const download=page.waitForEvent('download');await page.getByRole('button',{name:'전체 백업 내려받기'}).click();const file=await(await download).path();expect(file).toBeTruthy();
  const context=await browser.newContext({viewport:{width:390,height:844}});const restored=await context.newPage();await restored.goto('http://127.0.0.1:3107/mobile/');await restored.getByRole('button',{name:'설정',exact:true}).click();await restored.getByLabel('모바일 백업 파일').setInputFiles(file!);
- await expect(restored.getByRole('status')).toContainText('1건을 초안으로 복원');
- await restored.getByLabel('모바일 백업 파일').setInputFiles(file!);await expect(restored.getByRole('status')).toContainText('0건을 초안으로 복원');
+ const restoreStatus=restored.locator('.m-settings-note').filter({has:restored.getByRole('heading',{name:'기록을 안전하게 보관하기',exact:true})}).getByRole('status');
+ await expect(restoreStatus).toContainText('1건을 초안으로 복원');
+ await restored.getByLabel('모바일 백업 파일').setInputFiles(file!);await expect(restoreStatus).toContainText('0건을 초안으로 복원');
  expect((await new AxeBuilder({page:restored}).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
  expect(await restored.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await restored.getByRole('button',{name:'내 기록',exact:true}).click();await restored.getByRole('button',{name:'오늘 만난 자연 기록 열기'}).click();await expect(restored.getByText('백업 복원 검증')).toBeVisible();await context.close();
