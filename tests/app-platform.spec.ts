@@ -40,3 +40,75 @@ test('error does not overwrite and cancellation ignores late result',async({page
  await page.getByRole('button',{name:'이름 후보 찾기',exact:true}).click();await page.getByRole('button',{name:'대기 취소'}).click();await expect(page.getByRole('status')).toContainText('취소');
  await page.waitForTimeout(750);await expect(page.getByRole('button',{name:/무당벌레 테스트/})).toHaveCount(0);await expect(page.locator('.m-species')).toContainText('나중에');
 });
+
+test('signed out capture saves first, login returns to the same record without a photo request',async({page})=>{
+ await page.route('https://mock.supabase.co/**',r=>r.fulfill({json:{}}));
+ await page.route('**/capabilities',r=>r.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy'}}));
+ let photos=0,emails=0;await page.route('**/identify',r=>{photos++;return r.abort();});
+ await page.route('**/auth/v1/otp**',r=>{emails++;expect(r.request().postDataJSON()).not.toHaveProperty('photo');return r.fulfill({json:{}});});
+ await page.goto('/mobile/');await page.getByRole('button',{name:'촬영',exact:true}).click();
+ await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
+ await page.getByText('저장 전에 사진에서 이름 찾기',{exact:true}).click();
+ await expect(page.getByText('먼저 아래 ‘내 기록에 저장’',{exact:false})).toBeVisible();
+ await expect(page.getByLabel('식별 로그인 이메일')).toHaveCount(0);
+ await page.getByRole('button',{name:'내 기록에 저장'}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();
+ await page.getByLabel('식별 로그인 이메일').fill('test@example.org');
+ await page.getByRole('button',{name:'이 기록에서 로그인 이어가기'}).dblclick();
+ await expect(page.getByText('로그인 링크를 요청했어요.',{exact:false})).toBeVisible();expect(emails).toBe(1);expect(photos).toBe(0);
+ const pending=await page.evaluate(()=>JSON.parse(localStorage.getItem('nature-lens:identification-return:v1')!));expect(pending.id).toBeTruthy();
+ await mockSession(page);await page.reload();
+ await expect(page.getByRole('heading',{name:'오늘 만난 자연',exact:true})).toBeVisible();
+ await expect(page.getByLabel('식별 로그인 이메일')).toHaveCount(0);
+ expect(await page.evaluate(()=>localStorage.getItem('nature-lens:identification-return:v1'))).toBeNull();
+ expect(photos).toBe(0);
+ const stored=await page.evaluate(()=>new Promise<any[]>((resolve,reject)=>{const r=indexedDB.open('nature-lens-v1',2);r.onerror=()=>reject(r.error);r.onsuccess=()=>{const db=r.result;const tx=db.transaction('observations');const q=tx.objectStore('observations').getAll();q.onsuccess=()=>resolve(q.result);tx.oncomplete=()=>db.close();};}));
+ expect(stored).toHaveLength(1);expect(stored[0].id).toBe(pending.id);expect(stored[0].photo).toMatch(/^data:image/);
+});
+
+test('capabilities failure is retryable without sending or losing a saved photo',async({page})=>{
+ await mockSession(page);let available=false,photos=0;
+ await page.route('**/capabilities',r=>{return !available?r.fulfill({status:503,json:{}}):r.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy'}});});
+ await page.route('**/identify',r=>{photos++;return r.abort();});
+ // Save without opening the identification details in the capture form.
+ await record(page);
+ await expect(page.getByRole('button',{name:'식별 연결 다시 확인'})).toBeVisible();
+ available=true;await page.getByRole('button',{name:'식별 연결 다시 확인'}).click();
+ await expect(page.getByLabel('사진 전송과 처리 안내에 동의합니다')).toBeVisible();
+ expect(photos).toBe(0);await expect(page.getByRole('button',{name:'이름 후보 찾기',exact:true})).toBeDisabled();
+});
+
+test('slow capability check ends, offers retry, and keeps the saved record',async({page})=>{
+ await mockSession(page);let ready=false;
+ await page.route('**/capabilities',async r=>{if(!ready)await new Promise(resolve=>setTimeout(resolve,14000));await r.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy'}}).catch(()=>{});});
+ await record(page);
+ await expect(page.getByText('서버 응답이 늦어 연결 확인을 멈췄어요.',{exact:false})).toBeVisible({timeout:14000});
+ ready=true;await page.getByRole('button',{name:'식별 연결 다시 확인'}).click();
+ await expect(page.getByLabel('사진 전송과 처리 안내에 동의합니다')).toBeVisible();
+ await expect(page.locator('.m-species')).toContainText('나중에');
+});
+
+test('late sign in return does not cover a newly started board capture',async({page})=>{
+ await mockSession(page);await page.route('**/capabilities',r=>r.fulfill({json:{groups:[],policyUrl:null}}));
+ await record(page);
+ await page.evaluate(()=>new Promise<void>((resolve,reject)=>{const r=indexedDB.open('nature-lens-v1',2);r.onerror=()=>reject(r.error);r.onsuccess=()=>{const db=r.result,q=db.transaction('observations').objectStore('observations').getAll();q.onsuccess=()=>{localStorage.setItem('nature-lens:identification-return:v1',JSON.stringify({id:q.result[0].id,expiresAt:Date.now()+3600000}));db.close();resolve();};};}));
+ await page.addInitScript(()=>{const key='sb-mock-auth-token';const session=JSON.parse(localStorage.getItem(key)!);session.expires_at=1;localStorage.setItem(key,JSON.stringify(session));});
+ let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve;});let refresh=false;
+ await page.route('**/auth/v1/token**',async r=>{refresh=true;await held;await r.fulfill({json:{access_token:'fresh-token',refresh_token:'test',expires_in:3600,token_type:'bearer',user:{id:'test-user',aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{},created_at:new Date().toISOString()}}}).catch(()=>{});});
+ await page.goto('/board/');await expect.poll(()=>refresh).toBe(true);
+ await page.getByRole('button',{name:'관찰 추가',exact:true}).click();release();
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('sb-mock-auth-token')!).access_token)).toBe('fresh-token');
+ await expect(page.getByLabel('빠른 촬영 기록')).toBeVisible();
+ await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
+ await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByRole('button',{name:'내 기록에 저장'})).toBeEnabled();
+});
+
+
+test('server rejection of an expired session offers sign in on the saved record',async({page})=>{
+ await mockSession(page);await page.route('**/capabilities',r=>r.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy'}}));
+ await page.route('**/identify',r=>r.fulfill({status:401,json:{error:'unauthorized'}}));
+ await record(page);await page.getByLabel('인물과 개인정보가 없는 사진입니다').check();await page.getByLabel('사진 전송과 처리 안내에 동의합니다').check();
+ await page.getByRole('button',{name:'이름 후보 찾기',exact:true}).click();
+ await expect(page.getByLabel('식별 로그인 이메일')).toBeVisible();
+ await expect(page.getByRole('button',{name:'이름 후보 찾기',exact:true})).toBeDisabled();
+ await expect(page.locator('.m-species')).toContainText('나중에');
+});

@@ -12,6 +12,7 @@ import CloudPanel from './CloudPanel';
 import QuickCapture from './QuickCapture';
 import MonthlyJournal from './MonthlyJournal';
 import PrivateLocationNote from './PrivateLocationNote';
+import {useIdentificationReturn} from './useIdentificationReturn';
 import SpecimenPanel from './SpecimenPanel';
 import './mobile.css';
 import './board-layout.css';
@@ -34,6 +35,7 @@ export default function ObservationBoard() {
   const [reobserveFrom, setReobserveFrom] = useState<Observation | null>(null);
   const [saved, setSaved] = useState<Observation | null>(null);
   const [detail, setDetail] = useState<Observation | null>(null);
+  const loginReturnMessage=useIdentificationReturn(setDetail);
   const [deleting, setDeleting] = useState<Observation | null>(null);
   const [deleteError, setDeleteError] = useState('');
   const [query, setQuery] = useState('');
@@ -211,6 +213,7 @@ export default function ObservationBoard() {
     </aside>
     <div className={`m-app ${capture ? 'm-in-capture' : ''}`}>
       <main ref={main} id="main" className="m-content" tabIndex={-1}>
+        {loginReturnMessage&&<p role="status">{loginReturnMessage}</p>}
         {error && <p className="m-error" role="alert">{error}</p>}
         {capture ? <QuickCapture reobserveFrom={reobserveFrom} onClose={cancelCapture} onSaved={record => void afterSave(record)}/> : saved ? <section className="m-success">
           <div className="m-success-mark"><Check size={34}/></div><span className="m-muted">내 기록에 저장 완료</span><h1>발견 하나가 쌓였어요</h1><p>지금의 작은 관찰이<br/>나중엔 멋진 이야기가 될 거예요.</p><img src={saved.photo} alt="저장된 관찰 사진"/><strong>{saved.title}</strong><span className="m-draft-chip">나만 보는 초안</span>
