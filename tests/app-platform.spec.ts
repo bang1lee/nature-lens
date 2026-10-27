@@ -112,3 +112,53 @@ test('server rejection of an expired session offers sign in on the saved record'
  await expect(page.getByRole('button',{name:'이름 후보 찾기',exact:true})).toBeDisabled();
  await expect(page.locator('.m-species')).toContainText('나중에');
 });
+
+// Exercise the actual SDK PKCE exchange, with only the service response mocked.
+function callbackSession(){
+ const jwt=`${Buffer.from('{"alg":"none"}').toString('base64url')}.${Buffer.from(JSON.stringify({sub:'test-user',exp:Math.floor(Date.now()/1000)+3600})).toString('base64url')}.test`;
+ return {access_token:jwt,refresh_token:'callback-refresh',expires_in:3600,token_type:'bearer',user:{id:'test-user',aud:'authenticated',role:'authenticated',email:'test@example.org',app_metadata:{},user_metadata:{},created_at:new Date().toISOString()}};
+}
+async function callbackRoutes(page:Page, failure=false){
+ let exchanges=0;
+ await page.route('https://mock.supabase.co/**',r=>r.fulfill({json:[]}));
+ await page.route('**/auth/v1/token**',r=>{
+  exchanges++;expect(r.request().url()).toContain('grant_type=pkce');
+  expect(r.request().postDataJSON()).toEqual({auth_code:'mock-email-code',code_verifier:'mock-verifier'});
+  return failure?r.fulfill({status:400,json:{code:'flow_state_expired',msg:'Expired code'}}):r.fulfill({json:callbackSession()});
+ });
+ return ()=>exchanges;
+}
+test('general email callback exchanges PKCE once on home without a pending record',async({page})=>{
+ const exchanges=await callbackRoutes(page);
+ await page.addInitScript(()=>localStorage.setItem('sb-mock-auth-token-code-verifier',JSON.stringify('mock-verifier')));
+ await page.goto('/mobile/?code=mock-email-code');
+ await expect(page.getByRole('status').filter({hasText:'로그인했어요.'})).toBeVisible();
+ await expect(page).toHaveURL(/\/mobile\/$/);expect(exchanges()).toBe(1);
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('sb-mock-auth-token')!).user.id)).toBe('test-user');
+ await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+test('saved record survives PKCE email callback with no automatic photo upload',async({page})=>{
+ await page.route('**/capabilities',r=>r.fulfill({json:{groups:[],policyUrl:null}}));
+ const exchanges=await callbackRoutes(page);let uploads=0;
+ await page.route('**/identify',r=>{uploads++;return r.abort();});
+ await record(page);
+ const before=await page.evaluate(()=>new Promise<any>((resolve,reject)=>{const req=indexedDB.open('nature-lens-v1',2);req.onerror=()=>reject(req.error);req.onsuccess=()=>{const db=req.result,q=db.transaction('observations').objectStore('observations').getAll();q.onsuccess=()=>{const rows=q.result;localStorage.setItem('nature-lens:identification-return:v1',JSON.stringify({id:rows[0].id,expiresAt:Date.now()+3600000}));localStorage.setItem('sb-mock-auth-token-code-verifier',JSON.stringify('mock-verifier'));resolve(rows);db.close();};};}));
+ await page.goto('/mobile/?code=mock-email-code');
+ await expect(page.locator('.m-detail')).toBeVisible();expect(exchanges()).toBe(1);expect(uploads).toBe(0);
+ expect(await page.evaluate(()=>localStorage.getItem('nature-lens:identification-return:v1'))).toBeNull();
+ const after=await page.evaluate(()=>new Promise<any>((resolve,reject)=>{const req=indexedDB.open('nature-lens-v1',2);req.onerror=()=>reject(req.error);req.onsuccess=()=>{const db=req.result,q=db.transaction('observations').objectStore('observations').getAll();q.onsuccess=()=>{resolve(q.result);db.close();};};}));
+ expect(after).toEqual(before);
+});
+for(const scenario of ['missing-verifier','expired-with-old-session','error-fragment'])test(`failed email callback: ${scenario}`,async({page})=>{
+ if(scenario==='expired-with-old-session')await mockSession(page);
+ const exchanges=await callbackRoutes(page,true);
+ if(scenario==='expired-with-old-session')await page.addInitScript(()=>localStorage.setItem('sb-mock-auth-token-code-verifier',JSON.stringify('mock-verifier')));
+ await page.goto(scenario==='error-fragment'?'/mobile/#error=access_denied&error_code=otp_expired':'/mobile/?code=mock-email-code');
+ await expect(page.getByRole('status').filter({hasText:'이 로그인 링크를 완료하지 못했어요.'})).toBeVisible();
+ await expect(page.getByText('로그인했어요.',{exact:false})).toHaveCount(0);
+ await expect(page).toHaveURL(/\/mobile\/$/);
+ expect(exchanges()).toBe(scenario==='expired-with-old-session'?1:0);
+ if(scenario==='expired-with-old-session')expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('sb-mock-auth-token')!).user.id)).toBe('test-user');
+ await page.getByRole('button',{name:'촬영',exact:true}).click();
+ await expect(page.getByLabel('앨범 사진 선택')).toBeAttached();
+});

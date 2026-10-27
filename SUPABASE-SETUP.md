@@ -1,12 +1,12 @@
 # 회원·공동 관찰 연결 운영 가이드
 
-현재 상태: 연결 코드 준비. Supabase 프로젝트·실제 이메일 발송·실DB 보안 검증은 아직 없음. AI 판별은 설계만 있으며 자동 호출하지 않는다.
+현재 상태(2026-10-28): 공개 키 로컬 설정과 실제 Auth 설정 조회(HTTP200), Site URL/redirect 저장을 확인했다. 실제 이메일 왕복·커뮤니티 DB/RLS·외부 식별 API는 별도 미검증이다. 기기 내 관찰 저장/재관찰과 식별 연결 코드는 구현되어 있으며 로그인만으로 사진을 전송하지 않는다. 상세 근거는 `docs/integration-20261025/system-20261026/session-20261028/`에 기록한다.
 
 1. 전용 Supabase 프로젝트를 준비한다. 다른 서비스의 운영 DB에 이 파일럿 스키마를 바로 적용하지 않는다.
 2. `supabase/migrations/20260929000000_community_pilot.sql`을 검토하고 로컬 Supabase에서 먼저 적용한다. `supabase test db`로 `supabase/tests/community_rls.test.sql`을 실행한다. 현재 이 Mac에 Supabase CLI/Postgres가 없어 이 SQL 검사는 미실행이다.
 3. 서로 다른 테스트 계정 두 개로 비공개 제출 조회/삭제 격리, 승인 우회 거절, 로그아웃·계정 전환, 공개 후 철회를 검사한다. mock/타입 검사로 이 검증을 대신하지 않는다.
-4. Auth에 이메일 로그인을 활성화하고 Site URL과 redirect allowlist에 실제 `/nature-lens/mobile/` URL을 등록한다. PKCE 로그인 링크는 요청한 기기의 같은 브라우저에서 연다. 이메일 발송 제한과 CAPTCHA/가입 제한을 검토해 악용을 막는다.
-5. 빌드 환경에 아래 두 공개 값을 넣고 재빌드한다. GitHub Pages 정적 배포이므로 런타임에 설정 파일만 바꿔도 연결되지 않는다.
+4. Auth에 이메일 로그인을 활성화하고 Site URL과 redirect allowlist에 실제 배포의 `/mobile/` URL (`https://nature-lens-mvp.pages.dev/mobile/`)을 등록한다. PKCE 로그인 링크는 요청한 기기의 같은 브라우저에서 연다. 이메일 발송 제한과 CAPTCHA/가입 제한을 검토해 악용을 막는다.
+5. 빌드 환경에 아래 두 공개 값을 넣고 재빌드한다. Cloudflare Pages 정적 배포이므로 런타임에 설정 파일만 바꿔도 연결되지 않는다.
 
 ```text
 NEXT_PUBLIC_SUPABASE_URL=https://PROJECT.supabase.co
@@ -24,3 +24,11 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 - 좋아요·월간 자동 편찬은 여전히 예시/미연결이다. 이번 연결은 회원·제출·검수·승인 피드 범위다.
 
 공식 문서: https://supabase.com/docs/guides/database/postgres/row-level-security · https://supabase.com/docs/guides/auth/auth-email-passwordless · https://supabase.com/docs/guides/getting-started/api-keys
+
+## 단계별 연결 검증
+
+- 로그인 UI만 열려도 회원가입/메일 도착/인증 왕복 완료를 뜻하지 않는다. 첫 실검사는 Supabase 조직 구성원 이메일로 로그인 링크를 요청하고 같은 브라우저에서 연다. 기본 SMTP는 조직 구성원에게만 발송하며 일반 사용자 공개 전 별도 SMTP가 필요하다: https://supabase.com/docs/guides/auth/auth-smtp
+- 저장된 Site URL과 Redirect URL은 모두 위 운영 `/mobile/` 주소다. 로컬·미리보기에서 실로그인을 시험하려면 정확한 해당 주소를 별도 허용해야 한다.
+- 현재 read-only REST `select`+`limit=0` 조회에서 `profiles`, `community_submissions`, `community_feed`는 각각 404/PGRST205를 반환했다. 이는 현재 API schema cache에 나타나지 않음을 뜻하며, DB가 비었다거나 RLS가 통과했다는 증거가 아니다.
+- 기존 `create_obs_photos_storage_bucket` migration이 있으므로 기존 테이블·정책·함수를 먼저 대조한다. 커뮤니티 migration은 비멱등 CREATE이므로 통째로 재실행하지 않는다. DB 보안 검증 전 커뮤니티 성공/공개발행을 주장하지 않는다.
+- 로그인은 인증 연결이며 계정별 사진 동기화가 아니다. 사진과 재관찰은 브라우저에 남고, 별도 동의한 제출만 서버 전송 대상이다.

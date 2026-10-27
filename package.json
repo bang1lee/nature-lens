@@ -20,6 +20,7 @@
     "native:android:dev": "tauri android dev",
     "native:android:build": "tauri android build",
     "test:app": "playwright test -c app.playwright.config.ts",
+    "test:cloud-auth": "playwright test -c tests/cloud-auth.playwright.config.ts",
     "identify:preflight": "node scripts/identify-preflight.mjs",
     "build:cloudflare": "NEXT_PUBLIC_BASE_PATH= npm run build",
     "dev:worker": "wrangler dev --local --test-scheduled",

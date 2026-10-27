@@ -41,3 +41,7 @@ flowchart TD
 ```
 
 이 경로는 개발 지침이며 새 자동 실행 서버가 아니다. 사용자 설정 없이 실서비스 단계로 합류하지 않는다.
+
+## 후속 실행 · 2026-10-28
+
+공개 키와 로그인 복귀 주소 입력 후의 최신 완료 기준·담당·실행 증거는 [session-20261028/PLAN.md](session-20261028/PLAN.md)와 [VALIDATION.md](session-20261028/VALIDATION.md)를 따른다. 이전 시작 상태를 현재 서비스 상태로 해석하지 않는다. 인증 집중 검사는 `npm run test:cloud-auth`이며 CI에도 연결했다.
