@@ -1,0 +1,14 @@
+{
+  "source": "9737acc",
+  "frontend": "https://df6fc1e3.nature-lens-mvp.pages.dev",
+  "app": "https://nature-lens-mvp.pages.dev/mobile/",
+  "backend": {
+    "id": "dep-dbh447rbc2fs73emikm0",
+    "status": "live",
+    "commit": "9737acc947d378b744ade6aaad3326867f28ee16"
+  },
+  "migration": "20261029000000_discovery_game.sql",
+  "migrationHistoryRegistered": false,
+  "providerPhotoTested": false,
+  "realPointsAwardedByAudit": false
+}
