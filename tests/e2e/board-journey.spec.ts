@@ -1,3 +1,4 @@
+import {openRecordDetails} from './capture-helpers';
 import { test, expect } from '@playwright/test';
 import sharp from 'sharp';
 
@@ -27,9 +28,9 @@ test('board preserves explicit reobservation, the selected month and detail call
 
   await page.getByRole('button', { name: '관찰 추가', exact: true }).click();
   await page.getByLabel('앨범 사진 선택').setInputFiles({ name: 'first-pattern.png', mimeType: 'image/png', buffer: firstPhoto });
-  await page.getByLabel('이름 선택').fill(firstTitle);
-  await page.getByLabel('관찰 날짜').fill('2026-09-12');
-  await page.getByLabel('한 줄 메모').fill('첫날의 잎을 기록했어요.');
+  await openRecordDetails(page);await page.getByLabel('이름 선택').fill(firstTitle);
+  await openRecordDetails(page);await page.getByLabel('관찰 날짜').fill('2026-09-12');
+  await openRecordDetails(page);await page.getByLabel('한 줄 메모').fill('첫날의 잎을 기록했어요.');
   await page.getByRole('button', { name: '내 기록에 저장', exact: true }).click();
   await page.getByRole('button', { name: '방금 기록 보기' }).click();
 
@@ -51,7 +52,7 @@ test('board preserves explicit reobservation, the selected month and detail call
   // With a draft, rejecting discard keeps it; accepting discard restores the same detail.
   await reobserve.click();
   await page.getByLabel('앨범 사진 선택').setInputFiles({ name: 'discard-pattern.png', mimeType: 'image/png', buffer: secondPhoto });
-  await page.getByLabel('한 줄 메모').fill('취소 흐름만 검증하는 저장 전 메모');
+  await openRecordDetails(page);await page.getByLabel('한 줄 메모').fill('취소 흐름만 검증하는 저장 전 메모');
   await Promise.all([
     page.waitForEvent('dialog').then(dialog => {
       expect(dialog.type()).toBe('confirm');
@@ -80,9 +81,9 @@ test('board preserves explicit reobservation, the selected month and detail call
   await expect(capture).toBeVisible();
   await page.getByLabel('앨범 사진 선택').setInputFiles({ name: 'second-pattern.png', mimeType: 'image/png', buffer: secondPhoto });
   await expect(page.getByLabel('이름 선택')).toHaveValue('');
-  await page.getByLabel('이름 선택').fill(secondTitle);
-  await page.getByLabel('관찰 날짜').fill('2026-09-20');
-  await page.getByLabel('한 줄 메모').fill('같은 잎의 색이 달라졌어요.');
+  await openRecordDetails(page);await page.getByLabel('이름 선택').fill(secondTitle);
+  await openRecordDetails(page);await page.getByLabel('관찰 날짜').fill('2026-09-20');
+  await openRecordDetails(page);await page.getByLabel('한 줄 메모').fill('같은 잎의 색이 달라졌어요.');
   const sameSubject = page.getByLabel('지난번과 같은 개체를 관찰했습니다');
   await expect(sameSubject).not.toBeChecked();
   await page.getByRole('button', { name: '내 기록에 저장', exact: true }).click();

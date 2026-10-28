@@ -6,15 +6,15 @@ test.beforeEach(async({page})=>{
  await page.route('**/capabilities',r=>r.fulfill({json:{groups:[],policyUrl:null}}));
 });
 test('web board: camera starts only on demand, captures and persists a card',async({page})=>{
- await page.goto('/board/');await expect(page.getByRole('heading',{name:'내 관찰 보드',exact:false})).toBeVisible();
+ await page.goto('/board/',{waitUntil:'domcontentloaded'});await expect(page.getByRole('button',{name:'관찰 추가',exact:true})).toBeEnabled();await expect(page.getByRole('heading',{name:'내 관찰 보드',exact:false})).toBeVisible();
  await page.getByRole('button',{name:'관찰 추가',exact:true}).click();
  await expect(page.getByRole('button',{name:'카메라 켜기',exact:true})).toBeVisible();
  await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();
  const shoot=page.getByRole('button',{name:'사진 촬영하기',exact:true});await expect(shoot).toBeEnabled();await shoot.click();
- await expect(page.getByLabel('이름',{exact:false}).first()).toBeVisible();
- await page.getByLabel('이름',{exact:false}).first().fill('산책길의 작은 발견');
+ await page.getByText('기록 더하기',{exact:false}).click();await expect(page.getByRole('textbox',{name:'이름 선택',exact:true})).toBeVisible();
+ await page.getByRole('textbox',{name:'이름 선택',exact:true}).fill('산책길의 작은 발견');
  await page.getByRole('button',{name:'내 기록에 저장'}).click();await page.getByRole('button',{name:'홈으로',exact:true}).click();
- await expect(page.getByRole('button',{name:'산책길의 작은 발견 기록 열기'})).toBeVisible();await page.reload();await expect(page.getByRole('button',{name:'산책길의 작은 발견 기록 열기'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'산책길의 작은 발견 기록 열기'})).toBeVisible();await page.reload({waitUntil:'domcontentloaded'});await expect(page.getByRole('button',{name:'관찰 추가',exact:true})).toBeEnabled();await expect(page.getByRole('button',{name:'산책길의 작은 발견 기록 열기'})).toBeVisible();
  const audit=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa']).analyze();expect(audit.violations).toEqual([]);
  await page.screenshot({path:'test-results/web-board-desktop.png',fullPage:true});
  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -22,13 +22,13 @@ test('web board: camera starts only on demand, captures and persists a card',asy
 });
 test('denied camera still permits photo upload and closed preview releases stream',async({page})=>{
  await page.addInitScript(()=>{navigator.mediaDevices.getUserMedia=async()=>{throw new DOMException('denied','NotAllowedError');};});
- await page.goto('/board/');await page.getByRole('button',{name:'관찰 추가',exact:true}).click();await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();
+ await page.goto('/board/',{waitUntil:'domcontentloaded'});await expect(page.getByRole('button',{name:'관찰 추가',exact:true})).toBeEnabled();await page.getByRole('button',{name:'관찰 추가',exact:true}).click();await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();
  await expect(page.locator('.m-web-camera [role=alert]')).toContainText('권한');
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');await expect(page.getByRole('button',{name:'내 기록에 저장'})).toBeVisible();
 });
 test('camera tracks stop on explicit off and closing the capture screen',async({page})=>{
  await page.addInitScript(()=>{const original=navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);navigator.mediaDevices.getUserMedia=async c=>{const s=await original(c);(window as unknown as {cameraStream:MediaStream}).cameraStream=s;return s;};});
- await page.goto('/board/');await page.getByRole('button',{name:'관찰 추가',exact:true}).click();await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();await expect(page.getByRole('button',{name:'사진 촬영하기',exact:true})).toBeEnabled();await page.getByRole('button',{name:'카메라 끄기',exact:true}).click();
+ await page.goto('/board/',{waitUntil:'domcontentloaded'});await expect(page.getByRole('button',{name:'관찰 추가',exact:true})).toBeEnabled();await page.getByRole('button',{name:'관찰 추가',exact:true}).click();await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();await expect(page.getByRole('button',{name:'사진 촬영하기',exact:true})).toBeEnabled();await page.getByRole('button',{name:'카메라 끄기',exact:true}).click();
  expect(await page.evaluate(()=>(window as unknown as {cameraStream:MediaStream}).cameraStream.getTracks().every(t=>t.readyState==='ended'))).toBe(true);
  await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();await expect(page.getByRole('button',{name:'사진 촬영하기',exact:true})).toBeEnabled();await page.getByRole('button',{name:'촬영 닫기'}).click();
  expect(await page.evaluate(()=>(window as unknown as {cameraStream:MediaStream}).cameraStream.getTracks().every(t=>t.readyState==='ended'))).toBe(true);
@@ -38,7 +38,7 @@ test('late permission grant after closing immediately releases the camera',async
   Object.assign(window,{cameraStopped:false,resolveCamera:()=>{}});
   navigator.mediaDevices.getUserMedia=()=>new Promise(resolve=>{(window as unknown as {resolveCamera:()=>void}).resolveCamera=()=>resolve({getTracks:()=>[{stop:()=>{(window as unknown as {cameraStopped:boolean}).cameraStopped=true;}}]} as unknown as MediaStream);});
  });
- await page.goto('/board/');await page.getByRole('button',{name:'관찰 추가',exact:true}).click();await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();await expect(page.getByRole('status')).toContainText('연결 대기');
+ await page.goto('/board/',{waitUntil:'domcontentloaded'});await expect(page.getByRole('button',{name:'관찰 추가',exact:true})).toBeEnabled();await page.getByRole('button',{name:'관찰 추가',exact:true}).click();await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();await expect(page.getByRole('status')).toContainText('연결 대기');
  await page.getByRole('button',{name:'촬영 닫기'}).click();await page.evaluate(()=>(window as unknown as {resolveCamera:()=>void}).resolveCamera());
  await expect.poll(()=>page.evaluate(()=>(window as unknown as {cameraStopped:boolean}).cameraStopped)).toBe(true);
 });

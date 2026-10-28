@@ -1,3 +1,4 @@
+import {openRecordDetails} from './capture-helpers';
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 test('personal print excludes other months, public examples and navigation',async({page})=>{
@@ -5,8 +6,8 @@ test('personal print excludes other months, public examples and navigation',asyn
  for(const [date,title] of [['2026-09-10','가을의 잎'],['2026-08-10','다른 달 기록']]){
   await page.getByRole('button',{name:'촬영',exact:true}).click();
   await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
-  await page.getByLabel('관찰 날짜').fill(date);await page.getByLabel('이름 선택').fill(title);
-  await page.getByLabel('한 줄 메모').fill('나만의 관찰 메모 <script>text</script>');
+  await openRecordDetails(page);await page.getByLabel('관찰 날짜').fill(date);await openRecordDetails(page);await page.getByLabel('이름 선택').fill(title);
+  await openRecordDetails(page);await page.getByLabel('한 줄 메모').fill('나만의 관찰 메모 <script>text</script>');
   await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();
   await page.getByRole('button',{name:'홈으로',exact:true}).click();
  }

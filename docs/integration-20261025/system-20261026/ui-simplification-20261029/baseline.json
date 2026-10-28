@@ -1,0 +1,42 @@
+{
+  "viewport": "390x844",
+  "scope": "isolated signed-out production browser; icon fixture; no external writes; text includes full scrollable page; no real user study",
+  "rows": [
+    {
+      "name": "home",
+      "visibleText": 1069,
+      "pageHeight": 3637,
+      "viewport": 844,
+      "buttons": 25
+    },
+    {
+      "name": "capture before identification",
+      "visibleText": 459,
+      "pageHeight": 1542,
+      "viewport": 844,
+      "buttons": 4
+    },
+    {
+      "name": "capture immediate expanded signed out",
+      "visibleText": 784,
+      "pageHeight": 2283,
+      "viewport": 844,
+      "buttons": 5
+    },
+    {
+      "name": "capture tomorrow signed out",
+      "visibleText": 710,
+      "pageHeight": 1999,
+      "viewport": 844,
+      "buttons": 4
+    },
+    {
+      "name": "saved tomorrow signed out",
+      "visibleText": 656,
+      "pageHeight": 2178,
+      "viewport": 844,
+      "buttons": 11
+    }
+  ],
+  "measurementNote": "Capture baseline waits for photo preprocessing and form visibility; counts describe full scrollable document, not only first viewport."
+}

@@ -1,16 +1,19 @@
+import {openRecordDetails,gotoReady} from './capture-helpers';
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 test('mobile backup roundtrip, invalid restore and unconfigured community',async({page,browser})=>{
- await page.setViewportSize({width:390,height:844});await page.goto('/mobile/');
+ // Two browser contexts, a download, two restores and accessibility audit share this budget.
+ test.setTimeout(60000);
+ await page.setViewportSize({width:390,height:844});await gotoReady(page,'/mobile/');
  await page.getByRole('button',{name:'촬영',exact:true}).click();await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
- await page.getByLabel('한 줄 메모').fill('백업 복원 검증');await page.getByRole('button',{name:'내 기록에 저장'}).click();await page.getByRole('button',{name:'홈으로',exact:true}).click();
+ await openRecordDetails(page);await page.getByLabel('한 줄 메모').fill('백업 복원 검증');await page.getByRole('button',{name:'내 기록에 저장'}).click();await page.getByRole('button',{name:'홈으로',exact:true}).click();
  await page.getByRole('button',{name:'설정',exact:true}).click();
  await expect(page.getByRole('heading',{name:'함께 관찰하기 · 연결 준비'})).toBeVisible();
  await expect(page.getByRole('button',{name:'이메일 로그인 링크 받기'})).toHaveCount(0);
  await page.getByLabel('모바일 백업 파일').setInputFiles({name:'broken.json',mimeType:'application/json',buffer:Buffer.from('{}')});
  await expect(page.locator('.m-error[role=alert]')).toContainText('올바른 Nature Lens');
  const download=page.waitForEvent('download');await page.getByRole('button',{name:'전체 백업 내려받기'}).click();const file=await(await download).path();expect(file).toBeTruthy();
- const context=await browser.newContext({viewport:{width:390,height:844}});const restored=await context.newPage();await restored.goto('http://127.0.0.1:3107/mobile/');await restored.getByRole('button',{name:'설정',exact:true}).click();await restored.getByLabel('모바일 백업 파일').setInputFiles(file!);
+ const context=await browser.newContext({viewport:{width:390,height:844}});const restored=await context.newPage();await gotoReady(restored,'http://127.0.0.1:3107/mobile/');await restored.getByRole('button',{name:'설정',exact:true}).click();await restored.getByLabel('모바일 백업 파일').setInputFiles(file!);
  const restoreStatus=restored.locator('.m-settings-note').filter({has:restored.getByRole('heading',{name:'기록을 안전하게 보관하기',exact:true})}).getByRole('status');
  await expect(restoreStatus).toContainText('1건을 초안으로 복원');
  await restored.getByLabel('모바일 백업 파일').setInputFiles(file!);await expect(restoreStatus).toContainText('0건을 초안으로 복원');

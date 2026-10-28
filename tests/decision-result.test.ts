@@ -17,7 +17,7 @@ describe('identification decision presentation',()=>{
  it('shows real gateway candidates as unconfirmed, not calibrated confidence or verified Korean names',()=>{
   const decision=fromGatewayResult({state:'candidates',provider:'plantnet',modelVersion:'test',needsHumanReview:true,candidates:[{scientificName:'Pinus densiflora',commonName:'Japanese red pine',score:.8}]});
   const html=renderToStaticMarkup(createElement(DecisionResult,{decision,onCandidate:()=>{}}));
-  expect(html).toContain('한국어 이름 검증 전');
+  expect(html).toContain('한국어 이름 미확인');
   expect(html).toContain('정답 확률이 아니에요');
   expect(html).toContain('미확정 초안에 반영');
   expect(html).toContain('전문가 미검수');

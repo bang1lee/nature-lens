@@ -1,11 +1,12 @@
+import {openRecordDetails} from './capture-helpers';
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 test('same specimen confirmation, persisted timeline, private month and unrelated capture',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/mobile/');
  await page.getByRole('button',{name:'촬영',exact:true}).click();
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
- await page.getByLabel('이름 선택').fill('첫 나무');
- await page.getByLabel('한 줄 메모').fill('처음 만난 날');
+ await openRecordDetails(page);await page.getByLabel('이름 선택').fill('첫 나무');
+ await openRecordDetails(page);await page.getByLabel('한 줄 메모').fill('처음 만난 날');
  await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();
  await page.getByRole('button',{name:'방금 기록 보기'}).click();
  await page.getByRole('button',{name:'같은 대상 다시 관찰하기'}).click();
@@ -17,7 +18,7 @@ test('same specimen confirmation, persisted timeline, private month and unrelate
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
  await expect(page.getByLabel('지난번과 같은 개체를 관찰했습니다')).not.toBeChecked();
  await page.getByLabel('지난번과 같은 개체를 관찰했습니다').check();
- await page.getByLabel('한 줄 메모').fill('잎 색이 바뀌었어요');
+ await openRecordDetails(page);await page.getByLabel('한 줄 메모').fill('잎 색이 바뀌었어요');
  await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();
  await page.getByRole('button',{name:'방금 기록 보기'}).click();
  await expect(page.locator('.m-specimen')).toContainText('첫 나무');
