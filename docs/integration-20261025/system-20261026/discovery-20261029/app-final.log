@@ -1,0 +1,22 @@
+
+> nature-lens@0.1.0 test:app
+> playwright test -c app.playwright.config.ts --workers=1 --grep discovery
+
+[WebServer] (node:6535) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:6564) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:6566) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ⚠ Warning: Next.js ignored package-lock.json in /Users/light_one/.local/share/openrig-poc/nature-lens because it is outside the current Git repository (/Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+
+Running 2 tests using 1 worker
+
+(node:6577) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/app-platform.spec.ts:166:1 › discovery persists private round, reveals server result and score without another photo upload (5.4s)
+  ✓  2 tests/app-platform.spec.ts:200:1 › signed out discovery cannot submit predictions; capture choice survives save (2.1s)
+
+  2 passed (10.1s)

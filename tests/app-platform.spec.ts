@@ -162,3 +162,49 @@ for(const scenario of ['missing-verifier','expired-with-old-session','error-frag
  await page.getByRole('button',{name:'촬영',exact:true}).click();
  await expect(page.getByLabel('앨범 사진 선택')).toBeAttached();
 });
+
+test('discovery persists private round, reveals server result and score without another photo upload',async({page})=>{
+ await mockSession(page);
+ await page.route('**/capabilities',r=>r.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy',discovery:true}}));
+ let state='waiting',ready=false,submits=0,reveals=0;
+ const round=()=>({id:'00000000-0000-4000-8000-000000000001',state,prediction:'민들레',reason:'노란 꽃',readyAt:'2026-10-30T00:00:00Z',serverNow:ready?'2026-10-30T01:00:00Z':'2026-10-29T00:00:00Z',eligible:true,points:state==='revealed'?10:0,totalPoints:state==='revealed'?10:0,result:state==='revealed'?{state:'candidates',provider:'plantnet',modelVersion:'test',candidates:[{scientificName:'Taraxacum officinale',commonName:'민들레',score:.95}],needsHumanReview:true}:null});
+ await page.route('**/discovery-capabilities',r=>r.fulfill({json:{discovery:true}}));
+ await page.route('**/discovery/*',async route=>{
+  const action=new URL(route.request().url()).pathname.split('/').at(-1);
+  const input=route.request().postDataJSON();
+  if(action==='submit'){submits++;expect(input.prediction).toBe('민들레');expect(input.reason).toBe('노란 꽃');expect(input).not.toHaveProperty('latitude');}
+  else expect(input).not.toHaveProperty('photo');
+  if(action==='reveal'){reveals++;state='revealed';}
+  await route.fulfill({json:round()});
+ });
+ await record(page);await page.getByLabel('이름을 알아보는 방식').selectOption('tomorrow');
+ await page.getByLabel('내가 예상한 식물 이름').fill('민들레');await page.getByLabel('그렇게 생각한 이유').fill('노란 꽃');
+ await page.getByLabel('인물과 개인정보가 없는 사진입니다').check();await page.getByLabel('사진 전송 및 예상·결과·점수 보관에 동의합니다').check();
+ await page.getByRole('button',{name:'예상 제출하고 내일 확인하기'}).click();
+ await expect(page.getByText('나의 예상: 민들레')).toBeVisible();
+ await expect(page.getByRole('button',{name:'내 예상과 결과 비교하기'})).toHaveCount(0);
+ await expect(page.getByText('Taraxacum officinale',{exact:true})).toHaveCount(0);
+ expect(submits).toBe(1);
+ await page.reload();await page.getByRole('button',{name:'내 기록',exact:true}).click();await page.getByRole('button',{name:'오늘 만난 자연 기록 열기'}).click();
+ await expect(page.getByText('나의 예상: 민들레')).toBeVisible();
+ ready=true;await page.getByRole('button',{name:'공개 상태 새로 확인'}).click();await page.getByRole('button',{name:'내 예상과 결과 비교하기'}).click();
+ await expect(page.getByText('이번 예측 10점 · 누적 10점')).toBeVisible();expect(submits).toBe(1);expect(reveals).toBe(1);
+ expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
+ await page.screenshot({path:'test-results/discovery-score.png',fullPage:true});
+ await page.getByRole('button',{name:'민들레 이름을 미확정 초안에 반영'}).click();
+ await expect(page.locator('.m-species')).toHaveText('민들레');
+ await expect(page.getByText('이번 예측 10점 · 누적 10점')).toBeVisible();
+ expect(submits).toBe(1);expect(reveals).toBe(1);
+});
+
+test('signed out discovery cannot submit predictions; capture choice survives save',async({page})=>{
+ await page.route('https://mock.supabase.co/**',r=>r.fulfill({json:{}}));
+ await page.route('**/capabilities',r=>r.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy',discovery:true}}));
+ let calls=0;await page.route('**/discovery/*',r=>{calls++;return r.abort();});
+ await page.goto('/mobile/');await page.getByRole('button',{name:'촬영',exact:true}).click();await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
+ await page.getByText('저장 전에 사진에서 이름 찾기',{exact:true}).click();await page.getByLabel('이름을 알아보는 방식').selectOption('tomorrow');
+ await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();
+ await expect(page.getByLabel('이름을 알아보는 방식')).toHaveValue('tomorrow');
+ await expect(page.getByLabel('식별 로그인 이메일')).toBeVisible();
+ await expect(page.getByRole('button',{name:'예상 제출하고 내일 확인하기'})).toHaveCount(0);expect(calls).toBe(0);
+});

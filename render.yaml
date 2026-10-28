@@ -13,6 +13,8 @@ services:
         value: 0.0.0.0
       - key: IDENTIFY_ENABLED
         value: "false"
+      - key: DISCOVERY_ENABLED
+        value: "false"
       - key: IDENTIFY_LEDGER_BACKEND
         value: supabase
       - key: IDENTIFY_ALLOWED_ORIGINS

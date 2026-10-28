@@ -10,7 +10,7 @@ export async function saveObservation(record:Observation,expectedUpdatedAt:strin
  try{
   const existing=await tx.objectStore('observations').get(parsed.id) as Observation|undefined;
   if((existing?.updatedAt??null)!==expectedUpdatedAt)throw new Error('다른 창에서 이 기록이 변경되거나 삭제되었습니다. 내용을 따로 복사한 뒤 편집 창을 닫고 기록을 다시 열어 주세요.');
-  if(existing && existing.photo!==parsed.photo){delete parsed.publicGrid; delete parsed.region; delete parsed.aiIdentification;}
+  if(existing && existing.photo!==parsed.photo){delete parsed.publicGrid; delete parsed.region; delete parsed.aiIdentification; delete parsed.discoveryId; delete parsed.identificationTiming;}
   parsed.updatedAt=new Date(Math.max(Date.now(),existing?Date.parse(existing.updatedAt)+1:0)).toISOString();
   const observations=(await tx.objectStore('observations').getAll()).filter(o=>o.id!==parsed.id);observations.push(parsed);
   const collections=await tx.objectStore('collections').getAll();assertLibraryCapacity({observations,collections});

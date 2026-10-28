@@ -28,6 +28,7 @@ export default function QuickCapture({ onClose, onSaved, reobserveFrom }: Props)
     setLocating(true); setError('');
     navigator.geolocation.getCurrentPosition(p => { if (!active.current) return; setPosition({latitude:p.coords.latitude,longitude:p.coords.longitude,accuracy:p.coords.accuracy,capturedAt:new Date().toISOString()}); setMatches(false); setLocating(false); }, () => { if (!active.current) return; setLocating(false); setError('위치를 가져오지 못했어요. 지역만 선택하거나 위치 없이 저장할 수 있어요.'); }, {enableHighAccuracy:true,timeout:10000,maximumAge:0});
   }
+  const [identificationTiming,setIdentificationTiming]=useState<'now'|'tomorrow'>('now');
   const [analysis,setAnalysis]=useState<Observation['aiIdentification']>();
   const [scientificName,setScientificName]=useState('');
   const [aiAssisted,setAiAssisted]=useState(false);
@@ -57,7 +58,7 @@ export default function QuickCapture({ onClose, onSaved, reobserveFrom }: Props)
   async function select(file?: File) {
     if (!file || busy || identifying) return;
     setBusy(true); setError('');
-    try { setPhoto(await preparePhoto(file)); if(aiAssisted)setName('');setAnalysis(undefined);setScientificName('');setAiAssisted(false);setPhotoRevision(v=>v+1); setSameSubject(false); setMatches(false); setKeepPrecise(false); }
+    try { setPhoto(await preparePhoto(file)); if(aiAssisted)setName('');setAnalysis(undefined);setIdentificationTiming('now');setScientificName('');setAiAssisted(false);setPhotoRevision(v=>v+1); setSameSubject(false); setMatches(false); setKeepPrecise(false); }
     catch (e) { setError(e instanceof Error ? e.message : '사진을 읽지 못했어요. 다른 사진을 선택해 주세요.'); }
     finally {
       setBusy(false);
@@ -71,7 +72,7 @@ export default function QuickCapture({ onClose, onSaved, reobserveFrom }: Props)
     if(reobserveFrom && !sameSubject){setError('같은 개체를 다시 관찰한 것인지 확인해 주세요.');return;}
     setBusy(true); setError('');
     try {
-      const record = { ...draftBase, aiIdentification:analysis, scientificName, aiAssisted, ...(reobserveFrom ? reobservationContext(reobserveFrom) : {}), date:observedDate, photo, title: name.trim() || '오늘 만난 자연', species: name.trim(), notes: notes.trim(), taxonGroup, ...(region ? {region} : {}), ...(position && matches ? {publicGrid:coarsePoint(position.latitude, position.longitude)} : {}) };
+      const record = { ...draftBase, identificationTiming, aiIdentification:analysis, scientificName, aiAssisted, ...(reobserveFrom ? reobservationContext(reobserveFrom) : {}), date:observedDate, photo, title: name.trim() || '오늘 만난 자연', species: name.trim(), notes: notes.trim(), taxonGroup, ...(region ? {region} : {}), ...(position && matches ? {publicGrid:coarsePoint(position.latitude, position.longitude)} : {}) };
       const stored = await saveObservation(record, null, position && matches && keepPrecise ? position : null);
       onSaved(stored);
     } catch (e) { setError(e instanceof Error ? e.message : '저장하지 못했어요. 사진을 유지한 채 다시 시도할 수 있어요.'); }
@@ -100,8 +101,8 @@ export default function QuickCapture({ onClose, onSaved, reobserveFrom }: Props)
         <h1>발견한 순간을 남겨요</h1>{reobserveFrom && <div className="m-private-note"><strong>다시 만난 {reobserveFrom.title}</strong><p>같은 종류가 아니라, 지난번에 만난 바로 그 개체의 변화를 기록해요.</p><label className="m-location-check"><input type="checkbox" checked={sameSubject} onChange={e=>setSameSubject(e.target.checked)}/>지난번과 같은 개체를 관찰했습니다</label></div>}<label>관찰 날짜<input type="date" required value={observedDate} onChange={e=>setObservedDate(e.target.value)} disabled={busy||identifying}/></label><p>이름을 몰라도 괜찮아요. 사진만 저장해도 돼요.</p>
         <label>이름 <span>선택</span><input maxLength={100} value={name} onChange={e => {setName(e.target.value);setScientificName('');setAiAssisted(false);}} placeholder="어떤 자연을 만났나요?" disabled={busy||identifying}/></label>
         <label>한 줄 메모 <span>선택</span><textarea rows={3} maxLength={4000} value={notes} onChange={e => setNotes(e.target.value)} placeholder="색, 모양, 그때의 느낌을 자유롭게" disabled={busy||identifying}/></label>
-        <label>만난 생명<select aria-label="만난 생명" value={taxonGroup} disabled={identifying} onChange={e => {setTaxonGroup(e.target.value as typeof taxonGroup);setAnalysis(undefined);setScientificName('');if(aiAssisted)setName('');setAiAssisted(false);}}><option value="plant">식물</option><option value="insect">곤충</option><option value="other">기타 생명</option></select></label>
-        <details><summary>저장 전에 사진에서 이름 찾기</summary><IdentificationPanel key={`${photoRevision}-${taxonGroup}`} draft onBusyChange={setIdentifying} record={{...draftBase,photo,title:name||'오늘 만난 자연',species:name,scientificName,aiAssisted,aiIdentification:analysis,taxonGroup,date:observedDate}} onApplied={record=>{setTaxonGroup(record.taxonGroup||'plant');setAnalysis(record.aiIdentification);setScientificName(record.scientificName);setAiAssisted(record.aiAssisted);setName(record.species);}}/></details>
+        <label>만난 생명<select aria-label="만난 생명" value={taxonGroup} disabled={identifying} onChange={e => {setTaxonGroup(e.target.value as typeof taxonGroup);setAnalysis(undefined);setIdentificationTiming('now');setScientificName('');if(aiAssisted)setName('');setAiAssisted(false);}}><option value="plant">식물</option><option value="insect">곤충</option><option value="other">기타 생명</option></select></label>
+        <details><summary>저장 전에 사진에서 이름 찾기</summary><IdentificationPanel key={`${photoRevision}-${taxonGroup}`} draft onBusyChange={setIdentifying} record={{...draftBase,identificationTiming,photo,title:name||'오늘 만난 자연',species:name,scientificName,aiAssisted,aiIdentification:analysis,taxonGroup,date:observedDate}} onApplied={record=>{setIdentificationTiming(record.identificationTiming||'now');setTaxonGroup(record.taxonGroup||'plant');setAnalysis(record.aiIdentification);setScientificName(record.scientificName);setAiAssisted(record.aiAssisted);setName(record.species);}}/></details>
         <label>관찰 지역 <span>선택</span><select aria-label="관찰 지역" value={region} onChange={e => setRegion(e.target.value as typeof region)}><option value="">지역 비공개</option>{REGIONS.map(r=><option key={r}>{r}</option>)}</select></label>
         <div className="m-location"><h2>어디에서 만났나요?</h2><p>GPS는 버튼을 눌렀을 때만 요청해요. 지역 이름은 위에서 직접 선택해 주세요.</p><button type="button" className="m-secondary" onClick={locate} disabled={busy || locating || identifying}>{locating ? '위치를 찾는 중…' : '현재 GPS 위치 가져오기'}</button>
         {position && <><p>측정 정확도 약 {Math.round(position.accuracy)}m. 지금 있는 위치이며, 사진을 찍었던 장소와 다를 수 있어요.</p><label className="m-location-check"><input type="checkbox" checked={matches} onChange={e=>setMatches(e.target.checked)}/>이곳이 관찰한 장소입니다</label><label className="m-location-check"><input type="checkbox" checked={keepPrecise} onChange={e=>setKeepPrecise(e.target.checked)}/>정밀 좌표를 이 브라우저에만 보관</label><button type="button" className="m-text" onClick={()=>{setPosition(null);setMatches(false);setKeepPrecise(false);}}>GPS 사용 안 하기</button></>}

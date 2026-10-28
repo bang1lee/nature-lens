@@ -7,6 +7,7 @@ export const collectionSchema=z.object({id:text(100).min(1),name:text(80).min(1)
 // Validate new edits without making legacy backups or stored collections unreadable.
 export const collectionWriteSchema=collectionSchema.extend({name:z.string().trim().min(1,'컬렉션 이름을 입력해 주세요.').max(80)});
 export const observationSchema=z.object({
+ discoveryId:z.uuid().optional(), identificationTiming:z.enum(['now','tomorrow']).optional(),
  aiIdentification:z.object({decision:decisionSchema,analyzedAt:z.iso.datetime(),elapsedMs:z.number().nonnegative()}).strict().optional(),
  specimenId:text(100).min(1).optional(),previousObservationId:text(100).min(1).optional(),
  taxonGroup:z.enum(['plant','insect','other']).optional(),region:regionLabelSchema.optional(),publicGrid:publicGridSchema.optional(),

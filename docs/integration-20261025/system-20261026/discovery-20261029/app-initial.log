@@ -1,0 +1,82 @@
+
+> nature-lens@0.1.0 test:app
+> playwright test -c app.playwright.config.ts --workers=1
+
+[WebServer] (node:2760) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:2792) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:2794) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ⚠ Warning: Next.js ignored package-lock.json in /Users/light_one/.local/share/openrig-poc/nature-lens because it is outside the current Git repository (/Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+
+Running 21 tests using 1 worker
+
+(node:2796) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/app-platform.spec.ts:16:35 › app shell 360: consent, candidate, draft and keyboard (11.8s)
+  ✓   2 tests/app-platform.spec.ts:16:35 › app shell 412: consent, candidate, draft and keyboard (4.9s)
+  ✓   3 tests/app-platform.spec.ts:16:35 › app shell 1280: consent, candidate, draft and keyboard (7.8s)
+  ✓   4 tests/app-platform.spec.ts:29:1 › unconfigured gateway preserves manual record and reduced motion (3.7s)
+  ✓   5 tests/app-platform.spec.ts:35:1 › error does not overwrite and cancellation ignores late result (5.0s)
+  ✓   6 tests/app-platform.spec.ts:44:1 › signed out capture saves first, login returns to the same record without a photo request (3.8s)
+  ✓   7 tests/app-platform.spec.ts:68:1 › capabilities failure is retryable without sending or losing a saved photo (2.5s)
+  ✓   8 tests/app-platform.spec.ts:80:1 › slow capability check ends, offers retry, and keeps the saved record (14.0s)
+  ✓   9 tests/app-platform.spec.ts:90:1 › late sign in return does not cover a newly started board capture (6.9s)
+  ✓  10 tests/app-platform.spec.ts:106:1 › server rejection of an expired session offers sign in on the saved record (3.1s)
+  ✓  11 tests/app-platform.spec.ts:131:1 › general email callback exchanges PKCE once on home without a pending record (1.1s)
+  ✓  12 tests/app-platform.spec.ts:140:1 › saved record survives PKCE email callback with no automatic photo upload (6.6s)
+  ✓  13 tests/app-platform.spec.ts:152:88 › failed email callback: missing-verifier (9.2s)
+  ✓  14 tests/app-platform.spec.ts:152:88 › failed email callback: expired-with-old-session (1.7s)
+  ✓  15 tests/app-platform.spec.ts:152:88 › failed email callback: error-fragment (1.5s)
+  ✘  16 tests/app-platform.spec.ts:166:1 › discovery persists private round, reveals server result and score without another photo upload (30.0s)
+(node:3627) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  17 tests/app-platform.spec.ts:195:1 › signed out discovery cannot submit predictions; capture choice survives save (11.7s)
+(node:3696) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  18 tests/web-camera.spec.ts:8:1 › web board: camera starts only on demand, captures and persists a card (4.6s)
+  ✓  19 tests/web-camera.spec.ts:23:1 › denied camera still permits photo upload and closed preview releases stream (1.3s)
+  ✓  20 tests/web-camera.spec.ts:29:1 › camera tracks stop on explicit off and closing the capture screen (1.5s)
+  ✓  21 tests/web-camera.spec.ts:36:1 › late permission grant after closing immediately releases the camera (1.3s)
+
+
+  1) tests/app-platform.spec.ts:166:1 › discovery persists private round, reveals server result and score without another photo upload 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: '예상 제출하고 내일 확인하기' })
+        - locator resolved to <button disabled type="button" class="m-primary">예상 제출하고 내일 확인하기</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is not enabled
+        - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is not enabled
+        - retrying click action
+          - waiting 100ms
+        49 × waiting for element to be visible, enabled and stable
+           - element is not enabled
+         - retrying click action
+           - waiting 500ms
+
+
+      180 |  await record(page);await page.getByLabel('이름을 알아보는 방식').selectOption('tomorrow');
+      181 |  await page.getByLabel('내가 예상한 식물 이름').fill('민들레');await page.getByLabel('그렇게 생각한 이유').fill('노란 꽃');
+    > 182 |  await page.getByLabel('인물과 개인정보가 없는 사진입니다').check();await page.getByLabel('사진 전송 및 예상·결과·점수 보관에 동의합니다').check();
+          |                                                          ^
+      183 |  await page.getByRole('button',{name:'예상 제출하고 내일 확인하기'}).click();
+      184 |  await expect(page.getByText('나의 예상: 민들레')).toBeVisible();
+      185 |  await expect(page.getByRole('button',{name:'내 예상과 결과 비교하기'})).toHaveCount(0);
+        at /Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline/tests/app-platform.spec.ts:182:58
+
+    Error Context: test-results/app-platform-discovery-per-895ed-ithout-another-photo-upload/error-context.md
+
+  1 failed
+    tests/app-platform.spec.ts:166:1 › discovery persists private round, reveals server result and score without another photo upload 
+  20 passed (2.3m)

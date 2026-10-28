@@ -6,6 +6,7 @@ import {dirname,join} from 'node:path';
 import {homedir} from 'node:os';
 import {SupabaseQuotaLedger} from './supabase-quota.mjs';
 import {QuotaLedger} from './quota.mjs';
+import {DiscoveryStore} from './discovery-store.mjs';
 import {createGateway} from './gateway.mjs';
 const env=process.env;
 const database=env.IDENTIFY_LEDGER_PATH||join(homedir(),'.local/share/nature-lens/identify.sqlite');
@@ -18,7 +19,7 @@ const gateway=createGateway({
  enabled:env.IDENTIFY_ENABLED==='true'&&Boolean(authURL&&env.SUPABASE_PUBLISHABLE_KEY),
  origins:(env.IDENTIFY_ALLOWED_ORIGINS||'http://127.0.0.1:3107,http://localhost:3107').split(',').map(x=>x.trim()),
  keys:{plant:env.PLANTNET_API_KEY||'',insect:env.KINDWISE_INSECT_API_KEY||''},policyUrl:env.IDENTIFY_POLICY_URL||'',
-},{ledger,authenticate:async token=>{
+},{ledger,discovery:env.DISCOVERY_ENABLED==='true'?new DiscoveryStore(authURL,env.SUPABASE_SERVICE_ROLE_KEY):undefined,authenticate:async token=>{
  const r=await fetch(`${authURL}/auth/v1/user`,{headers:{Authorization:`Bearer ${token}`,apikey:env.SUPABASE_PUBLISHABLE_KEY},signal:AbortSignal.timeout(5000)});
  if(!r.ok)return null;const user=await r.json();
  // Anonymous accounts must not reset a per-person pilot quota.
