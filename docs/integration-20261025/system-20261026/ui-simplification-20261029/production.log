@@ -1,0 +1,5 @@
+
+> nature-lens@0.1.0 test:production
+> node tests/production-smoke.mjs
+
+PASS: production basePath, first-visit precache, offline reload, local review, PDF rendering, offline board camera and persistence, board manifest, zero page errors

@@ -1,0 +1,18 @@
+{
+  "passed": 12,
+  "checks": [
+    "existing observations preserved",
+    "owner reads own pending",
+    "pending absent from public feed",
+    "client cannot approve",
+    "client cannot choose another owner",
+    "other account cannot read profile",
+    "other account cannot read submission",
+    "other account cannot delete submission",
+    "only operator-approved row visible",
+    "anonymous cannot read base rows",
+    "public view omits owner ID and moderation notes",
+    "owner withdrawal removes public entry"
+  ],
+  "scope": "Local PGlite PostgreSQL with simulated auth.uid/roles. Not live auth, PostgREST, storage, or concurrency validation."
+}

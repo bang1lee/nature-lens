@@ -35,7 +35,7 @@ export default function CommunityHome({onCapture, onJournal}: Props) {
   {notice&&<p className="m-error" role="status">{notice}</p>}
   <div className="c-feed">{ranked.map((s,i)=><article className="c-feed-card" key={s.id} data-story-id={s.id}>
    <header><span className="c-author-mark">{s.author[0]}</span><div><strong>{s.author}</strong><span><MapPin size={11}/>{s.region} · {GROUP_LABELS[s.group]}</span></div><span className="c-card-index">{i===0?'이번 기간의 공감 기록':'함께한 발견'}</span></header>
-   <button className="c-photo-button" aria-label={`${s.title} 이야기 읽기`} onClick={()=>{setOpened(s);window.scrollTo(0,0);}}><img src={`${base}/community/${s.image}`} alt={`${s.species} AI 예시 이미지`} loading={i===0?'eager':'lazy'}/></button>
+   <button className="c-photo-button" aria-label={`${s.title} 이야기 읽기`} onClick={()=>{setOpened(s);window.scrollTo(0,0);}}><img src={`${base}/community/${s.image}`} alt={`${s.species} AI 예시 이미지`} loading="lazy" decoding="async"/></button>
    <div className="c-card-body"><span className="c-image-caption">AI 예시 이미지 · 실제 관찰 아님</span><h3><button onClick={()=>{setOpened(s);window.scrollTo(0,0);}}>{s.title}</button></h3><p>{s.story}</p><blockquote>{s.care}</blockquote><footer>{heart(s,s.count)}<button className="m-text" onClick={()=>{setOpened(s);window.scrollTo(0,0);}}>이야기 더 읽기 <ArrowRight size={15}/></button></footer></div>
   </article>)}</div>
   <p className="c-local-likes">좋아요는 이 브라우저의 예시 화면에만 반영돼요.<br/>실제 이용자 공유·집계는 아직 연결 전입니다.</p>

@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
-import {Camera,Leaf,LoaderCircle,SwitchCamera,Flower2,Cherry} from 'lucide-react';
+import {Camera,Leaf,LoaderCircle,SwitchCamera} from 'lucide-react';
 export default function WebCamera({onCapture}:{onCapture:(photo:string)=>void}) {
  const video=useRef<HTMLVideoElement>(null);const stream=useRef<MediaStream|null>(null);const generation=useRef(0);
  const [live,setLive]=useState(false);const [pending,setPending]=useState(false);const [ready,setReady]=useState(false);
@@ -31,18 +31,16 @@ export default function WebCamera({onCapture}:{onCapture:(photo:string)=>void}) 
   ctx.drawImage(v,0,0,canvas.width,canvas.height);const photo=canvas.toDataURL('image/jpeg',.85);stop();onCapture(photo);
  }
  return <div className="m-web-camera">
-  <div className={`m-viewfinder ${live?'lens-viewfinder-live':''}`}>
+  <div className="m-viewfinder">
    <video ref={video} hidden={!live} autoPlay muted playsInline aria-label="카메라 미리보기" onLoadedData={()=>setReady(Boolean(stream.current&&video.current?.videoWidth))}/>
    {!live&&<><Leaf size={60} strokeWidth={1}/><h1>오늘 만난 자연을<br/>사진으로 남겨요.</h1><p>카메라를 켜거나 아래에서 사진을 선택하세요.<br/>촬영 전에는 카메라를 사용하지 않아요.</p></>}
-   {live&&<><div className="lens-focus-frame" aria-hidden="true"><i/><i/><i/><i/></div><p className="lens-focus-hint">관찰할 자연을 가운데에 담아보세요</p></>}
   </div>
   {error&&<p className="m-error" role="alert">{error}</p>}
-  <div className={`m-live-controls ${live?'lens-controls-live':''}`}>
+  <div className="m-live-controls">
    {!live&&!pending&&<button className="m-secondary" onClick={()=>void start()}><Camera size={20}/> 카메라 켜기</button>}
    {pending&&<p role="status"><LoaderCircle className="spin" size={18}/> 카메라 연결 대기 중</p>}
    {live&&<><button className="m-secondary" disabled={pending} onClick={()=>void start(facing==='environment'?'user':'environment')}><SwitchCamera size={18}/> 카메라 전환</button><button className="m-shutter" aria-label="사진 촬영하기" disabled={!ready||pending} onClick={capture}><Camera size={27}/></button></>}
    {(live||pending)&&<button className="m-secondary" onClick={stop}>{pending?'연결 취소':'카메라 끄기'}</button>}
   </div>
-  <div className="lens-shot-guide"><span><Leaf size={16} aria-hidden="true"/> 잎</span><span><Flower2 size={16} aria-hidden="true"/> 꽃</span><span><Cherry size={16} aria-hidden="true"/> 열매</span><p>모양과 무늬가 선명하게 보이도록 가까이 담아주세요.</p></div>
  </div>;
 }

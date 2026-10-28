@@ -1,0 +1,1 @@
+{"passed":6,"scope":"Local PostgreSQL/WASM role simulation; per-user 5, global 50, duplicate, anonymous function/table denial. No real provider calls or concurrent transactions."}

@@ -1,0 +1,19 @@
+{
+  "passed": 13,
+  "checks": [
+    "submission conceals result",
+    "duplicate photo cannot change prediction",
+    "completed result still concealed",
+    "other user denied",
+    "server time blocks early reveal",
+    "matching name awarded 10",
+    "repeat reveal never awards twice",
+    "early reveal forfeits score",
+    "immediate answer excludes prediction under another record ID",
+    "uncertain result not scored",
+    "direct immediate endpoint forfeits pending points",
+    "anon cannot read table or call scoring RPC",
+    "authenticated cannot read table or call scoring RPC"
+  ],
+  "scope": "isolated PGlite SQL; not live service"
+}
