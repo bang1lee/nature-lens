@@ -34,3 +34,6 @@
 실 Pl@ntNet 사용자 사진 식별 및 실계정 점수 적립, 장기 자정 경계 실운영, 실기기 접근성/초보 사용자5명 과제 검사. 촬영 카메라는 자동 검사에서 가상 스트림이며 현장 GPS 성공 보장 아님.
 
 추가 검수: 계정 전환 중 대기 상태 초기화, 이전 계정 RPC 발행 방지, 익명 세션 제외, 앱 복귀 시 점수 읽기 갱신을 반영. 회원 UI 재검사2/2. 정적 출력 오프라인 재실행·카메라·보관·PDF 인쇄 검사 통과.
+
+## 배포 완료
+Cloudflare https://f6bc8401.nature-lens-mvp.pages.dev → https://nature-lens-mvp.pages.dev/mobile/ . 소스4f8978f GitHub push 완료, merge 없음. 실제 공개 앱에서 격리 브라우저의 아이콘 사진 저장→재관찰→월간 도감 통과, 페이지 오류0, 외부 사진 요청0. gateway health/capabilities200, 외부 출처403, 익명 식별401. Render 기존 배포 유지(백엔드 변경 없음). GitHub CI40760507879 확인 시 진행 중이며 CI 통과로 보고하지 않음. 상세 배포 정보는 release.json.

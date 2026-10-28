@@ -1,0 +1,40 @@
+{
+  "startedAt": "2026-10-28T20:08:18.252Z",
+  "checks": [
+    {
+      "path": "/health",
+      "status": 200,
+      "expected": 200,
+      "ms": 13393
+    },
+    {
+      "path": "/capabilities",
+      "status": 200,
+      "expected": 200,
+      "ms": 2531
+    },
+    {
+      "path": "/capabilities",
+      "status": 403,
+      "expected": 403,
+      "ms": 308
+    },
+    {
+      "path": "/identify",
+      "status": 401,
+      "expected": 401,
+      "ms": 318
+    },
+    {
+      "name": "live capability UI and signed-out identification gate",
+      "pass": true
+    },
+    {
+      "name": "deployed local save → reobservation → reload → monthly journal",
+      "pass": true
+    }
+  ],
+  "externalPhotoRequests": 0,
+  "providerIdentification": "NOT_TESTED",
+  "errors": []
+}
