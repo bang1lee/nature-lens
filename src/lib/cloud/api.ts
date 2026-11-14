@@ -15,6 +15,7 @@ export function cloudErrorMessage(error: unknown): string {
   if (e?.status === 429 || message.includes('rate limit') || message.includes('too many')) return '요청이 너무 많아요. 잠시 후 다시 시도해 주세요.';
   if (e?.code === 'PGRST205' || e?.code === '42P01') return '공동 관찰 서버가 아직 준비되지 않았어요. 운영자에게 공동 관찰 연결 설정 확인을 요청해 주세요. 로그인과 내 기록 보관은 계속 이용할 수 있어요.';
   if (e?.code === '23505') return '이미 사용 중인 별칭이에요. 다른 별칭을 골라 주세요.';
+  if (message.includes('map_area_unavailable')) return '선택한 지도 구역을 더 이상 이용할 수 없어요. 지도 구역을 다시 확인해 주세요.';
   if (message.includes('alias_required')) return '먼저 공개 별칭을 만들어 주세요.';
   if (message.includes('pending_limit')) return '검수 대기 중인 제출이 너무 많아요. 기존 제출이 처리되거나 철회된 뒤 다시 제출해 주세요.';
   if (message.includes('submission_limit')) return '제출 가능한 총 개수에 도달했어요. 이전 제출을 철회한 뒤 다시 시도해 주세요.';
@@ -58,7 +59,7 @@ export async function createAlias(client: SupabaseClient, alias: string): Promis
 
 export async function submitObservation(client: SupabaseClient, payload: SubmissionPayload): Promise<void> {
   const safe = submissionPayloadSchema.parse(payload);
-  const { error } = await client.from('community_submissions').insert(safe);
+  const { error } = await boundedRequest(client.from('community_submissions').insert(safe), '제출 결과를 확인하지 못했어요. 중복 제출을 피하려면 내 제출 목록을 먼저 확인해 주세요.');
   if (error) fail(error);
 }
 
@@ -79,4 +80,10 @@ export async function listFeed(client: SupabaseClient, offset: number): Promise<
   const { data, error } = await boundedRequest(client.from('community_feed').select(FEED_COLUMNS).order('approved_at', { ascending: false }).range(offset, offset + FEED_PAGE - 1));
   if (error) fail(error);
   return z.array(feedItemSchema).parse(data ?? []);
+}
+
+export async function listMapAreas(client: SupabaseClient): Promise<{id:string;label:string}[]> {
+  const {data,error}=await boundedRequest(client.from('map_areas').select('id,label').eq('active',true).order('label'));
+  if(error) fail(error);
+  return z.array(z.object({id:z.string().regex(/^[a-z0-9_-]{1,80}$/),label:z.string().min(1).max(100)})).parse(data??[]);
 }

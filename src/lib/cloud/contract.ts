@@ -12,7 +12,8 @@ export const submissionPayloadSchema = z.object({
   taxon_group: z.enum(['plant', 'insect', 'other']), region: regionLabelSchema.nullable(),
   protection: z.enum(['unknown', 'protected', 'common']), photo: observationSchema.shape.photo,
   consent_upload: z.literal(true), no_people: z.literal(true), ai_assisted: z.boolean(),
-}).strict();
+  map_area_id: z.string().regex(/^[a-z0-9_-]{1,80}$/).nullable().optional(), consent_map: z.boolean().optional(),
+}).strict().refine(v => !v.consent_map || !!v.map_area_id, '지도 구역을 선택해 주세요.');
 export type SubmissionPayload = z.infer<typeof submissionPayloadSchema>;
 
 export type SubmitConfirmation = { uploadConsent: boolean; noPeople: boolean };

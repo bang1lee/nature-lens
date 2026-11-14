@@ -43,7 +43,7 @@ export function useIdentificationReturn(open:(record:Observation)=>void){
    if(!active||!canOpen)return;
    clearIdentificationReturn();
    if(record)open(record);else setMessage('로그인은 완료했지만 이 브라우저에서 이어갈 기록을 찾지 못했어요. 원래 기록을 저장한 브라우저를 확인해 주세요.');
-  }).catch(()=>{if(active){if(callback)cleanCallback();setMessage(callback?'이 로그인 링크를 완료하지 못했어요. 링크를 요청한 같은 브라우저에서 열거나, 설정에서 새 링크를 요청해 주세요. 내 기록은 그대로예요.':'로그인 연결을 확인하지 못했어요. 내 기록은 기기에 그대로 보관돼 있어요.');}}).finally(()=>window.clearTimeout(timer));
+  }).catch(()=>{if(active){if(callback)cleanCallback();setMessage(callback?'이 로그인 링크를 완료하지 못했어요. 기존 로그인 여부는 별개이므로 설정에서 현재 상태를 확인해 주세요. 로그인이 필요하면 링크를 요청한 같은 브라우저에서 열거나 설정에서 새 링크를 요청해 주세요. 내 기록은 그대로예요.':'로그인 연결을 확인하지 못했어요. 내 기록은 기기에 그대로 보관돼 있어요.');}}).finally(()=>window.clearTimeout(timer));
   return()=>{active=false;window.clearTimeout(timer);window.removeEventListener('pointerdown',cancel);window.removeEventListener('keydown',cancel);};
  },[open]);
  return message;

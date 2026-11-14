@@ -31,12 +31,15 @@
     "test:deployed-api": "node tests/deployed-api-smoke.mjs",
     "identify:local": "node server/local-identification.mjs",
     "test:identify:local": "node tests/live-identification.e2e.mjs",
-    "deploy:pages": "npm run build:cloudflare && cd deploy/pages && wrangler pages deploy ../../out --project-name nature-lens-mvp --branch main"
+    "deploy:pages": "npm run build:cloudflare && cd deploy/pages && wrangler pages deploy ../../out --project-name nature-lens-mvp --branch main",
+    "graph:local": "NX_NO_CLOUD=true NX_DAEMON=false NX_LOAD_DOT_ENV_FILES=false nx graph --print",
+    "verify:local": "NX_NO_CLOUD=true NX_DAEMON=false NX_LOAD_DOT_ENV_FILES=false nx run-many -t boundary,typecheck,test --projects=web,worker --parallel=1"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
     "idb": "latest",
     "lucide-react": "latest",
+    "maplibre-gl": "^5.24.0",
     "next": "16.3.8",
     "qrcode.react": "^4.2.0",
     "react": "latest",
@@ -46,6 +49,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "latest",
+    "@babel/parser": "7.29.12",
     "@cloudflare/workers-types": "5.20261007.1",
     "@playwright/test": "latest",
     "@tauri-apps/cli": "2.12.0",
@@ -53,6 +57,7 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "fake-indexeddb": "^6.2.5",
+    "nx": "23.3.1",
     "typescript": "latest",
     "vitest": "latest",
     "wrangler": "4.148.0"
@@ -60,5 +65,8 @@
   "type": "module",
   "overrides": {
     "sharp": "$sharp"
+  },
+  "nx": {
+    "includedScripts": []
   }
 }

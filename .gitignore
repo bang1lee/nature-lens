@@ -36,3 +36,6 @@ release/
 .dev.vars*
 *.bak
 __pycache__/
+
+# Local Nx task graph and cache
+.nx/

@@ -153,11 +153,16 @@ for(const scenario of ['missing-verifier','expired-with-old-session','error-frag
  const exchanges=await callbackRoutes(page,true);
  if(scenario==='expired-with-old-session')await page.addInitScript(()=>localStorage.setItem('sb-mock-auth-token-code-verifier',JSON.stringify('mock-verifier')));
  await page.goto(scenario==='error-fragment'?'/mobile/#error=access_denied&error_code=otp_expired':'/mobile/?code=mock-email-code');
- await expect(page.getByRole('status').filter({hasText:'이 로그인 링크를 완료하지 못했어요.'})).toBeVisible();
+ const callbackStatus=page.getByRole('status').filter({hasText:'이 로그인 링크를 완료하지 못했어요.'});
+ await expect(callbackStatus).toBeVisible();
+ await expect(callbackStatus).toContainText('기존 로그인 여부는 별개이므로 설정에서 현재 상태를 확인해 주세요.');
  await expect(page.getByText('로그인했어요.',{exact:false})).toHaveCount(0);
  await expect(page).toHaveURL(/\/mobile\/$/);
  expect(exchanges()).toBe(scenario==='expired-with-old-session'?1:0);
  if(scenario==='expired-with-old-session')expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('sb-mock-auth-token')!).user.id)).toBe('test-user');
+ await page.getByRole('button',{name:'설정',exact:true}).click();
+ if(scenario==='expired-with-old-session')await expect(page.locator('.m-cloud').getByText('로그인되어 있어요.',{exact:true})).toBeVisible();
+ else await expect(page.locator('.m-cloud').getByLabel('로그인 이메일',{exact:true})).toBeVisible();
  await page.getByRole('button',{name:'촬영',exact:true}).click();
  await expect(page.getByLabel('앨범 사진 선택')).toBeAttached();
 });

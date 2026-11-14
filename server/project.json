@@ -1,0 +1,12 @@
+{
+  "name": "gateway",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "server",
+  "tags": ["runtime:node"],
+  "implicitDependencies": ["web"],
+  "targets": {
+    "serve": { "command": "npm run identify:server", "cache": false, "continuous": true },
+    "test": { "command": "npm run test -- tests/gateway.test.ts tests/discovery-gateway.test.ts tests/supabase-quota.test.ts tests/local-identification.test.ts", "cache": false }
+  }
+}

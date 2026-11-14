@@ -7,7 +7,7 @@ const gateway='https://nature-lens-identify.onrender.com';
 const output=process.env.AUDIT_OUTPUT_DIR||'test-results/deployed-journey-audit';
 await mkdir(output,{recursive:true});
 const evidence={startedAt:new Date().toISOString(),checks:[],externalPhotoRequests:0,providerIdentification:'NOT_TESTED',errors:[]};
-const browser=await chromium.launch();
+const browser=await chromium.launch(process.env.AUDIT_BROWSER_CHANNEL?{channel:process.env.AUDIT_BROWSER_CHANNEL}:{});
 try {
  for(const [path,options,status] of [
   ['/health',{},200],
@@ -41,6 +41,14 @@ try {
  await page.getByRole('button',{name:'방금 기록 보기'}).click();
  await expect(page.getByLabel('식별 로그인 이메일')).toBeVisible();
  await expect(page.getByRole('button',{name:'이름 후보 찾기',exact:true})).toHaveCount(0);
+  await page.getByRole('button',{name:'기록 수정 및 공개 준비',exact:true}).click();
+  const editor=page.getByRole('dialog',{name:'관찰 기록 편집'});
+  await expect(editor).toBeVisible();
+  await editor.getByLabel('관찰 메모').fill('운영 배포 검수용 메모');
+  await editor.getByRole('button',{name:'초안 저장',exact:true}).click();
+  await expect(editor).toHaveCount(0);
+  await expect(page.locator('.m-detail-notes')).toHaveText('운영 배포 검수용 메모');
+  evidence.checks.push({name:'deployed mobile edit persists before reobservation',pass:true});
  await page.getByRole('button',{name:'같은 대상 다시 관찰하기'}).click();
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
  await page.getByLabel('지난번과 같은 개체를 관찰했습니다').check();

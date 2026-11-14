@@ -1,0 +1,25 @@
+{
+  "name": "worker",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "worker",
+  "tags": ["runtime:worker"],
+  "implicitDependencies": ["web"],
+  "targets": {
+    "dev": { "command": "npm run dev:worker", "cache": false, "continuous": true },
+    "typecheck": {
+      "command": "npm run typecheck:worker",
+      "cache": true,
+      "outputs": [],
+      "inputs": [
+        "{projectRoot}/**/*.ts",
+        "{projectRoot}/tsconfig.json",
+        "{workspaceRoot}/src/lib/transfer-contract.ts",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/package-lock.json",
+        { "runtime": "node -p \"process.platform + '-' + process.arch + '-' + process.version\"" }
+      ]
+    },
+    "local-integration": { "command": "npm run test:worker", "cache": false }
+  }
+}
