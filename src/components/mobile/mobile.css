@@ -238,3 +238,24 @@
 .m-identify label:has(input[type=checkbox]){min-height:48px;display:flex;align-items:center;gap:10px}
 .m-identify button,.nl-decision button{min-height:48px}
 .m-identify,.m-quick-fields,.nl-decision{overflow-wrap:anywhere}
+
+/* Public beta flow: choice icons, kept photo, save states */
+.m-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.m-identification-choice svg{flex:none;color:#345b46}
+.m-identification-choice label{transition:background-color 120ms ease-out,border-color 120ms ease-out}
+.m-identification-choice label:active{background:#e3ebd9}
+.m-photo-review.is-kept{margin:0 0 16px}.m-photo-review.is-kept img{height:200px;max-height:200px;object-fit:cover}
+.m-save-state{display:flex;align-items:center;gap:8px;margin:0;font-size:14px;line-height:1.6;color:#465a3c}
+.m-save-state svg,.m-public-scope svg{flex:none}
+.m-save-state.is-cloud{color:#254f3b;font-weight:600}.m-save-state.is-failed{color:#8a3b2a}
+.m-public{margin:24px 0;padding:20px;border:1px solid #c5cfba;border-radius:12px;background:#fcfbf6;display:grid;gap:12px;overflow-wrap:anywhere}
+.m-public form{display:grid;gap:12px}.m-public p{margin:0;font-size:14px;line-height:1.7}
+.m-public-scope{display:flex;align-items:center;gap:8px;color:#34503c}
+.m-public label{display:grid;gap:6px;font-size:14px}
+.m-public label:has(input[type=checkbox]){display:flex;align-items:center;gap:10px;min-height:48px}
+.m-public input[type=checkbox]{width:22px;height:22px;flex:none}
+.m-public input:not([type=checkbox]){width:100%;min-height:48px;font:inherit;border:1px solid #526353;border-radius:8px;padding:10px 12px;background:#fffefa;color:#213d32}
+.m-public summary{min-height:48px;padding:12px 0;font-size:15px;cursor:pointer}
+.nl-decision button{display:inline-flex;align-items:center;gap:8px}
+.m-quick-fields .m-identify input[type=checkbox]{width:22px;height:22px;flex:none}
+.m-quick-fields .m-identify label:has(input[type=checkbox]){justify-content:flex-start;text-align:left}

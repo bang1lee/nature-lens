@@ -32,7 +32,7 @@ test('board preserves explicit reobservation, the selected month and detail call
   await openRecordDetails(page);await page.getByLabel('관찰 날짜').fill('2026-09-12');
   await openRecordDetails(page);await page.getByLabel('한 줄 메모').fill('첫날의 잎을 기록했어요.');
   await page.getByRole('button', { name: '내 기록에 저장', exact: true }).click();
-  await page.getByRole('button', { name: '방금 기록 보기' }).click();
+  await page.getByRole('button', { name: '내 기록 보기' }).click();
 
   const firstDetail = page.getByRole('dialog', { name: firstTitle, exact: true });
   await expect(firstDetail).toBeVisible();
@@ -90,7 +90,7 @@ test('board preserves explicit reobservation, the selected month and detail call
   await expect(page.getByRole('region', { name: '빠른 촬영 기록' }).getByRole('alert')).toContainText('같은 개체');
   await sameSubject.check();
   await page.getByRole('button', { name: '내 기록에 저장', exact: true }).click();
-  await page.getByRole('button', { name: '방금 기록 보기' }).click();
+  await page.getByRole('button', { name: '내 기록 보기' }).click();
 
   const secondDetail = page.getByRole('dialog', { name: secondTitle, exact: true });
   await expect(secondDetail).toBeVisible();

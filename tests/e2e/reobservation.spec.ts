@@ -8,7 +8,7 @@ test('same specimen confirmation, persisted timeline, private month and unrelate
  await openRecordDetails(page);await page.getByLabel('이름 선택').fill('첫 나무');
  await openRecordDetails(page);await page.getByLabel('한 줄 메모').fill('처음 만난 날');
  await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();
- await page.getByRole('button',{name:'방금 기록 보기'}).click();
+ await page.getByRole('button',{name:'내 기록 보기'}).click();
  await page.getByRole('button',{name:'같은 대상 다시 관찰하기'}).click();
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
  await expect(page.getByLabel('이름 선택')).toHaveValue('');
@@ -20,7 +20,7 @@ test('same specimen confirmation, persisted timeline, private month and unrelate
  await page.getByLabel('지난번과 같은 개체를 관찰했습니다').check();
  await openRecordDetails(page);await page.getByLabel('한 줄 메모').fill('잎 색이 바뀌었어요');
  await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();
- await page.getByRole('button',{name:'방금 기록 보기'}).click();
+ await page.getByRole('button',{name:'내 기록 보기'}).click();
  await expect(page.locator('.m-specimen')).toContainText('첫 나무');
  await expect(page.locator('.m-specimen')).toContainText('오늘 만난 자연');
  const audit=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa']).analyze();expect(audit.violations).toEqual([]);

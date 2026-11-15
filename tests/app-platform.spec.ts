@@ -3,7 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 async function record(page:Page){
  await page.goto('/mobile/',{waitUntil:'domcontentloaded'});await expect(page.locator('.f-cover-date')).not.toHaveText('오늘의 관찰');await page.getByRole('button',{name:'촬영',exact:true}).click();
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
- await page.getByRole('button',{name:'내 기록에 저장'}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();
+ await page.getByRole('button',{name:'내 기록에 저장'}).click();await page.getByRole('button',{name:'내 기록 보기'}).click();
 }
 async function mockSession(page:Page){
  await page.addInitScript(()=>{
@@ -29,7 +29,7 @@ for(const width of [360,412,1280])test(`app shell ${width}: consent, candidate, 
 test('unconfigured gateway preserves manual record and reduced motion',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:390,height:844});
  await mockSession(page);await page.route('**/capabilities',r=>r.fulfill({json:{groups:[],policyUrl:null}}));
- await record(page);await expect(page.getByRole('button',{name:'이름 후보 찾기',exact:true})).toBeDisabled();await expect(page.getByText('인식 서버 연결 준비 중이에요.',{exact:false})).toBeVisible();
+ await record(page);await expect(page.getByRole('button',{name:'이름 후보 찾기',exact:true})).toBeDisabled();await expect(page.getByText('이름 찾기 연결을 준비하고 있어요.',{exact:false})).toBeVisible();
  await page.screenshot({path:'test-results/app-mobile.png',fullPage:true});
 });
 test('error does not overwrite and cancellation ignores late result',async({page})=>{
@@ -50,7 +50,7 @@ test('signed out capture saves first, login returns to the same record without a
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
  await expect(page.getByRole('button',{name:'계속하기',exact:true})).toBeVisible();
  await expect(page.getByLabel('식별 로그인 이메일')).toHaveCount(0);
- await page.getByRole('button',{name:'내 기록에 저장'}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();
+ await page.getByRole('button',{name:'내 기록에 저장'}).click();await page.getByRole('button',{name:'내 기록 보기'}).click();
  await page.getByLabel('식별 로그인 이메일').fill('test@example.org');
  await page.getByRole('button',{name:'이 기록에서 로그인 이어가기'}).dblclick();
  await expect(page.getByText('로그인 링크를 요청했어요.',{exact:false})).toBeVisible();expect(emails).toBe(1);expect(photos).toBe(0);
@@ -80,7 +80,7 @@ test('slow capability check ends, offers retry, and keeps the saved record',asyn
  await mockSession(page);let ready=false;
  await page.route('**/capabilities',async r=>{if(!ready)await new Promise(resolve=>setTimeout(resolve,14000));await r.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy'}}).catch(()=>{});});
  await record(page);
- await expect(page.getByText('서버 응답이 늦어 연결 확인을 멈췄어요.',{exact:false})).toBeVisible({timeout:14000});
+ await expect(page.getByText('응답이 늦어 연결 확인을 멈췄어요.',{exact:false})).toBeVisible({timeout:14000});
  ready=true;await page.getByRole('button',{name:'식별 연결 다시 확인'}).click();
  await expect(page.getByLabel('사진 전송과 처리 안내에 동의합니다')).toBeVisible();
  await expect(page.locator('.m-species')).toContainText('나중에');
@@ -181,8 +181,8 @@ test('discovery persists private round, reveals server result and score without 
   if(action==='reveal'){reveals++;state='revealed';}
   await route.fulfill({json:round()});
  });
- await record(page);await page.getByRole('radio',{name:/내일의 발견/}).click();
- await page.getByLabel('내가 예상한 식물 이름').fill('민들레');await page.getByText('관찰한 단서 더하기 · 선택',{exact:true}).click();await page.getByLabel('그렇게 생각한 이유').fill('노란 꽃');
+ await record(page);await page.getByRole('radio',{name:/다음날 확인하기/}).click();
+ await page.getByLabel('어떤 식물일까요?').fill('민들레');await page.getByText('관찰한 단서 더하기 · 선택',{exact:true}).click();await page.getByLabel('그렇게 생각한 이유').fill('노란 꽃');
  await page.getByLabel('인물과 개인정보가 없는 사진입니다').check();await page.getByLabel('사진 전송 및 예상·결과·점수 보관에 동의합니다').check();
  await page.getByRole('button',{name:'예상 제출하고 내일 확인하기'}).click();
  await expect(page.getByText('나의 예상: 민들레')).toBeVisible();
@@ -191,7 +191,7 @@ test('discovery persists private round, reveals server result and score without 
  expect(submits).toBe(1);
  await page.reload({waitUntil:'domcontentloaded'});await expect(page.locator('.f-cover-date')).not.toHaveText('오늘의 관찰');await page.getByRole('button',{name:'내 기록',exact:true}).click();await page.getByRole('button',{name:'오늘 만난 자연 기록 열기'}).click();
  await expect(page.getByText('나의 예상: 민들레')).toBeVisible();
- ready=true;await page.getByRole('button',{name:'공개 상태 새로 확인'}).click();await page.getByRole('button',{name:'내 예상과 결과 비교하기'}).click();
+ ready=true;await page.getByRole('button',{name:'결과 상태 다시 확인'}).click();await page.getByRole('button',{name:'내 예상과 결과 비교하기'}).click();
  await expect(page.getByText('이번 예측 10점 · 예측 누적 10점')).toBeVisible();expect(submits).toBe(1);expect(reveals).toBe(1);
  expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
  await page.screenshot({path:'test-results/discovery-score.png',fullPage:true});
@@ -206,9 +206,9 @@ test('signed out discovery cannot submit predictions; capture choice survives sa
  await page.route('**/capabilities',r=>r.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy',discovery:true}}));
  let calls=0;await page.route('**/discovery/*',r=>{calls++;return r.abort();});
  await page.goto('/mobile/',{waitUntil:'domcontentloaded'});await expect(page.locator('.f-cover-date')).not.toHaveText('오늘의 관찰');await page.getByRole('button',{name:'촬영',exact:true}).click();await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
- await page.getByRole('radio',{name:/내일의 발견/}).click();
- await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();
- await expect(page.getByRole('radio',{name:/내일의 발견/})).toBeChecked();
+ await page.getByRole('radio',{name:/다음날 확인하기/}).click();
+ await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'내 기록 보기'}).click();
+ await expect(page.getByRole('radio',{name:/다음날 확인하기/})).toBeChecked();
  await expect(page.getByLabel('식별 로그인 이메일')).toBeVisible();
  await expect(page.getByRole('button',{name:'예상 제출하고 내일 확인하기'})).toHaveCount(0);expect(calls).toBe(0);
 });

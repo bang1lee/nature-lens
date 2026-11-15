@@ -32,13 +32,13 @@ try {
  await expect(page.locator('.f-cover-date')).not.toHaveText('오늘의 관찰');
  await page.getByRole('button',{name:'촬영',exact:true}).click();
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
- await expect(page.getByRole('radio',{name:/지금 알아보기/})).toBeChecked();
+ await expect(page.getByRole('radio',{name:/바로 확인하기/})).toBeChecked();
  await page.screenshot({path:output+'/capture.png',fullPage:true});
  await page.getByText('기록 더하기',{exact:false}).click();
  evidence.checks.push({name:'live capability UI and signed-out identification gate',pass:true});
  await page.getByLabel('이름 선택').fill('검수용 나무');
  await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();
- await page.getByRole('button',{name:'방금 기록 보기'}).click();
+ await page.getByRole('button',{name:'내 기록 보기'}).click();
  await expect(page.getByLabel('식별 로그인 이메일')).toBeVisible();
  await expect(page.getByRole('button',{name:'이름 후보 찾기',exact:true})).toHaveCount(0);
   await page.getByRole('button',{name:'기록 수정 및 공개 준비',exact:true}).click();
@@ -55,7 +55,7 @@ try {
  await page.getByText('기록 더하기',{exact:false}).click();
  await page.getByLabel('한 줄 메모').fill('검수용 재관찰');
  await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();
- await page.getByRole('button',{name:'방금 기록 보기'}).click();
+ await page.getByRole('button',{name:'내 기록 보기'}).click();
  await expect(page.locator('.m-specimen')).toContainText('검수용 나무');
  await page.reload();await page.locator('.f-return').waitFor();
  await page.getByRole('button',{name:'저널',exact:true}).click();

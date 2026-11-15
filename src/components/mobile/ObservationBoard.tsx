@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ArrowRight, BookOpen, Camera, Check, ChevronRight, FolderOpen, ImagePlus, Leaf, List, MoreHorizontal, NotebookPen, ScanSearch, Search, ShieldCheck, Sprout, Trash2, WifiOff, X } from 'lucide-react';
+import { ArrowRight, BookOpen, Camera, Check, ChevronRight, FolderOpen, ImagePlus, Leaf, List, MoreHorizontal, NotebookPen, ScanSearch, Search, ShieldCheck, Sprout, Trash2, WifiOff, X, Smartphone } from 'lucide-react';
 import { deleteObservation, readLibrary, saveObservation } from '@/lib/storage';
 import { canPublish, type Collection, type Observation } from '@/lib/domain';
 import { demoRecords } from '@/lib/demo';
 import BackupPanel from './BackupPanel';
 import TransferPanel from './TransferPanel';
 import IdentificationPanel from './IdentificationPanel';
+import PublicSave from './PublicSave';
 import CloudPanel from './CloudPanel';
 import QuickCapture from './QuickCapture';
 import MonthlyJournal from './MonthlyJournal';
@@ -216,8 +217,8 @@ export default function ObservationBoard() {
         {loginReturnMessage&&<p role="status">{loginReturnMessage}</p>}
         {error && <p className="m-error" role="alert">{error}</p>}
         {capture ? <QuickCapture reobserveFrom={reobserveFrom} onClose={cancelCapture} onSaved={record => void afterSave(record)}/> : saved ? <section className="m-success">
-          <div className="m-success-mark"><Check size={34}/></div><span className="m-muted">내 기록에 저장 완료</span><h1>발견 하나가 쌓였어요</h1><p>지금의 작은 관찰이<br/>나중엔 멋진 이야기가 될 거예요.</p><img src={saved.photo} alt="저장된 관찰 사진"/><strong>{saved.title}</strong><span className="m-draft-chip">나만 보는 초안</span>
-          <div className="m-success-actions"><button className="m-primary" onClick={() => { openDetail(saved); setSaved(null); setTab('records'); }}>방금 기록 보기 <ArrowRight size={19}/></button><button className="m-secondary" onClick={() => openMonth(saved)}><BookOpen size={19}/> 이달의 도감에 모아 보기</button><button className="m-secondary" onClick={() => openCapture()}><Camera size={19}/> 하나 더 기록하기</button><button className="m-text" onClick={() => navigate('records')}>홈으로</button></div>
+          <div className="m-success-mark"><Smartphone size={32} aria-hidden="true"/></div><span className="m-muted">이 기기에 보관했어요</span><h1>발견 하나가 쌓였어요</h1><p>지금의 작은 관찰이<br/>나중엔 멋진 이야기가 될 거예요.</p><img src={saved.photo} alt="저장된 관찰 사진"/><strong>{saved.title}</strong><span className="m-draft-chip">나만 보는 초안</span>
+          <div className="m-success-actions"><button className="m-primary" onClick={() => { openDetail(saved); setSaved(null); setTab('records'); }}>내 기록 보기 <ArrowRight size={19}/></button><button className="m-text" onClick={() => openMonth(saved)}><BookOpen size={17}/> 이달의 도감에 모아 보기</button><button className="m-text" onClick={() => openCapture()}><Camera size={17}/> 하나 더 기록하기</button><button className="m-text" onClick={() => navigate('records')}>홈으로</button></div>
         </section> : <>
           <header className="m-header"><a className="m-brand" href={`${base}/board/`}><Leaf size={25}/> nature lens</a><span className="m-board-breadcrumb">내 관찰실 <span>/</span> {tab === 'records' ? '관찰 보드' : tab === 'collections' ? '컬렉션' : tab === 'journal' ? '저널' : '보관·전달'}</span><span className="m-header-state">{offline ? <><WifiOff size={14}/> 오프라인</> : '나의 관찰실'}</span></header>
           {message && <p className="m-board-message" role="status">{message}</p>}
@@ -252,7 +253,7 @@ export default function ObservationBoard() {
       <dialog ref={detailDialog} className="m-detail m-board-detail" aria-labelledby="board-detail-title" onCancel={event => { event.preventDefault(); closeDetail(); }}>{detail && <>
         <header className="m-header"><button className="m-icon" aria-label="목록으로" onClick={() => closeDetail()}><X/></button><span>나의 관찰</span><span className="m-draft-chip">{canPublish(detail) ? '내 확인 완료' : '초안'}</span></header>
         <div className="m-detail-body"><img className="m-detail-photo" src={detail.photo} alt={detail.title || '관찰 사진'}/><div className="m-detail-copy"><span className="m-muted">{detail.date} · {detail.region || '지역 비공개'}</span><h1 id="board-detail-title">{detail.title || '이름 미정'}</h1><p className="m-species">{detail.species || '생물 이름은 나중에 확인해도 돼요'}</p>
-          <IdentificationPanel key={`${detail.id}-${detail.updatedAt}`} record={detail} onApplied={record => { setDetail(record); void load().catch(() => setError('목록을 다시 열어 주세요.')); }}/>
+          <IdentificationPanel key={`${detail.id}-${detail.updatedAt}`} record={detail} onApplied={record => { setDetail(record); void load().catch(() => setError('목록을 다시 열어 주세요.')); }}/><PublicSave key={`public-${detail.id}`} record={detail} onApplied={record => { setDetail(record); void load().catch(() => setError('목록을 다시 열어 주세요.')); }}/>
           <PrivateLocationNote key={detail.id} id={detail.id} onRemoved={() => { setDetail({ ...detail, region: undefined, publicGrid: undefined, status: 'draft' }); void load().catch(() => setError('목록을 다시 열어 주세요.')); }}/>
           <p className="m-detail-notes">{detail.notes || '아직 메모가 없어요. 사진에 담긴 발견을 천천히 살펴보세요.'}</p>
           <SpecimenPanel record={detail} records={records} onOpen={record => setDetail(record)} onReobserve={() => openCapture(detail)}/>
