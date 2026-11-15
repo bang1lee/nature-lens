@@ -104,7 +104,7 @@ test('publishing requires both confirmations; failed upload retries without dupl
   expect(metadata).not.toHaveProperty('email');expect(metadata).not.toHaveProperty('region');expect(metadata).not.toHaveProperty('publicGrid');expect(metadata).not.toHaveProperty('photo');
   await publish.click();await expect(panel.getByRole('status')).toContainText('공개 베타에 저장했어요');
   expect(mock.rows).toHaveLength(1);expect(mock.uploadAttempts).toBe(2);expect(mock.rows[0].state).toBe('published');expect(mock.signupRequests).toHaveLength(0);
-  await page.getByRole('button',{name:'방금 기록 보기'}).click();
+  await page.getByRole('button',{name:'내 기록 보기'}).click();
   const again=page.getByLabel('공개 베타 사진 저장');
   await again.getByLabel('이 사진과 기록을 공개 베타에 저장하는 데 동의해요').check();
   await again.getByLabel('사진에 사람이나 개인 정보가 없어요').check();
@@ -144,7 +144,7 @@ test('a guest explicitly consents, uploads without email, retries, and restores 
   expect(mock.signupRequests).toHaveLength(1);expect(mock.rows).toHaveLength(1);expect(mock.uploadAttempts).toBe(2);
   const uploaded=mock.photos.get(mock.rows[0].photo_path)!;
   expect(uploaded.length).toBeGreaterThan(100);expect(uploaded.subarray(0,2)).toEqual(Buffer.from([0xff,0xd8]));expect(uploaded.subarray(-2)).toEqual(Buffer.from([0xff,0xd9]));
-  await page.getByRole('button',{name:'방금 기록 보기'}).click();
+  await page.getByRole('button',{name:'내 기록 보기'}).click();
   const again=page.getByLabel('공개 베타 사진 저장');
   await again.getByLabel('이 사진과 기록을 공개 베타에 저장하는 데 동의해요').check();
   await again.getByLabel('사진에 사람이나 개인 정보가 없어요').check();
@@ -217,8 +217,9 @@ test('capture, identify, apply an unconfirmed candidate and publish the same rec
   await page.getByRole('button',{name:'가입 없이 바로 확인하기',exact:true}).click();
   await page.getByRole('button',{name:'민들레 이름을 미확정 초안에 반영'}).click();
   await expect(page.getByText('AI 후보를 반영한 미확정 기록입니다.')).toBeVisible();
-  await page.getByRole('button',{name:'공개 저장으로 계속',exact:true}).click();
   const panel=page.getByLabel('공개 베타 사진 저장');
+  await expect(page.getByRole('img',{name:'방금 담은 자연 사진'})).toBeVisible();
+  await expect(panel).toBeVisible();
   await panel.getByLabel('이 사진과 기록을 공개 베타에 저장하는 데 동의해요').check();
   await panel.getByLabel('사진에 사람이나 개인 정보가 없어요').check();
   await panel.getByRole('button',{name:'공개로 저장'}).click();
