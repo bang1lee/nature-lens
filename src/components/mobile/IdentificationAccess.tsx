@@ -13,10 +13,10 @@ export default function IdentificationAccess({draft,recordId,onState,forceLogin=
   const timer=setTimeout(()=>update('error'),10_000);
   void getSupabase().then(async client=>{
    if(!active)return;
-   const {data}=client.auth.onAuthStateChange((_event,session)=>{clearTimeout(timer);update(session?'signed-in':'signed-out');});
+   const {data}=client.auth.onAuthStateChange((_event,session)=>{clearTimeout(timer);update(session&&!session.user.is_anonymous?'signed-in':'signed-out');});
    unsubscribe=()=>data.subscription.unsubscribe();
    const session=await client.auth.getSession();if(session.error)throw session.error;
-   clearTimeout(timer);update(session.data.session?'signed-in':'signed-out');
+   clearTimeout(timer);update(session.data.session&&!session.data.session.user.is_anonymous?'signed-in':'signed-out');
   }).catch(()=>{clearTimeout(timer);update('error');});
   return()=>{active=false;clearTimeout(timer);unsubscribe?.();};
  },[attempt,onState,forceLogin]);

@@ -23,35 +23,40 @@ import type {SupabaseClient} from '@supabase/supabase-js';
 import {publishBetaObservation,listBetaFeed,listMyBetaObservations,restoreBetaObservation} from '../src/lib/cloud/beta-public';
 const owner='11111111-1111-4111-8111-111111111111';
 function fakeCloud(){
- let row:Record<string,any>|null=null,photo:Blob|null=null,userId=owner,uploads=0,failPublish=false;
+ let row:Record<string,any>|null=null,photo:Blob|null=null,userId=owner,uploads=0,failPublish=false,afterInsert=()=>{};
  const client={auth:{getUser:async()=>({data:{user:{id:userId}},error:null})},storage:{from:()=>({getPublicUrl:(p:string)=>({data:{publicUrl:`https://example.invalid/${p}`}}),upload:async(_p:string,b:Blob)=>{uploads++;if(photo)return {error:{statusCode:'409'}};photo=b;return {error:null};},download:async()=>photo?{data:photo,error:null}:{data:null,error:{}}})},from:(table:string)=>{
   let op='select',values:Record<string,unknown>={};const filters:Record<string,unknown>={};
   const finish=()=>{if(table==='beta_public_feed')return {data:row?.state==='published'?[{id:row.id,title:row.record.title,species:row.record.species,observed_on:row.record.date,notes:row.record.notes,photo_path:row.photo_path,published_at:row.published_at,owner_id:'do-not-expose'}]:[],error:null};
-   if(op==='insert'){if(row)return {data:null,error:{code:'23505'}};row={...values,owner_id:owner,state:'staging',published_at:null};return {data:row,error:null};}
+   if(op==='insert'){if(row)return {data:null,error:{code:'23505'}};row={...values,owner_id:owner,state:'staging',published_at:null};afterInsert();return {data:row,error:null};}
    if(op==='update'){if(failPublish){failPublish=false;return {data:null,error:{message:'offline'}};}if(row&&row.state==='staging'){row={...row,...values,published_at:'2026-11-15T00:00:00Z'};return {data:row,error:null};}return {data:null,error:null};}
    const match=row&&Object.entries(filters).every(([key,val])=>row?.[key]===val);return {data:match?row:null,error:null};};
   const q:any={select:()=>q,eq:(k:string,v:unknown)=>{filters[k]=v;return q;},order:()=>q,limit:()=>q,insert:(v:Record<string,unknown>)=>{op='insert';values=v;return q;},update:(v:Record<string,unknown>)=>{op='update';values=v;return q;},single:async()=>finish(),maybeSingle:async()=>finish(),then:(yes:(v:unknown)=>unknown,no:(e:unknown)=>unknown)=>{const result=finish();return Promise.resolve(table==='beta_public_observations'&&op==='select'?{...result,data:result.data?[result.data]:[]}:result).then(yes,no);}};return q;
  }};
- return {client:client as unknown as SupabaseClient,getRow:()=>row,getUploads:()=>uploads,setUser:(id:string)=>{userId=id;},failNextPublish:()=>{failPublish=true;}};
+ return {client:client as unknown as SupabaseClient,getRow:()=>row,getUploads:()=>uploads,setUser:(id:string)=>{userId=id;},failNextPublish:()=>{failPublish=true;},setAfterInsert:(fn:()=>void)=>{afterInsert=fn;}};
 }
 const synthetic=()=>({...newObservation(),id:'own-observation',title:'합성 기록',species:'후보 이름',notes:'합성 관찰',photo:'data:image/png;base64,YQ==',region:'경기 안성' as const,publicGrid:{latitude:37.1,longitude:127.3},noPeople:false,previousObservationId:'old',specimenId:'specimen',sessionId:'local-collection'});
 const agreed={publicConsent:true,noPeople:true} as const;
 it('requires consent before writes; retries the exact record without duplicate uploads and rejects changes',async()=>{
- const cloud=fakeCloud(),record=synthetic();await expect(publishBetaObservation(cloud.client,owner,record,{publicConsent:false,noPeople:true} as any)).rejects.toThrow();expect(cloud.getRow()).toBeNull();
+ const cloud=fakeCloud(),record=synthetic(),getUser=vi.spyOn(cloud.client.auth,'getUser');await expect(publishBetaObservation(cloud.client,owner,record,{publicConsent:false,noPeople:true} as any)).rejects.toThrow();await expect(publishBetaObservation(cloud.client,owner,record,{publicConsent:true,noPeople:false} as any)).rejects.toThrow();expect(getUser).not.toHaveBeenCalled();expect(cloud.getRow()).toBeNull();expect(cloud.getUploads()).toBe(0);
  const first=await publishBetaObservation(cloud.client,owner,record,agreed);expect(first.alreadyPublished).toBe(false);expect(cloud.getRow()?.record).not.toHaveProperty('region');expect(cloud.getRow()?.record).not.toHaveProperty('publicGrid');expect(cloud.getRow()?.record.noPeople).toBe(false);expect(cloud.getRow()?.photo_path).not.toContain(owner);
  const again=await publishBetaObservation(cloud.client,owner,record,agreed);expect(again.alreadyPublished).toBe(true);expect(cloud.getUploads()).toBe(1);
- await expect(publishBetaObservation(cloud.client,owner,{...record,notes:'수정된 내용'},agreed)).rejects.toThrow('다른 버전');expect(cloud.getUploads()).toBe(1);
+ const published=structuredClone(cloud.getRow());await expect(publishBetaObservation(cloud.client,owner,{...record,notes:'수정된 내용'},agreed)).rejects.toThrow('다른 버전');expect(cloud.getUploads()).toBe(1);expect(cloud.getRow()).toEqual(published);
 });
 it('recovers a previously uploaded photo after publication fails, without overwriting it',async()=>{
  const cloud=fakeCloud(),record=synthetic();cloud.failNextPublish();await expect(publishBetaObservation(cloud.client,owner,record,agreed)).rejects.toThrow('공개 저장 결과');
  const retry=await publishBetaObservation(cloud.client,owner,record,agreed);expect(retry.alreadyPublished).toBe(false);expect(cloud.getUploads()).toBe(2);expect(cloud.getRow()?.state).toBe('published');
 });
+it('stops before photo upload if the active identity changes after staging',async()=>{
+ const cloud=fakeCloud();let current=true;cloud.setAfterInsert(()=>{current=false;});
+ await expect(publishBetaObservation(cloud.client,owner,synthetic(),agreed,()=>current)).rejects.toThrow('연결 상태');
+ expect(cloud.getRow()?.state).toBe('staging');expect(cloud.getUploads()).toBe(0);
+});
 it('rejects a changed account and strips owner info from public feed',async()=>{
- const cloud=fakeCloud(),record=synthetic();cloud.setUser('22222222-2222-4222-8222-222222222222');await expect(publishBetaObservation(cloud.client,owner,record,agreed)).rejects.toThrow('로그인 상태');expect(cloud.getRow()).toBeNull();cloud.setUser(owner);await publishBetaObservation(cloud.client,owner,record,agreed);const feed=await listBetaFeed(cloud.client);expect(feed).toHaveLength(1);expect(feed[0]).not.toHaveProperty('owner_id');
+ const cloud=fakeCloud(),record=synthetic();cloud.setUser('22222222-2222-4222-8222-222222222222');await expect(publishBetaObservation(cloud.client,owner,record,agreed)).rejects.toThrow('연결 상태');expect(cloud.getRow()).toBeNull();cloud.setUser(owner);await publishBetaObservation(cloud.client,owner,record,agreed);const feed=await listBetaFeed(cloud.client);expect(feed).toHaveLength(1);expect(feed[0]).not.toHaveProperty('owner_id');
 });
 
 it('restores only the owner’s published record without precise location or missing collection link',async()=>{
- const cloud=fakeCloud(),record=synthetic();await publishBetaObservation(cloud.client,owner,record,agreed);const list=await listMyBetaObservations(cloud.client,owner);expect(list).toHaveLength(1);const restored=await restoreBetaObservation(cloud.client,owner,list[0]);expect(restored).toMatchObject({id:record.id,specimenId:'specimen',previousObservationId:'old',sessionId:null,photo:'data:image/jpeg;base64,YQ=='});expect(restored).not.toHaveProperty('publicGrid');expect(restored).not.toHaveProperty('region');cloud.setUser('22222222-2222-4222-8222-222222222222');await expect(restoreBetaObservation(cloud.client,owner,list[0])).rejects.toThrow('로그인 상태');
+ const cloud=fakeCloud(),record=synthetic();await publishBetaObservation(cloud.client,owner,record,agreed);const list=await listMyBetaObservations(cloud.client,owner);expect(list).toHaveLength(1);const restored=await restoreBetaObservation(cloud.client,owner,list[0]);expect(restored).toMatchObject({id:record.id,specimenId:'specimen',previousObservationId:'old',sessionId:null,photo:'data:image/jpeg;base64,YQ=='});expect(restored).not.toHaveProperty('publicGrid');expect(restored).not.toHaveProperty('region');cloud.setUser('22222222-2222-4222-8222-222222222222');await expect(restoreBetaObservation(cloud.client,owner,list[0])).rejects.toThrow('연결 상태');
 });
 it('a stalled account check returns a retryable status instead of waiting forever',async()=>{
  vi.useFakeTimers();try{const cloud=fakeCloud();(cloud.client.auth as any).getUser=()=>new Promise(()=>{});const operation=publishBetaObservation(cloud.client,owner,synthetic(),agreed);const assertion=expect(operation).rejects.toThrow('응답이 늦어');await vi.advanceTimersByTimeAsync(30_000);await assertion;expect(cloud.getRow()).toBeNull();}finally{vi.useRealTimers();}

@@ -32,7 +32,7 @@ export default function DiscoveryPanel({record,draft=false,onApplied,onBusyChang
  },[attempt]);
  async function call(action:string,data:unknown){
   const client=await getSupabase();const {data:auth}=await client.auth.getSession();
-  if(!auth.session){if(active.current)setForceLogin(true);throw Error('로그인한 참여자만 이용할 수 있어요.');}
+  if(!auth.session||auth.session.user.is_anonymous){if(active.current)setForceLogin(true);throw Error('로그인한 참여자만 이용할 수 있어요.');}
   const c=new AbortController();controller.current=c;
   const response=await fetch(`${identificationEndpoint}/discovery/${action}`,{method:'POST',headers:{Authorization:`Bearer ${auth.session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify(data),credentials:'omit',cache:'no-store',signal:AbortSignal.any([c.signal,AbortSignal.timeout(28000)])});
   if(!response.ok){if(response.status===401&&active.current)setForceLogin(true);throw Error(response.status===401?'로그인 상태를 다시 확인해 주세요.':response.status===404?'이 계정의 예측을 찾지 못했어요. 참여한 계정으로 로그인해 주세요.':response.status===429?'오늘 식별 한도를 사용했어요. 내일 다시 시도해 주세요.':response.status===409?'아직 공개 시간이 아니에요.':response.status===503?'다음날 확인은 아직 준비되지 않았어요.':'결과를 받지 못했어요. 잠시 뒤 다시 확인해 주세요.');}
