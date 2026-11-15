@@ -32,7 +32,7 @@ try {
  await expect(page.locator('.f-cover-date')).not.toHaveText('오늘의 관찰');
  await page.getByRole('button',{name:'촬영',exact:true}).click();
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
- await expect(page.getByRole('radio',{name:/지금 알아보기/})).toBeChecked();
+ await expect(page.getByRole('radio',{name:/바로 확인하기/})).toBeChecked();
  await page.screenshot({path:output+'/capture.png',fullPage:true});
  await page.getByText('기록 더하기',{exact:false}).click();
  evidence.checks.push({name:'live capability UI and signed-out identification gate',pass:true});

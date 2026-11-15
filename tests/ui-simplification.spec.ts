@@ -15,13 +15,13 @@ test('simple capture saves before login, preserves tomorrow choice, never sends 
  let posts=0;await page.route('**/discovery/*',r=>{posts++;return r.abort();});await page.route('**/identify',r=>{posts++;return r.abort();});
  await capture(page);
  await expect(page.getByLabel('한 줄 메모')).toBeHidden();await expect(page.getByLabel('관찰 날짜')).toBeHidden();
- await page.getByRole('radio',{name:'내일의 발견',exact:false}).check();
+ await page.getByRole('radio',{name:'다음날 확인하기',exact:false}).check();
  await page.screenshot({path:`${evidence}/simplified-photo.png`,fullPage:true});
- await page.getByRole('button',{name:'계속하기',exact:true}).click();
+ await page.getByRole('button',{name:'다음날 확인하기',exact:true}).click();
  await expect(page.getByLabel('식별 로그인 이메일')).toBeVisible();
  expect(await stored(page)).toMatchObject([{identificationTiming:'tomorrow'}]);
  await expect(page.getByLabel('내가 예상한 식물 이름')).toHaveCount(0);
- await expect(page.getByRole('radio',{name:'내일의 발견',exact:false})).toBeChecked();
+ await expect(page.getByRole('radio',{name:'다음날 확인하기',exact:false})).toBeChecked();
  expect(posts).toBe(0);
  expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
  await page.screenshot({path:`${evidence}/simplified-login.png`,fullPage:true});
@@ -40,7 +40,7 @@ test('signed in continue still requires both consents before identification',asy
  await page.route('https://mock.supabase.co/**',r=>r.fulfill({json:[]}));
  await page.route('**/capabilities',r=>r.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy'}}));
  let calls=0;await page.route('**/identify',r=>{calls++;return r.fulfill({json:{state:'candidates',provider:'plantnet',modelVersion:'test',candidates:[{scientificName:'Taraxacum officinale',commonName:'민들레',score:.95}],needsHumanReview:true}});});
- await capture(page);await page.getByRole('button',{name:'계속하기',exact:true}).click();
+ await capture(page);await page.getByRole('button',{name:'바로 확인하기',exact:true}).click();
  const find=page.getByRole('button',{name:'이름 후보 찾기',exact:true});await expect(find).toBeDisabled();
  await page.getByLabel('인물과 개인정보가 없는 사진입니다').check();await expect(find).toBeDisabled();
  await page.getByLabel('사진 전송과 처리 안내에 동의합니다').check();await find.click();

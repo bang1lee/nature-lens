@@ -17,6 +17,7 @@ type Round=z.infer<typeof roundSchema>;
 type Props={record:Observation;draft?:boolean;onApplied:(record:Observation)=>void;onBusyChange?:(busy:boolean)=>void};
 export default function DiscoveryPanel({record,draft=false,onApplied,onBusyChange}:Props){
  const [access,setAccess]=useState<IdentificationAccessState>('checking');
+ const [forceLogin,setForceLogin]=useState(false);
  const [available,setAvailable]=useState(false),[checking,setChecking]=useState(true);
  const [prediction,setPrediction]=useState(''),[reason,setReason]=useState('');
  const [consent,setConsent]=useState(false),[noPeople,setNoPeople]=useState(false);
@@ -25,15 +26,15 @@ export default function DiscoveryPanel({record,draft=false,onApplied,onBusyChang
  const [attempt,setAttempt]=useState(0);
  useEffect(()=>{active.current=true;const c=new AbortController();setChecking(true);
   if(!identificationEndpoint){setChecking(false);return;}
-  void fetch(`${identificationEndpoint}/discovery-capabilities`,{signal:AbortSignal.any([c.signal,AbortSignal.timeout(12000)]),credentials:'omit',cache:'no-store'}).then(r=>r.json()).then(raw=>{if(active.current)setAvailable(z.object({discovery:z.boolean()}).parse(raw).discovery===true);}).catch(()=>{}).finally(()=>{if(active.current)setChecking(false);});
+  void fetch(`${identificationEndpoint}/discovery-capabilities`,{signal:AbortSignal.any([c.signal,AbortSignal.timeout(45000)]),credentials:'omit',cache:'no-store'}).then(r=>r.json()).then(raw=>{if(active.current)setAvailable(z.object({discovery:z.boolean()}).parse(raw).discovery===true);}).catch(()=>{}).finally(()=>{if(active.current)setChecking(false);});
   return()=>{active.current=false;c.abort();controller.current?.abort();onBusyChange?.(false);};
  },[attempt]);
  async function call(action:string,data:unknown){
   const client=await getSupabase();const {data:auth}=await client.auth.getSession();
-  if(!auth.session)throw Error('로그인한 참여자만 이용할 수 있어요.');
+  if(!auth.session){if(active.current)setForceLogin(true);throw Error('로그인한 참여자만 이용할 수 있어요.');}
   const c=new AbortController();controller.current=c;
   const response=await fetch(`${identificationEndpoint}/discovery/${action}`,{method:'POST',headers:{Authorization:`Bearer ${auth.session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify(data),credentials:'omit',cache:'no-store',signal:AbortSignal.any([c.signal,AbortSignal.timeout(28000)])});
-  if(!response.ok)throw Error(response.status===401?'로그인 상태를 다시 확인해 주세요.':response.status===404?'이 계정의 예측을 찾지 못했어요. 참여한 계정으로 로그인해 주세요.':response.status===429?'오늘 식별 한도를 사용했어요. 내일 다시 시도해 주세요.':response.status===409?'아직 공개 시간이 아니에요.':response.status===503?'예측 서버 연결이 아직 준비되지 않았어요.':'결과를 받지 못했어요. 잠시 뒤 다시 확인해 주세요.');
+  if(!response.ok){if(response.status===401&&active.current)setForceLogin(true);throw Error(response.status===401?'로그인 상태를 다시 확인해 주세요.':response.status===404?'이 계정의 예측을 찾지 못했어요. 참여한 계정으로 로그인해 주세요.':response.status===429?'오늘 식별 한도를 사용했어요. 내일 다시 시도해 주세요.':response.status===409?'아직 공개 시간이 아니에요.':response.status===503?'예측 서버 연결이 아직 준비되지 않았어요.':'결과를 받지 못했어요. 잠시 뒤 다시 확인해 주세요.');}
   return roundSchema.parse(await response.json());
  }
  async function run(action:'submit'|'read'|'reveal',early=false){
@@ -63,10 +64,10 @@ export default function DiscoveryPanel({record,draft=false,onApplied,onBusyChang
  }
  return <section className="m-identify" aria-label="내일의 발견">
   <h2>내일의 발견</h2>
-  {!cloudConfig.enabled?<p>로그인 연결이 필요해요.</p>:<IdentificationAccess draft={draft} recordId={record.id} onState={setAccess}/>}
+  {!cloudConfig.enabled?<p>로그인 연결이 필요해요.</p>:<IdentificationAccess draft={draft} recordId={record.id} onState={setAccess} forceLogin={forceLogin} onAuthenticated={()=>setForceLogin(false)}/>}
   {!draft&&access==='signed-in'&&<>
    {record.taxonGroup==='insect'||record.taxonGroup==='other'?<p>내일의 발견은 식물 사진으로 참여할 수 있어요.</p>:record.demo?<p>예제 사진은 점수에 참여할 수 없어요.</p>:<>
-   {!available&&<p>{checking?'예측 서버를 확인하고 있어요.':'예측·점수 서버 연결 준비 중이에요. 바로 식별은 기존 방식으로 이용할 수 있어요.'}</p>}
+   {!available&&<p>{checking?'서버 연결 중… 처음에는 잠시 걸릴 수 있어요.':'예측·점수 서버 연결 준비 중이에요. 바로 식별은 기존 방식으로 이용할 수 있어요.'}</p>}
    {!available&&!checking&&<button type="button" className="m-secondary" onClick={()=>setAttempt(n=>n+1)}>예측 연결 다시 확인</button>}
    {round&&round.state!=='seen'?<div className="m-private-note">
     <strong>나의 예상: {round.prediction}</strong>{round.reason&&<details><summary>내가 남긴 단서</summary><p>{round.reason}</p></details>}

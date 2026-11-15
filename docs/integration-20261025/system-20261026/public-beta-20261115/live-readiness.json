@@ -1,0 +1,32 @@
+{
+  "at": "2026-11-15T06:22:53.360Z",
+  "results": [
+    {
+      "path": "/health",
+      "status": 200,
+      "elapsed": 32748,
+      "body": {
+        "status": "ok"
+      }
+    },
+    {
+      "path": "/capabilities",
+      "status": 200,
+      "elapsed": 32918,
+      "body": {
+        "groups": [
+          "plant"
+        ],
+        "policyUrl": "https://nature-lens-mvp.pages.dev/identification-policy.html"
+      }
+    },
+    {
+      "path": "/discovery-capabilities",
+      "status": 200,
+      "elapsed": 32691,
+      "body": {
+        "discovery": true
+      }
+    }
+  ]
+}

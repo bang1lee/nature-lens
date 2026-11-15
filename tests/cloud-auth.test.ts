@@ -1,6 +1,6 @@
 import {afterEach,expect,it,vi} from 'vitest';
 import type {SupabaseClient} from '@supabase/supabase-js';
-import {cloudErrorMessage,fetchAlias,requestMagicLink} from '../src/lib/cloud/api';
+import {cloudErrorMessage,fetchAlias,requestEmailCode,requestMagicLink,verifyEmailCode} from '../src/lib/cloud/api';
 
 afterEach(()=>vi.useRealTimers());
 
@@ -30,4 +30,16 @@ it('ends an unanswered login request without claiming mail delivery or retrying 
  expect(await outcome).toBeInstanceOf(Error);
  expect((await outcome).message).toMatch(/메일함/);
  expect(send).toHaveBeenCalledTimes(1);
+});
+
+it('requires a real session from the email-code verification response',async()=>{
+ const send=vi.fn().mockResolvedValue({error:null});
+ const verify=vi.fn().mockResolvedValue({data:{session:null},error:null});
+ const client={auth:{signInWithOtp:send,verifyOtp:verify}} as unknown as SupabaseClient;
+ await requestEmailCode(client,'test@example.org');
+ expect(send).toHaveBeenCalledWith({email:'test@example.org',options:{shouldCreateUser:true}});
+ await expect(verifyEmailCode(client,'test@example.org','123456')).rejects.toThrow('인증된 로그인 상태를 확인하지 못했어요.');
+ expect(verify).toHaveBeenCalledWith({email:'test@example.org',token:'123456',type:'email'});
+ await expect(verifyEmailCode(client,'test@example.org','invalid')).rejects.toThrow('인증번호');
+ expect(verify).toHaveBeenCalledTimes(1);
 });

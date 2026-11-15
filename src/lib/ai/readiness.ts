@@ -5,7 +5,7 @@ export async function checkIdentificationService(endpoint:string|null,signal:Abo
  signal.throwIfAborted();
  const url=parseIdentificationEndpoint(endpoint??undefined);
  if(!url)return {state:'unconfigured'};
- const timeout=AbortSignal.timeout(12_000);
+ const timeout=AbortSignal.timeout(45_000);
  try{
   const response=await fetcher(`${url}/capabilities`,{signal:AbortSignal.any([signal,timeout]),credentials:'omit',cache:'no-store'});
   if(!response.ok)return {state:'unavailable'};

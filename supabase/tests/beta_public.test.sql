@@ -1,0 +1,26 @@
+-- Disposable local Supabase/PGlite fixture only; do not run against owner data.
+begin;
+select plan(13);
+insert into auth.users(id) values ('10000000-0000-4000-8000-000000000001'),('10000000-0000-4000-8000-000000000002');
+set local role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
+insert into public.beta_public_observations(id,owner_id,local_id,photo_path,photo_sha256,record,public_consent,no_people) values('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','local-a','20000000-0000-4000-8000-000000000001.jpg',repeat('a',64),'{"id":"local-a","title":"합성","species":"후보","date":"2026-11-15","notes":"시험"}',true,true);
+select is((select count(*)::int from public.beta_public_feed),0,'staging excluded from public feed');
+select throws_ok($$insert into public.beta_public_observations(id,owner_id,local_id,photo_path,photo_sha256,record,public_consent,no_people) values('20000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000001','bad','20000000-0000-4000-8000-000000000003.jpg',repeat('a',64),'{"id":"bad"}',true,true)$$,'23514',null,'incomplete feed metadata rejected');
+select throws_ok($$insert into public.beta_public_observations(id,owner_id,local_id,photo_path,photo_sha256,record,public_consent,no_people) values('20000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000002','local-b','20000000-0000-4000-8000-000000000002.jpg',repeat('a',64),'{"id":"local-b"}',true,true)$$,'42501',null,'cannot reserve for another owner');
+select throws_ok($$update public.beta_public_observations set state='published' where local_id='local-a'$$,'P0001',null,'cannot publish without object');
+select throws_ok($$insert into storage.objects(bucket_id,name) values('nature-lens-beta-public','wrong.jpg')$$,'42501',null,'cannot upload outside reserved path');
+insert into storage.objects(bucket_id,name) values('nature-lens-beta-public','20000000-0000-4000-8000-000000000001.jpg');
+update public.beta_public_observations set state='published' where local_id='local-a';
+select is((select count(*)::int from public.beta_public_feed),1,'published visible on public feed');
+select throws_ok($$update public.beta_public_observations set record='{}'::jsonb where local_id='local-a'$$,'42501',null,'record immutable for client');
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000002',true);
+select is((select count(*)::int from public.beta_public_observations),0,'other owner cannot read row');
+select is((select count(*)::int from storage.objects where bucket_id='nature-lens-beta-public'),0,'other owner cannot list storage metadata');
+with changed as (update public.beta_public_observations set state='published' returning 1) select is(count(*)::int,0,'other owner cannot update') from changed;
+set local role anon;
+select is((select count(*)::int from public.beta_public_feed),1,'anon can read feed');
+select throws_ok($$select * from public.beta_public_observations$$,'42501',null,'anon cannot read owner metadata');
+select throws_ok($$select owner_id from public.beta_public_feed$$,'42703',null,'feed does not expose owner id');
+select * from finish();
+rollback;

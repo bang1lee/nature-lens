@@ -12,6 +12,7 @@ export function cloudErrorMessage(error: unknown): string {
   if ((typeof navigator !== 'undefined' && navigator.onLine === false) || error instanceof TypeError || message.includes('failed to fetch') || message.includes('network') || message.includes('load failed')) return '인터넷에 연결되지 않았어요. 연결을 확인한 뒤 다시 시도해 주세요. 내 로컬 기록은 그대로예요.';
   if (e?.code === 'over_email_send_rate_limit' || message.includes('email rate limit')) return '로그인 메일 발송 한도에 도달했어요. 메일함과 스팸함을 먼저 확인하고, 시간이 지난 뒤 다시 요청해 주세요. 계속되면 운영자에게 메일 발송 설정 확인을 요청해 주세요.';
   if (e?.code === 'email_address_not_authorized' || message.includes('email address not authorized')) return '현재 메일 발송 설정에서는 이 주소로 로그인 링크를 보낼 수 없어요. 운영자가 사용자용 메일 발송(SMTP)을 설정해야 해요. 내 기록은 이 기기에 그대로 있어요.';
+  if (e?.code === 'otp_expired' || e?.code === 'invalid_token') return '인증번호가 올바르지 않거나 만료됐어요. 번호를 확인하거나 새 번호를 요청해 주세요.';
   if (e?.status === 429 || message.includes('rate limit') || message.includes('too many')) return '요청이 너무 많아요. 잠시 후 다시 시도해 주세요.';
   if (e?.code === 'PGRST205' || e?.code === '42P01') return '공동 관찰 서버가 아직 준비되지 않았어요. 운영자에게 공동 관찰 연결 설정 확인을 요청해 주세요. 로그인과 내 기록 보관은 계속 이용할 수 있어요.';
   if (e?.code === '23505') return '이미 사용 중인 별칭이에요. 다른 별칭을 골라 주세요.';
@@ -41,6 +42,26 @@ export async function requestMagicLink(client: SupabaseClient, email: string, re
   if (!parsed.success) throw new Error('올바른 이메일 주소를 입력해 주세요.');
   const { error } = await boundedRequest(client.auth.signInWithOtp({ email: parsed.data, options: { emailRedirectTo: redirectTo, shouldCreateUser: true } }), '로그인 링크 요청 결과를 확인하지 못했어요. 메일함과 스팸함을 먼저 확인한 뒤 잠시 후 다시 요청해 주세요.');
   if (error) fail(error);
+}
+
+export async function requestEmailCode(client: SupabaseClient, email: string) {
+  const parsed = emailSchema.safeParse(email);
+  if (!parsed.success) throw new Error('올바른 이메일 주소를 입력해 주세요.');
+  const { error } = await boundedRequest(client.auth.signInWithOtp({email:parsed.data,options:{shouldCreateUser:true}}), '인증번호 요청 결과를 확인하지 못했어요. 메일함을 먼저 확인한 뒤 잠시 후 다시 요청해 주세요.');
+  if (error) fail(error);
+}
+
+export async function verifyEmailCode(client: SupabaseClient, email: string, token: string) {
+  const parsed = emailSchema.safeParse(email);
+  if (!parsed.success) throw new Error('올바른 이메일 주소를 입력해 주세요.');
+  if (!/^\d{6,10}$/.test(token)) throw new Error('인증번호를 숫자로 입력해 주세요.');
+  const { data, error } = await boundedRequest(client.auth.verifyOtp({email:parsed.data,token,type:'email'}), '인증 결과를 확인하지 못했어요. 설정에서 로그인 상태를 먼저 확인해 주세요.');
+  if (error) {
+    if (error.status === 403 && !error.code) throw new Error('인증을 완료하지 못했어요. 인증번호를 확인해 주세요.');
+    fail(error);
+  }
+  if (!data.session?.access_token) throw new Error('인증된 로그인 상태를 확인하지 못했어요. 다시 시도해 주세요.');
+  return data.session;
 }
 
 export async function fetchAlias(client: SupabaseClient, userId: string): Promise<string | null> {

@@ -5,19 +5,19 @@ import type {Observation} from '@/lib/domain';
 import {cloudConfig,CLOUD_DISABLED_TEXT} from '@/lib/cloud/config';
 import {getSupabase} from '@/lib/cloud/client';
 import {buildSubmissionPayload,type FeedItem,type MySubmission} from '@/lib/cloud/contract';
-import {requestMagicLink,fetchAlias,createAlias,listMySubmissions,listFeed,submitObservation,withdrawSubmission,cloudErrorMessage,listMapAreas} from '@/lib/cloud/api';
+import {fetchAlias,createAlias,listMySubmissions,listFeed,submitObservation,withdrawSubmission,cloudErrorMessage,listMapAreas} from '@/lib/cloud/api';
+import EmailSignIn from './EmailSignIn';
 export default function CloudPanel({records,onEditRecord}:{records:Observation[];onEditRecord?:(record:Observation)=>void}){
  const client=useRef<SupabaseClient|null>(null);const epoch=useRef(0);const lock=useRef(false);const alive=useRef(false);const feedTicket=useRef(0);const areaTicket=useRef(0);
  const [uid,setUid]=useState<string|null>(null),[ready,setReady]=useState(false),[busy,setBusy]=useState(false);
- const [attempt,setAttempt]=useState(0),[authError,setAuthError]=useState(''),[cooldown,setCooldown]=useState(false);
+ const [attempt,setAttempt]=useState(0),[authError,setAuthError]=useState('');
  const [community,setCommunity]=useState<'loading'|'ready'|'error'>('loading'),[communityError,setCommunityError]=useState('');
  const [feedState,setFeedState]=useState<'loading'|'ready'|'error'>('loading'),[feedError,setFeedError]=useState('');
- const [email,setEmail]=useState(''),[alias,setAlias]=useState<string|null>(null),[aliasInput,setAliasInput]=useState('');
+ const [alias,setAlias]=useState<string|null>(null),[aliasInput,setAliasInput]=useState('');
  const [mine,setMine]=useState<MySubmission[]>([]),[feed,setFeed]=useState<FeedItem[]>([]),[selected,setSelected]=useState('');
  const [areas,setAreas]=useState<{id:string;label:string}[]>([]),[mapArea,setMapArea]=useState(''),[mapConsent,setMapConsent]=useState(false);
  const [areaState,setAreaState]=useState<'loading'|'ready'|'error'>('loading'),[mineWarning,setMineWarning]=useState('');
  const [consent,setConsent]=useState(false),[noPeople,setNoPeople]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
- useEffect(()=>{if(!cooldown)return;const timer=setTimeout(()=>setCooldown(false),60_000);return()=>clearTimeout(timer);},[cooldown]);
  async function loadCommunity(c:SupabaseClient,id:string,ticket:number){
   setCommunity('loading');setCommunityError('');
   try{const [a,m]=await Promise.all([fetchAlias(c,id),listMySubmissions(c,id)]);if(alive.current&&ticket===epoch.current){setAlias(a);setMine(m);setCommunity('ready');}}
@@ -51,7 +51,7 @@ export default function CloudPanel({records,onEditRecord}:{records:Observation[]
  if(!cloudConfig.enabled)return <section className="m-settings-note"><h2>함께 관찰하기 · 연결 준비</h2><p>{CLOUD_DISABLED_TEXT[cloudConfig.reason]}</p><p>내 기록은 계속 이 기기에 보관됩니다. 홈의 이야기와 공감은 가상 예시이며 실제 커뮤니티와 별개입니다.</p></section>;
  const local=records.filter(r=>!r.demo);const selectedRecord=local.find(r=>r.id===selected);const readiness=selectedRecord?buildSubmissionPayload(selectedRecord,{uploadConsent:true,noPeople:true}):null;
  return <section className="m-settings-note m-cloud"><h2>함께 관찰하기</h2><p>내 기록은 자동 전송되지 않아요. 선택한 기록만 동의를 확인한 뒤 검수 대기열로 보냅니다.</p>
- {authError?<><p className="m-error" role="alert">{authError}</p><button className="m-secondary" onClick={()=>setAttempt(n=>n+1)}>로그인 상태 다시 확인</button></>:!ready?<p role="status">로그인 상태 확인 중…</p>:!uid?<form onSubmit={e=>{e.preventDefault();if(cooldown)return;void action(async(c,t)=>{setCooldown(true);await requestMagicLink(c,email,`${location.origin}${process.env.NEXT_PUBLIC_BASE_PATH||''}/mobile/`);if(t===epoch.current)setMessage('로그인 링크를 요청했어요. 같은 브라우저에서 이메일의 링크를 열어 주세요.');});}}><label>로그인 이메일<input type="email" required maxLength={254} value={email} disabled={busy} onChange={e=>setEmail(e.target.value)} autoComplete="email"/></label><button disabled={busy||cooldown} className="m-primary">이메일 로그인 링크 받기</button>{cooldown&&<p>메일함과 스팸함을 확인해 주세요. 다시 요청하려면 잠시 기다려 주세요.</p>}</form>:<>
+ {authError?<><p className="m-error" role="alert">{authError}</p><button className="m-secondary" onClick={()=>setAttempt(n=>n+1)}>로그인 상태 다시 확인</button></>:!ready?<p role="status">로그인 상태 확인 중…</p>:!uid?<EmailSignIn/>:<>
  <p>로그인되어 있어요.</p>
  <button className="m-text" disabled={busy} onClick={()=>void action(async c=>{const {error:e}=await c.auth.signOut();if(e)throw new Error(cloudErrorMessage(e));})}>로그아웃</button>
  {community==='loading'?<p role="status">공동 관찰 연결 확인 중… 내 기록은 계속 이용할 수 있어요.</p>:community==='error'?<><p className="m-error" role="alert">{communityError}</p><button className="m-secondary" disabled={busy} onClick={()=>{if(client.current)void loadCommunity(client.current,uid,epoch.current);}}>공동 관찰 연결 다시 확인</button></>:<>

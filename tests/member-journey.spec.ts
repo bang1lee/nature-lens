@@ -56,7 +56,7 @@ test('member prepares a captured and identified record, submits it, then reobser
   await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
   await page.getByText('기록 더하기',{exact:false}).click();
   await page.getByLabel('한 줄 메모').fill('꽃과 잎을 관찰했어요');
-  await page.getByRole('button',{name:'계속하기',exact:true}).click();
+  await page.getByRole('button',{name:'바로 확인하기',exact:true}).click();
   const find=page.getByRole('button',{name:'이름 후보 찾기',exact:true});
   await expect(find).toBeDisabled();
   await page.getByLabel('인물과 개인정보가 없는 사진입니다').check();
@@ -70,7 +70,7 @@ test('member prepares a captured and identified record, submits it, then reobser
   expect(requests.identify).toHaveLength(1);
   expect(requests.identify[0]).toMatchObject({taxonGroup:'plant',transmissionConsent:true,noPeople:true});
   expect(requests.identify[0]).not.toHaveProperty('notes');
-  await page.getByRole('button',{name:'내 기록으로',exact:true}).click();
+  await page.getByRole('button',{name:'공개 저장으로 계속',exact:true}).click();
   await page.getByRole('button',{name:'홈으로',exact:true}).click();
   await page.getByRole('button',{name:'설정',exact:true}).click();
 

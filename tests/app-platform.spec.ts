@@ -48,7 +48,7 @@ test('signed out capture saves first, login returns to the same record without a
  await page.route('**/auth/v1/otp**',r=>{emails++;expect(r.request().postDataJSON()).not.toHaveProperty('photo');return r.fulfill({json:{}});});
  await page.goto('/mobile/',{waitUntil:'domcontentloaded'});await expect(page.locator('.f-cover-date')).not.toHaveText('오늘의 관찰');await page.getByRole('button',{name:'촬영',exact:true}).click();
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
- await expect(page.getByRole('button',{name:'계속하기',exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'바로 확인하기',exact:true})).toBeVisible();
  await expect(page.getByLabel('식별 로그인 이메일')).toHaveCount(0);
  await page.getByRole('button',{name:'내 기록에 저장'}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();
  await page.getByLabel('식별 로그인 이메일').fill('test@example.org');
@@ -181,7 +181,7 @@ test('discovery persists private round, reveals server result and score without 
   if(action==='reveal'){reveals++;state='revealed';}
   await route.fulfill({json:round()});
  });
- await record(page);await page.getByRole('radio',{name:/내일의 발견/}).click();
+ await record(page);await page.getByRole('radio',{name:/다음날 확인하기/}).click();
  await page.getByLabel('내가 예상한 식물 이름').fill('민들레');await page.getByText('관찰한 단서 더하기 · 선택',{exact:true}).click();await page.getByLabel('그렇게 생각한 이유').fill('노란 꽃');
  await page.getByLabel('인물과 개인정보가 없는 사진입니다').check();await page.getByLabel('사진 전송 및 예상·결과·점수 보관에 동의합니다').check();
  await page.getByRole('button',{name:'예상 제출하고 내일 확인하기'}).click();
@@ -206,9 +206,9 @@ test('signed out discovery cannot submit predictions; capture choice survives sa
  await page.route('**/capabilities',r=>r.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy',discovery:true}}));
  let calls=0;await page.route('**/discovery/*',r=>{calls++;return r.abort();});
  await page.goto('/mobile/',{waitUntil:'domcontentloaded'});await expect(page.locator('.f-cover-date')).not.toHaveText('오늘의 관찰');await page.getByRole('button',{name:'촬영',exact:true}).click();await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
- await page.getByRole('radio',{name:/내일의 발견/}).click();
+ await page.getByRole('radio',{name:/다음날 확인하기/}).click();
  await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();
- await expect(page.getByRole('radio',{name:/내일의 발견/})).toBeChecked();
+ await expect(page.getByRole('radio',{name:/다음날 확인하기/})).toBeChecked();
  await expect(page.getByLabel('식별 로그인 이메일')).toBeVisible();
  await expect(page.getByRole('button',{name:'예상 제출하고 내일 확인하기'})).toHaveCount(0);expect(calls).toBe(0);
 });
