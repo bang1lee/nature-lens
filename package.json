@@ -36,7 +36,10 @@
     "test:map": "playwright test -c community-map.playwright.config.ts",
     "test:member": "playwright test -c member-journey.playwright.config.ts",
     "graph:local": "NX_NO_CLOUD=true NX_DAEMON=false NX_LOAD_DOT_ENV_FILES=false nx graph --print",
-    "verify:local": "NX_NO_CLOUD=true NX_DAEMON=false NX_LOAD_DOT_ENV_FILES=false nx run-many -t boundary,typecheck,test --projects=web,worker --parallel=1"
+    "verify:local": "NX_NO_CLOUD=true NX_DAEMON=false NX_LOAD_DOT_ENV_FILES=false nx run-many -t boundary,typecheck,test --projects=web,worker --parallel=1",
+    "test:guest": "playwright test -c tests/guest-identification.playwright.config.ts",
+    "test:beta": "playwright test -c beta-photos.playwright.config.ts",
+    "test:otp": "playwright test -c otp-auth.playwright.config.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",

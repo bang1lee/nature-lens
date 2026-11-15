@@ -70,22 +70,26 @@ test('a timed-out code request is not repeated or presented as successful',async
  await page.clock.fastForward(45_000);await expect(send).toBeEnabled();
 });
 
-test('a 401 can be followed by fresh code verification on the same saved record',async({page})=>{
+test('a 401 keeps the photo while the member signs in again through settings',async({page})=>{
  const calls=await routes(page);
  await page.addInitScript(session=>localStorage.setItem('sb-mock-auth-token',JSON.stringify({...session,expires_at:Math.floor(Date.now()/1000)+3600})),session());
  await page.goto('/mobile/');await page.getByRole('button',{name:'촬영',exact:true}).click();
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
- await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();
+ await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'내 기록 보기'}).click();
+ const originalPhoto=await page.locator('.m-detail-photo').getAttribute('src');
  await page.getByLabel('인물과 개인정보가 없는 사진입니다').check();await page.getByLabel('사진 전송과 처리 안내에 동의합니다').check();
  await page.getByRole('button',{name:'이름 후보 찾기',exact:true}).click();
- await page.getByLabel('식별 로그인 이메일',{exact:true}).fill(email);
- await page.getByRole('button',{name:'인증번호 받기',exact:true}).click();
- await page.getByLabel('인증번호',{exact:true}).fill('123456');
- await page.getByRole('button',{name:'인증하고 계속',exact:true}).click();
- await expect(page.getByLabel('식별 로그인 이메일',{exact:true})).toHaveCount(0);
- await expect(page.getByRole('button',{name:'이름 후보 찾기',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'지금은 식별을 사용할 수 없어요'})).toBeVisible();
+ await page.getByRole('button',{name:'설정',exact:true}).click();
+ const panel=page.locator('.m-cloud');await panel.getByRole('button',{name:'로그아웃'}).click();
+ await panel.getByLabel('로그인 이메일',{exact:true}).fill(email);
+ await panel.getByRole('button',{name:'인증번호 받기',exact:true}).click();
+ await panel.getByLabel('인증번호',{exact:true}).fill('123456');
+ await panel.getByRole('button',{name:'인증하고 계속',exact:true}).click();
+ await expect(panel.getByText('로그인되어 있어요.',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'내 기록',exact:true}).click();await page.getByRole('button',{name:'오늘 만난 자연 기록 열기'}).click();
  expect(calls).toMatchObject({send:1,verify:1,identify:1});
- await expect(page.locator('.m-detail-photo')).toBeVisible();
+ await expect(page.locator('.m-detail-photo')).toHaveAttribute('src',originalPhoto!);
 });
 
 test('prediction 401 offers fresh code login without resending the photo',async({page})=>{
@@ -94,8 +98,8 @@ test('prediction 401 offers fresh code login without resending the photo',async(
  await page.goto('/mobile/');await page.getByRole('button',{name:'촬영',exact:true}).click();
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
  await page.getByRole('radio',{name:/다음날 확인하기/}).check();
- await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();
- await page.getByLabel('내가 예상한 식물 이름').fill('합성 꽃');
+ await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'내 기록 보기'}).click();
+ await page.getByLabel('어떤 식물일까요?').fill('합성 꽃');
  await page.getByLabel('인물과 개인정보가 없는 사진입니다').check();
  await page.getByLabel('사진 전송 및 예상·결과·점수 보관에 동의합니다').check();
  await page.getByRole('button',{name:'예상 제출하고 내일 확인하기'}).click();
@@ -106,5 +110,5 @@ test('prediction 401 offers fresh code login without resending the photo',async(
  await expect(page.getByLabel('식별 로그인 이메일',{exact:true})).toHaveCount(0);
  await expect(page.getByRole('button',{name:'예상 제출하고 내일 확인하기'})).toBeVisible();
  expect(calls).toMatchObject({send:1,verify:1,discovery:1});
- await expect(page.getByLabel('내가 예상한 식물 이름')).toHaveValue('합성 꽃');
+ await expect(page.getByLabel('어떤 식물일까요?')).toHaveValue('합성 꽃');
 });

@@ -40,6 +40,27 @@ test('explicit consent starts guest identification once, while saving a recovera
  expect(records).toHaveLength(1);expect(records[0].photo).toMatch(/^data:image/);expect(records[0].aiIdentification.decision.state).toBe('candidates');
 });
 
+test('the result is visible immediately and resending requires an explicit action',async({page})=>{
+ let identifications=0;
+ await page.setViewportSize({width:390,height:844});
+ await page.route('https://mock.supabase.co/**',route=>new URL(route.request().url()).pathname==='/auth/v1/signup'?route.fulfill({json:session()}):route.fulfill({json:[]}));
+ await page.route('**/capabilities',route=>route.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy'}}));
+ await page.route('**/identify',route=>{identifications++;return route.fulfill({json:{state:'candidates',provider:'plantnet',modelVersion:'mock',candidates:[{scientificName:'Taraxacum officinale',commonName:'민들레',score:.95}],needsHumanReview:true}});});
+ await photo(page);await consent(page);
+ const result=page.getByRole('region',{name:'식별 결과'});
+ await expect(result.getByRole('button',{name:'민들레 이름을 미확정 초안에 반영'})).toBeVisible();
+ await expect(result).toBeFocused();
+ await expect.poll(()=>result.getByText('민들레',{exact:true}).first().evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=window.innerHeight;})).toBe(true);
+ await expect(page.getByLabel('사진 전송과 처리 안내에 동의합니다')).toBeHidden();
+ await page.getByText('다시 식별하기',{exact:true}).click();
+ await expect(page.getByLabel('사진 전송과 처리 안내에 동의합니다')).toBeChecked();
+ expect(identifications).toBe(1);
+ await page.getByLabel('사진 전송과 처리 안내에 동의합니다').uncheck();
+ const find=page.getByRole('button',{name:'이름 후보 찾기',exact:true});await expect(find).toBeDisabled();
+ await page.getByLabel('사진 전송과 처리 안내에 동의합니다').check();
+ expect(identifications).toBe(1);await find.click();await expect.poll(()=>identifications).toBe(2);
+});
+
 test('changing the target while connecting requires a new identification action',async({page})=>{
  let release!:()=>void;const pending=new Promise<void>(resolve=>{release=resolve;});
  let signups=0,identifications=0;
@@ -92,7 +113,8 @@ test('failed guest setup keeps the photo and retries only on a new click',async(
  await photo(page);await consent(page);
  await expect(page.getByText('가입 없이 연결하지 못했어요.',{exact:false})).toBeVisible();
  expect(signups).toBe(1);expect(identifications).toBe(0);
- await expect(page.getByAltText('이름을 확인할 관찰 사진')).toBeVisible();
+ await expect(page.getByAltText('방금 담은 자연 사진')).toBeVisible();
+ await page.getByText('다시 식별하기',{exact:true}).click();
  await page.getByRole('button',{name:'이름 후보 찾기',exact:true}).click();
  await expect(page.getByRole('button',{name:'민들레 이름을 미확정 초안에 반영'})).toBeVisible();
  expect(signups).toBe(2);expect(identifications).toBe(1);
@@ -107,6 +129,7 @@ test('an anonymous identification session does not grant access to member predic
  await page.route('**/identify',route=>route.fulfill({json:{state:'candidates',provider:'plantnet',modelVersion:'mock',candidates:[{scientificName:'Taraxacum officinale',commonName:'민들레',score:.95}],needsHumanReview:true}}));
  await photo(page);await consent(page);
  await expect(page.getByRole('button',{name:'민들레 이름을 미확정 초안에 반영'})).toBeVisible();
+ await page.getByRole('button',{name:'내 기록 보기',exact:true}).click();
  await page.getByRole('radio',{name:/다음날 확인하기/}).click();
  await expect(page.getByLabel('식별 로그인 이메일')).toBeVisible();
  await expect(page.getByLabel('내가 예상한 식물 이름')).toHaveCount(0);
@@ -140,6 +163,7 @@ test('identification and public photo publishing cannot run on the same changing
   await panel.getByLabel('이 사진과 기록을 공개 베타에 저장하는 데 동의해요').check();
   await panel.getByLabel('사진에 사람이나 개인 정보가 없어요').check();
   await panel.getByRole('button',{name:'공개로 저장'}).click();await saving;
+  await page.getByText('다시 식별하기',{exact:true}).click();
   await expect(page.getByRole('button',{name:'이름 후보 찾기',exact:true})).toBeDisabled();
   await expect(page.getByRole('button',{name:'민들레 이름을 미확정 초안에 반영'})).toBeDisabled();
   await expect(page.getByRole('button',{name:'내 기록 보기',exact:true})).toBeDisabled();

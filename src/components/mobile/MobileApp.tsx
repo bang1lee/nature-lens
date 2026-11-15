@@ -39,6 +39,10 @@ export default function MobileApp({webBoard=false}:{webBoard?:boolean}) {
   const [saved, setSaved] = useState<Observation | null>(null);
   const [detail, setDetail] = useState<Observation | null>(null);
   const [editing, setEditing] = useState<Observation | null>(null);
+  const [detailIdentifying,setDetailIdentifying]=useState(false);
+  const [detailPublishing,setDetailPublishing]=useState(false);
+  const [detailLocationBusy,setDetailLocationBusy]=useState(false);
+  const detailBusy=detailIdentifying||detailPublishing||detailLocationBusy;
   const editReturnFocus = useRef<HTMLElement | null>(null);
   const loginReturnMessage=useIdentificationReturn(setDetail);
   const [query, setQuery] = useState('');
@@ -66,18 +70,25 @@ export default function MobileApp({webBoard=false}:{webBoard?:boolean}) {
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLElement && (event.target.closest('input,textarea,select,[contenteditable]'))) return;
-      if (!capture && !saved && !event.ctrlKey && !event.metaKey && !event.altKey && event.key.toLowerCase() === 'n') { event.preventDefault(); setReobserveFrom(null); setCapture(true); window.scrollTo(0, 0); }
+      if (!capture && !saved && !detailBusy && !editing && !event.ctrlKey && !event.metaKey && !event.altKey && event.key.toLowerCase() === 'n') { event.preventDefault(); setReobserveFrom(null); setCapture(true); window.scrollTo(0, 0); }
     };
     window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
-  }, [capture, saved]);
+  }, [capture, saved,detailBusy,editing]);
 
-  function navigate(next: Tab) { setTab(webBoard&&next==='home'?'records':next); setDetail(null); setGroup(null); setQuery(''); window.scrollTo(0, 0); }
+  useEffect(()=>{
+    if(!detailBusy)return;
+    const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};
+    window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);
+  },[detailBusy]);
+
+  function navigate(next: Tab) { if(detailBusy||editing)return;setTab(webBoard&&next==='home'?'records':next); setDetail(null); setGroup(null); setQuery(''); window.scrollTo(0, 0); }
   async function afterSave(record: Observation, opened = false) {
     // A record already continued inside the capture flow opens directly instead of repeating a success screen.
     setCapture(false); if (opened) { setSaved(null); setDetail(record); setTab('records'); } else setSaved(record); window.scrollTo(0, 0);
     try { await load(); } catch { setError('저장은 완료했지만 목록 갱신에 실패했어요. 다시 열어 주세요.'); }
   }
   function openEditor(record: Observation) {
+    if(detailBusy)return;
     editReturnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setEditing(record);
   }
@@ -92,17 +103,42 @@ export default function MobileApp({webBoard=false}:{webBoard?:boolean}) {
     closeEditor();
     void load().catch(() => setError('수정은 저장했지만 목록 갱신에 실패했어요. 다시 열어 주세요.'));
   }
+  async function refreshDetailAfterLocationRemoval(id:string){
+    const data=await readLibrary();
+    const latest=data.observations.find(item=>item.id===id);
+    if(!latest)throw new Error('record-not-found');
+    setDetail(current=>current?.id===id?latest:current);
+    setRecords(data.observations.sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)));
+    setCollections(data.collections);
+  }
   const filtered = records.filter(r => (taxonFilter==='all'||r.taxonGroup===taxonFilter) && (!group || r.sessionId === group) && `${r.title} ${r.species} ${r.notes}`.toLowerCase().includes(query.toLowerCase()));
-  const openCapture = () => { setSaved(null); setReobserveFrom(null); setCapture(true); window.scrollTo(0, 0); };
+  const openCapture = () => { if(detailBusy||editing)return;setSaved(null); setReobserveFrom(null); setCapture(true); window.scrollTo(0, 0); };
   const recordCard = (r: Observation) => <button key={r.id} className="m-record-card" aria-label={`${r.title} 기록 열기`} onClick={() => { setDetail(r); window.scrollTo(0, 0); }}><img src={r.photo} alt="" loading="lazy" decoding="async"/><span className="m-record-copy"><small>{r.date.replaceAll('-', '. ')}{r.demo ? ' · 예제' : ''}</small><strong>{r.title}</strong><span>{r.status === 'reviewed' ? '기기 기록 · 내 확인 완료' : '기기 기록 · 초안'}</span>{webBoard&&r.notes&&<span className="m-board-note">{r.notes}</span>}</span></button>;
 
   return <div className={`m-stage ${webBoard ? 'm-web-board' : ''}`}>
-    <aside className="m-preview-note"><Leaf size={30}/><h2>손안의<br/>자연 기록장.</h2><p>촬영하고, 한 줄 남기고,<br/>다음 발견으로.</p><span>나의 자연 관찰실</span><ol><li>사진 촬영 또는 앨범 선택</li><li>이름과 메모는 필요할 때만</li><li>초안 저장 후 나중에 검수</li></ol><a href={`${base}/`}>기존 출판 작업실 <ArrowRight size={16}/></a></aside>
+    <aside className="m-preview-note"><Leaf size={30}/><h2>손안의<br/>자연 기록장.</h2><p>촬영하고, 한 줄 남기고,<br/>다음 발견으로.</p><span>나의 자연 관찰실</span><ol><li>사진 촬영 또는 앨범 선택</li><li>이름과 메모는 필요할 때만</li><li>초안 저장 후 나중에 검수</li></ol><a href={detailBusy||editing?undefined:`${base}/`} aria-disabled={detailBusy||!!editing} tabIndex={detailBusy||editing?-1:undefined}>기존 출판 작업실 <ArrowRight size={16}/></a></aside>
     <div className={`m-app ${capture && !saved ? 'm-in-capture' : ''}`}>
       <main id="main" className="m-content" tabIndex={-1} aria-busy={loading} data-ready={!loading}>
       {capture ? <QuickCapture key={captureKey} reobserveFrom={reobserveFrom} onClose={() => setCapture(false)} onSaved={(r,opened) => void afterSave(r,opened)} onRetake={r=>{setReobserveFrom(r);setCaptureKey(k=>k+1);window.scrollTo(0,0);void load().catch(()=>{});}}/> : saved ? <section className="m-success">
-        <div className="m-success-mark"><Smartphone size={32} aria-hidden="true"/></div><span className="m-muted">이 기기에 보관했어요</span><h1>발견 하나가 쌓였어요</h1><p>지금의 작은 관찰이<br/>나중엔 멋진 이야기가 될 거예요.</p><img src={saved.photo} alt="저장된 관찰 사진"/><strong>{saved.title}</strong><span className="m-draft-chip">기기 기록 · 초안</span><BetaPublish record={saved}/><p className="f-next-note">기록 상세에서 이름 후보를 확인하고,<br/>다음 만남을 같은 대상에 이어 남겨요.</p><div className="m-success-actions"><button className="m-primary" onClick={() => { setDetail(saved); setSaved(null); setTab('records'); }}>내 기록 보기 <ArrowRight size={19}/></button><button className="m-text" onClick={()=>{setJournalMonth(saved.date.slice(0,7));setSaved(null);navigate('journal');}}><BookOpen size={17}/> 이달의 도감에 모아 보기</button><button className="m-secondary" onClick={()=>{setReobserveFrom(saved);setSaved(null);setCapture(true);window.scrollTo(0,0);}}><Camera size={19}/> 같은 대상 다시 관찰하기</button><button className="m-text" onClick={openCapture}><Camera size={17}/> 하나 더 기록하기</button><button className="m-text" onClick={() => { setSaved(null); navigate('home'); }}>홈으로</button></div>
-      </section> : detail ? <section className="m-detail"><header className="m-header"><button className="m-icon" aria-label="목록으로" onClick={() => { setDetail(null); setTab('records'); }}><ArrowLeft/></button><span>나의 관찰</span><span className="m-draft-chip">{detail.status === 'reviewed' ? '내 확인 완료' : '초안'}</span></header><img className="m-detail-photo" src={detail.photo} alt={detail.title}/><div className="m-detail-copy"><span className="m-muted">{detail.date} · {detail.region || '지역 비공개'}</span><h1>{detail.title}</h1><p className="m-species">{detail.species || '생물 이름은 나중에 확인해도 돼요'}</p><IdentificationPanel key={`${detail.id}-${detail.updatedAt}`} record={detail} onRetake={()=>{setReobserveFrom(detail);setSaved(null);setCapture(true);window.scrollTo(0,0);}} onApplied={record=>{setDetail(record);void load().catch(()=>setError('목록을 다시 열어 주세요.'));}}/><BetaPublish key={`public-${detail.id}`} record={detail}/><PrivateLocationNote key={detail.id} id={detail.id} onRemoved={() => {setDetail({...detail,region:undefined,publicGrid:undefined,status:'draft'});void load().catch(()=>setError('목록을 다시 열어 주세요.'));}}/><p className="m-detail-notes">{detail.notes || '아직 메모가 없어요. 사진에 담긴 발견을 천천히 살펴보세요.'}</p><SpecimenPanel record={detail} records={records} onOpen={record=>{setDetail(record);window.scrollTo(0,0);}} onReobserve={()=>{setReobserveFrom(detail);setSaved(null);setCapture(true);window.scrollTo(0,0);}}/><button className="m-secondary f-month-link" onClick={()=>{setJournalMonth(detail.date.slice(0,7));navigate('journal');}}><BookOpen size={18}/> 이 기록의 월간 도감 보기</button><button className="m-secondary" onClick={()=>openEditor(detail)}>기록 수정 및 공개 준비</button>{detail.demo && <p className="m-private-note">사용법을 보여 주는 가상 예제입니다.</p>}<div className="m-info-line"><ShieldCheck size={21}/><p>이 브라우저에 저장된 기록이에요.<br/>기록을 수정하고 공개 전 확인을 할 수 있어요. 백업은 설정에서 할 수 있어요.</p></div><a className="m-secondary" href={`${base}/`}>출판 작업실에서 이어하기 <ArrowRight size={18}/></a></div></section> : <>
+        <div className="m-success-mark"><Smartphone size={32} aria-hidden="true"/></div><span className="m-muted">이 기기에 보관했어요</span><h1>발견 하나가 쌓였어요</h1><p>지금의 작은 관찰이<br/>나중엔 멋진 이야기가 될 거예요.</p><img src={saved.photo} alt="저장된 관찰 사진"/><strong>{saved.title}</strong><span className="m-draft-chip">기기 기록 · 초안</span><BetaPublish record={saved} onBusyChange={setDetailPublishing}/><p className="f-next-note">기록 상세에서 이름 후보를 확인하고,<br/>다음 만남을 같은 대상에 이어 남겨요.</p><div className="m-success-actions"><button disabled={detailPublishing} className="m-primary" onClick={() => { setDetail(saved); setSaved(null); setTab('records'); }}>내 기록 보기 <ArrowRight size={19}/></button><button disabled={detailPublishing} className="m-text" onClick={()=>{setJournalMonth(saved.date.slice(0,7));setSaved(null);navigate('journal');}}><BookOpen size={17}/> 이달의 도감에 모아 보기</button><button disabled={detailPublishing} className="m-secondary" onClick={()=>{setReobserveFrom(saved);setSaved(null);setCapture(true);window.scrollTo(0,0);}}><Camera size={19}/> 같은 대상 다시 관찰하기</button><button disabled={detailPublishing} className="m-text" onClick={openCapture}><Camera size={17}/> 하나 더 기록하기</button><button disabled={detailPublishing} className="m-text" onClick={() => { setSaved(null); navigate('home'); }}>홈으로</button></div>
+      </section> : detail ? <section className="m-detail">
+        <header className="m-header"><button className="m-icon" aria-label="목록으로" disabled={detailBusy||!!editing} onClick={() => { setDetail(null); setTab('records'); }}><ArrowLeft/></button><span>나의 관찰</span><span className="m-draft-chip">{detail.status === 'reviewed' ? '내 확인 완료' : '초안'}</span></header>
+        <img className="m-detail-photo" src={detail.photo} alt={detail.title}/>
+        <div className="m-detail-copy"><span className="m-muted">{detail.date} · {detail.region || '지역 비공개'}</span><h1>{detail.title}</h1><p className="m-species">{detail.species || '생물 이름은 나중에 확인해도 돼요'}</p>
+          <fieldset className="m-identification-group" disabled={detailPublishing||detailLocationBusy||!!editing}><legend className="m-visually-hidden">이름 확인</legend><IdentificationPanel key={`${detail.id}-${detail.updatedAt}`} record={detail} onBusyChange={setDetailIdentifying} onRetake={()=>{setReobserveFrom(detail);setSaved(null);setCapture(true);window.scrollTo(0,0);}} onApplied={record=>{setDetail(record);void load().catch(()=>setError('목록을 다시 열어 주세요.'));}}/></fieldset>
+          <BetaPublish key={`public-${detail.id}`} record={detail} disabled={detailIdentifying||detailLocationBusy||!!editing} onBusyChange={setDetailPublishing}/>
+          <fieldset className="m-identification-group" disabled={detailBusy||!!editing}><legend className="m-visually-hidden">기록 관리</legend>
+            <PrivateLocationNote key={detail.id} id={detail.id} onBusyChange={setDetailLocationBusy} onRemoved={()=>refreshDetailAfterLocationRemoval(detail.id)}/>
+            <p className="m-detail-notes">{detail.notes || '아직 메모가 없어요. 사진에 담긴 발견을 천천히 살펴보세요.'}</p>
+            <SpecimenPanel record={detail} records={records} onOpen={record=>{setDetail(record);window.scrollTo(0,0);}} onReobserve={()=>{setReobserveFrom(detail);setSaved(null);setCapture(true);window.scrollTo(0,0);}}/>
+            <button className="m-secondary f-month-link" onClick={()=>{setJournalMonth(detail.date.slice(0,7));navigate('journal');}}><BookOpen size={18}/> 이 기록의 월간 도감 보기</button>
+            <button className="m-secondary" onClick={()=>openEditor(detail)}>기록 수정 및 공개 준비</button>
+          </fieldset>
+          {detail.demo && <p className="m-private-note">사용법을 보여 주는 가상 예제입니다.</p>}
+          <div className="m-info-line"><ShieldCheck size={21}/><p>이 브라우저에 저장된 기록이에요.<br/>기록을 수정하고 공개 전 확인을 할 수 있어요. 백업은 설정에서 할 수 있어요.</p></div>
+          <a className="m-secondary" href={detailBusy||editing?undefined:`${base}/`} aria-disabled={detailBusy||!!editing} tabIndex={detailBusy||editing?-1:undefined}>출판 작업실에서 이어하기 <ArrowRight size={18}/></a>
+        </div>
+      </section> : <>
         <header className="m-header"><a className="m-brand" href={`${base}/${webBoard?'board':'mobile'}/`}><Leaf size={25}/> nature lens</a><span className="m-header-state">{offline ? <><WifiOff size={14}/> 오프라인</> : '나의 관찰실'}</span></header>
         {loginReturnMessage&&<p role="status">{loginReturnMessage}</p>}
         {error && <p className="m-error" role="alert">{error}</p>}
@@ -114,7 +150,7 @@ export default function MobileApp({webBoard=false}:{webBoard?:boolean}) {
       </>}
       </main>
       {editing && <Editor record={editing} collections={collections} onSave={saveEdit} onClose={closeEditor} mobileIdentification/>}
-      {!capture && !saved && <nav className="m-tabbar" aria-label="모바일 메뉴"><button onClick={() => navigate('home')} aria-current={!detail && tab === 'home' ? 'page' : undefined}><Home size={22}/><span>홈</span></button><button onClick={() => navigate('records')} aria-current={tab === 'records' ? 'page' : undefined}><List size={23}/><span>내 기록</span></button><button className="m-tab-camera" aria-label="촬영" onClick={openCapture}><span><Camera size={25}/></span><small>촬영</small></button><button onClick={() => navigate('journal')} aria-current={tab === 'journal' ? 'page' : undefined}><BookOpen size={22}/><span>저널</span></button><button onClick={() => navigate('settings')} aria-current={tab === 'settings' ? 'page' : undefined}><Settings size={22}/><span>설정</span></button></nav>}
+      {!capture && !saved && <nav className="m-tabbar" aria-label="모바일 메뉴"><button disabled={detailBusy||!!editing} onClick={() => navigate('home')} aria-current={!detail && tab === 'home' ? 'page' : undefined}><Home size={22}/><span>홈</span></button><button disabled={detailBusy||!!editing} onClick={() => navigate('records')} aria-current={tab === 'records' ? 'page' : undefined}><List size={23}/><span>내 기록</span></button><button disabled={detailBusy||!!editing} className="m-tab-camera" aria-label="촬영" onClick={openCapture}><span><Camera size={25}/></span><small>촬영</small></button><button disabled={detailBusy||!!editing} onClick={() => navigate('journal')} aria-current={tab === 'journal' ? 'page' : undefined}><BookOpen size={22}/><span>저널</span></button><button disabled={detailBusy||!!editing} onClick={() => navigate('settings')} aria-current={tab === 'settings' ? 'page' : undefined}><Settings size={22}/><span>설정</span></button></nav>}
     </div>
   </div>;
 }

@@ -27,6 +27,9 @@ jobs:
       - run: npm run test:e2e
       - run: npm run test:app
       - run: npm run test:cloud-auth
+      - run: npm run test:guest
+      - run: npm run test:beta
+      - run: npm run test:otp
       - run: npm run test:member
       - run: npm run test:map
       - run: npm run build

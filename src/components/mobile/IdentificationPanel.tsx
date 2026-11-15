@@ -30,6 +30,15 @@ function ImmediateIdentification({record,onApplied,draft=false,onBusyChange,onRe
  const [message,setMessage]=useState('');
  const [decision,setDecision]=useState<IdentificationDecision|null>(record.aiIdentification?.decision||null);
  const controller=useRef<AbortController|null>(null);const mounted=useRef(true);const flight=useRef(false);
+ const resultRegion=useRef<HTMLDivElement>(null);const focusFirstResult=useRef(Boolean(startIntent?.isPending()));
+ useEffect(()=>{
+  if(!decision||!focusFirstResult.current)return;
+  focusFirstResult.current=false;
+  const active=document.activeElement;
+  if(active instanceof HTMLElement&&active.matches('button,a,input,select,textarea,summary'))return;
+  resultRegion.current?.focus({preventScroll:true});
+  resultRegion.current?.scrollIntoView({block:'nearest',behavior:'auto'});
+ },[decision]);
  useEffect(()=>{
   mounted.current=true;
   const c=new AbortController();
@@ -83,9 +92,7 @@ function ImmediateIdentification({record,onApplied,draft=false,onBusyChange,onRe
   }catch(error){if(mounted.current)setMessage(error instanceof Error?error.message:'후보를 저장하지 못했어요.');}
   finally{flight.current=false;onBusyChange?.(false);if(mounted.current)setSaving(false);}
  }
- return <section className="m-identify" aria-labelledby="identify-title">
-  <h2 id="identify-title"><Sparkles size={20} aria-hidden="true"/> 바로 확인하기</h2>
-  <p>AI가 찾은 이름 후보예요. 확정된 이름은 아니에요.</p>
+ const controls=<>
   {localApp&&<label>식별 처리 방식<select value={mode} disabled={busy||saving} onChange={e=>{startIntent?.cancel();setMode(e.target.value as typeof mode);setConsent(false);setNoPeople(false);setDecision(null);setMessage('');}}><option value="local">이 Mac에서 처리 · 실험용</option><option value="external">외부 API</option></select></label>}
   <details><summary>찾을 생물 바꾸기</summary><label>찾을 생물<select value={group} disabled={busy||saving} onChange={e=>{startIntent?.cancel();setGroup(e.target.value as typeof group);setDecision(null);setConsent(false);setNoPeople(false);setMessage('');}}><option value="plant">식물</option><option value="insect">곤충</option></select></label></details>
   {!ready?<div className="m-private-note"><p>{record.demo?'예제 사진은 전송하지 않아요. 직접 촬영한 기록에서 사용해 주세요.':mode==='local'?'이 Mac의 실험용 인식 서버에 연결하지 못했어요. 수동 기록을 계속할 수 있어요.':service.state==='checking'?'서버 연결 중… 처음에는 잠시 걸릴 수 있어요.':service.state==='unconfigured'?'이 배포에는 온라인 식별 연결이 설정되지 않았어요. 사진을 먼저 저장하고 나중에 이름을 확인할 수 있어요.':service.state==='disabled'?'인식 서버 연결 준비 중이에요. 지금은 이름을 직접 기록할 수 있어요.':service.state==='timeout'?'서버 응답이 늦어 연결 확인을 멈췄어요. 사진을 먼저 저장하거나 잠시 뒤 다시 확인해 주세요.':service.state==='invalid'?'식별 서버의 응답이나 사진 처리 안내를 확인할 수 없어 전송을 막았어요. 수동 기록은 계속할 수 있어요.':service.state==='unavailable'?'식별 서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요. 사진은 먼저 저장할 수 있어요.':'선택한 생물은 현재 연결된 식별 서비스에서 지원하지 않아요. 이름 없이 저장할 수 있어요.'}</p>{!record.demo&&mode==='external'&&['timeout','invalid','unavailable','disabled'].includes(service.state)&&<button type="button" className="m-secondary" onClick={()=>setProbeAttempt(n=>n+1)}>식별 연결 다시 확인</button>}</div>:<>
@@ -95,8 +102,13 @@ function ImmediateIdentification({record,onApplied,draft=false,onBusyChange,onRe
   </>}
   <button type="button" className="m-secondary" disabled={!ready||!consent||!noPeople||busy||saving} onClick={()=>void identify()}>{busy?<><LoaderCircle className="spin" size={18}/> 이름 후보 찾는 중</>:'이름 후보 찾기'}</button>
   {busy&&<button type="button" className="m-text" onClick={()=>{controller.current?.abort();controller.current=null;flight.current=false;onBusyChange?.(false);setBusy(false);setMessage('대기를 취소했어요. 이미 전송된 사진의 처리는 완료될 수 있어요.');}}>대기 취소</button>}
+ </>;
+ return <section className="m-identify" aria-labelledby="identify-title">
+  <h2 id="identify-title"><Sparkles size={20} aria-hidden="true"/> 바로 확인하기</h2>
+  <p>AI가 찾은 이름 후보예요. 확정된 이름은 아니에요.</p>
+  {decision&&<div ref={resultRegion} tabIndex={-1} role="region" aria-label="식별 결과"><DecisionResult decision={decision} saving={saving||busy} onRetake={onRetake} onCandidate={index=>{const taxon=decision.state==='candidates'?decision.candidates[index]:null;if(taxon)void apply({scientificName:taxon.scientificName,commonName:taxon.koreanName||taxon.displayName||'',score:taxon.score});}}/></div>}
   <p role="status" aria-live="polite">{message}</p>
-  {decision&&<DecisionResult decision={decision} saving={saving||busy} onRetake={onRetake} onCandidate={index=>{const taxon=decision.state==='candidates'?decision.candidates[index]:null;if(taxon)void apply({scientificName:taxon.scientificName,commonName:taxon.koreanName||taxon.displayName||'',score:taxon.score});}}/>}
+  {decision?<details><summary>다시 식별하기</summary>{controls}</details>:controls}
   {record.aiAssisted&&<p className="m-private-note">AI 후보를 반영한 미확정 기록입니다.</p>}
   {record.aiIdentification&&<details><summary>분석 정보</summary><p className="m-private-note">최근 분석 {record.aiIdentification.elapsedMs}ms · {record.aiIdentification.decision.state==='unavailable'?'연결 실패':record.aiIdentification.decision.provenance.provider} · {draft?'사진과 함께 저장할 분석 결과예요.':'분석 결과를 기기에 보관했어요.'}</p></details>}
  </section>;
@@ -113,10 +125,10 @@ export default function IdentificationPanel(props:Props){
  async function choose(value:'now'|'tomorrow'){
   if(changing||working||props.record.discoveryId)return;
   if(value!==timing)props.startIntent?.cancel();
-  setChanging(true);setChoiceError('');
+  setChanging(true);props.onBusyChange?.(true);setChoiceError('');
   try{const updated={...props.record,identificationTiming:value};const stored=props.draft?updated:await saveObservation(updated,props.record.updatedAt);setTiming(value);props.onApplied(stored);}
   catch{setChoiceError('선택을 저장하지 못했어요. 다시 시도해 주세요.');}
-  finally{setChanging(false);}
+  finally{setChanging(false);props.onBusyChange?.(false);}
  }
  if(props.record.taxonGroup==='other')return <p className="m-private-note">기타 생명은 아직 이름 찾기를 지원하지 않아요. 이름 없이 기록할 수 있어요.</p>;
  return <>{!props.hideChoice&&<IdentificationChoice value={tomorrow?'tomorrow':'now'} disabled={changing||working||Boolean(props.record.discoveryId)} onChange={value=>void choose(value)}/>}{choiceError&&<p role="alert">{choiceError}</p>}{tomorrow?<DiscoveryPanel {...props} onBusyChange={value=>{setWorking(value);props.onBusyChange?.(value);}}/>:<ImmediateIdentification {...props} onBusyChange={value=>{setWorking(value);props.onBusyChange?.(value);}}/>}</>;

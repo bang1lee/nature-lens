@@ -35,15 +35,14 @@ test('guest can save optional fields without login; 320px remains usable',async(
  expect(await stored(page)).toMatchObject([{notes:'잎이 자랐어요'}]);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
-test('signed in continue still requires both consents before identification',async({page})=>{
+test('signed in direct identification requires consent and stores the chosen candidate',async({page})=>{
  await page.addInitScript(()=>{localStorage.setItem('sb-mock-auth-token',JSON.stringify({access_token:`${btoa('{"alg":"none"}')}.${btoa(JSON.stringify({sub:'test-user',exp:Math.floor(Date.now()/1000)+3600}))}.test`,refresh_token:'test',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user:{id:'test-user',aud:'authenticated',role:'authenticated',email:'test@example.org',app_metadata:{},user_metadata:{},created_at:new Date().toISOString()}}));});
  await page.route('https://mock.supabase.co/**',r=>r.fulfill({json:[]}));
  await page.route('**/capabilities',r=>r.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy'}}));
  let calls=0;await page.route('**/identify',r=>{calls++;return r.fulfill({json:{state:'candidates',provider:'plantnet',modelVersion:'test',candidates:[{scientificName:'Taraxacum officinale',commonName:'민들레',score:.95}],needsHumanReview:true}});});
- await capture(page);await page.getByRole('button',{name:'바로 확인하기',exact:true}).click();
- const find=page.getByRole('button',{name:'이름 후보 찾기',exact:true});await expect(find).toBeDisabled();
- await page.getByLabel('인물과 개인정보가 없는 사진입니다').check();await expect(find).toBeDisabled();
- await page.getByLabel('사진 전송과 처리 안내에 동의합니다').check();await find.click();
+ await capture(page);
+ const find=page.getByRole('button',{name:'가입 없이 바로 확인하기',exact:true});await expect(find).toBeDisabled();expect(calls).toBe(0);
+ await page.getByLabel('인물과 개인정보가 없는 사진이며, 사진을 식별 서비스에 보내 분석하는 데 동의합니다').check();await find.click();
  await page.getByRole('button',{name:'민들레 이름을 미확정 초안에 반영'}).click();
  expect(calls).toBe(1);expect(await stored(page)).toMatchObject([{species:'민들레',aiAssisted:true}]);
  await expect(page.getByText('식별 화면 시연',{exact:true})).toHaveCount(0);

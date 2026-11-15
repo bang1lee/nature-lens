@@ -65,15 +65,22 @@ export async function publishBetaObservation(client:SupabaseClient,userId:string
   else row=rowSchema.parse(data);
  }
  assertCurrent();
- compatible(row,metadata,hash);
- if(row.state==='published')return {id:row.id,localId:row.local_id,photoUrl:link(client,row.photo_path),alreadyPublished:true};
+ if(row.state==='published'){compatible(row,metadata,hash);return {id:row.id,localId:row.local_id,photoUrl:link(client,row.photo_path),alreadyPublished:true};}
+ if(row.photo_sha256!==hash)throw new Error('이 기록의 다른 사진이 이미 공개 저장 준비 중이에요. 새 기록으로 공개해 주세요.');
  await own(client,userId);assertCurrent();
  const bucket=client.storage.from(BUCKET),upload=await network(bucket.upload(row.photo_path,image,{contentType:'image/jpeg',upsert:false}));
  if(upload.error){const recovered=await network(bucket.download(row.photo_path));if(recovered.error||!recovered.data||await sha(recovered.data)!==hash)throw new Error('사진 전송을 완료하지 못했어요. 연결을 확인하고 다시 시도해 주세요.');}
  assertCurrent();await own(client,userId);assertCurrent();
- const {data,error}=await network(client.from('beta_public_observations').update({state:'published'}).eq('id',row.id).eq('owner_id',userId).select(RECORD_COLUMNS).maybeSingle());
- if(error||!data){const latest=await existing(client,userId,metadata.id);if(latest?.state!=='published')throw new Error('공개 저장 결과를 확인하지 못했어요. 내 서버 기록을 확인한 뒤 다시 시도해 주세요.');compatible(latest,metadata,hash);return {id:latest.id,localId:latest.local_id,photoUrl:link(client,latest.photo_path),alreadyPublished:true};}
- const published=rowSchema.parse(data);return {id:published.id,localId:published.local_id,photoUrl:link(client,published.photo_path),alreadyPublished:false};
+ let confirmed=false;
+ try{
+  const {data,error}=await network(client.rpc('finalize_beta_public_observation',{p_id:row.id,p_expected_record:row.record,p_new_record:metadata,p_photo_sha256:hash}));
+  confirmed=!error&&data===true;
+ }catch{/* The transaction may have completed despite a lost response. */}
+ assertCurrent();
+ const latest=await existing(client,userId,metadata.id);assertCurrent();
+ if(latest?.state!=='published')throw new Error('공개 저장 결과를 확인하지 못했어요. 내 서버 기록을 확인한 뒤 다시 시도해 주세요.');
+ compatible(latest,metadata,hash);
+ return {id:latest.id,localId:latest.local_id,photoUrl:link(client,latest.photo_path),alreadyPublished:!confirmed};
 }
 export async function listBetaFeed(client:SupabaseClient):Promise<BetaFeedItem[]>{
  const {data,error}=await network(client.from('beta_public_feed').select(FEED_COLUMNS).order('published_at',{ascending:false}).limit(100));
