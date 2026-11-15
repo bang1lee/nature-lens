@@ -27,11 +27,11 @@ export function cloudErrorMessage(error: unknown): string {
 
 function fail(error: unknown): never { throw new CloudRequestError(cloudErrorMessage(error)); }
 
-async function boundedRequest<T>(request: PromiseLike<T>, message = '서버 응답이 늦어 확인을 멈췄어요. 내 기록은 그대로예요. 잠시 후 다시 확인해 주세요.'): Promise<T> {
+async function boundedRequest<T>(request: PromiseLike<T>, message = '서버 응답이 늦어 확인을 멈췄어요. 내 기록은 그대로예요. 잠시 후 다시 확인해 주세요.', onTimeout?: () => void): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     return await Promise.race([request, new Promise<never>((_, reject) => {
-      timer = setTimeout(() => reject(new CloudRequestError(message)), 15_000);
+      timer = setTimeout(() => { onTimeout?.(); reject(new CloudRequestError(message)); }, 15_000);
     })]);
   } catch (error) { fail(error); }
   finally { clearTimeout(timer); }
@@ -80,7 +80,9 @@ export async function createAlias(client: SupabaseClient, alias: string): Promis
 
 export async function submitObservation(client: SupabaseClient, payload: SubmissionPayload): Promise<void> {
   const safe = submissionPayloadSchema.parse(payload);
-  const { error } = await boundedRequest(client.from('community_submissions').insert(safe), '제출 결과를 확인하지 못했어요. 중복 제출을 피하려면 내 제출 목록을 먼저 확인해 주세요.');
+  // Cancel a stalled insert so it is less likely to land after the member has been told to check the list.
+  const controller = new AbortController();
+  const { error } = await boundedRequest(client.from('community_submissions').insert(safe).abortSignal(controller.signal), '제출 결과를 확인하지 못했어요. 중복 제출을 피하려면 내 제출 목록을 먼저 확인해 주세요.', () => controller.abort());
   if (error) fail(error);
 }
 

@@ -7,7 +7,7 @@ test('review examples remain isolated from saved observations',async({page})=>{
  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
  await openRecordDetails(page);await page.getByLabel('이름 선택').fill('검수되지 않은 기록');
  await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();
- await page.getByRole('button',{name:'방금 기록 보기'}).click();
+ await page.getByRole('button',{name:'내 기록 보기'}).click();
  await page.getByRole('button',{name:'설정',exact:true}).click();
  await expect(page.getByRole('heading',{name:'내 기록과 개인정보'})).toBeVisible();
  await page.getByText('전문가 검수 과정 미리보기 · 목업',{exact:true}).click();

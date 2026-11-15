@@ -20,8 +20,8 @@ test('simple capture saves before login, preserves tomorrow choice, never sends 
  await page.getByRole('button',{name:'다음날 확인하기',exact:true}).click();
  await expect(page.getByLabel('식별 로그인 이메일')).toBeVisible();
  expect(await stored(page)).toMatchObject([{identificationTiming:'tomorrow'}]);
- await expect(page.getByLabel('내가 예상한 식물 이름')).toHaveCount(0);
- await expect(page.getByRole('radio',{name:'다음날 확인하기',exact:false})).toBeChecked();
+ await expect(page.getByLabel('어떤 식물일까요?')).toHaveCount(0);
+ await expect(page.getByRole('heading',{name:'다음날 확인하기'})).toBeVisible();
  expect(posts).toBe(0);
  expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
  await page.screenshot({path:`${evidence}/simplified-login.png`,fullPage:true});
@@ -31,7 +31,7 @@ test('guest can save optional fields without login; 320px remains usable',async(
  await capture(page);await page.getByText('기록 더하기',{exact:false}).click();
  await page.getByLabel('한 줄 메모').fill('잎이 자랐어요');
  await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();
- await expect(page.getByRole('button',{name:'방금 기록 보기'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'내 기록 보기'})).toBeVisible();
  expect(await stored(page)).toMatchObject([{notes:'잎이 자랐어요'}]);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });

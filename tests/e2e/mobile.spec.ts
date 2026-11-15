@@ -13,7 +13,7 @@ for (const width of [390, 412]) {
   const noteAudit=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa']).analyze();expect(noteAudit.violations).toEqual([]);
   await page.getByRole('button',{name:'내 기록에 저장'}).click();
   await expect(page.getByRole('heading',{name:'발견 하나가 쌓였어요'})).toBeVisible();
-  await page.getByRole('button',{name:'방금 기록 보기'}).click();
+  await page.getByRole('button',{name:'내 기록 보기'}).click();
   await expect(page.getByText('햇빛 아래 잎을 관찰했어요')).toBeVisible();
   await page.getByRole('button',{name:'목록으로'}).click();
   await page.reload(); await page.getByRole('button',{name:'내 기록',exact:true}).click();

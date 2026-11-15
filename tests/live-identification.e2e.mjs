@@ -18,13 +18,13 @@ try{
  expect(actual.decision.state).toBe('candidates');expect(actual.decision.candidates[0].scientificName).toBe('Danaus plexippus');
  await page.getByRole('button',{name:/Danaus plexippus 이름을 미확정/}).click();await expect(page.getByLabel('이름 선택')).toHaveValue('Danaus plexippus');
  const beforeSave=await page.evaluate(async()=>{const db=await new Promise(resolve=>{const r=indexedDB.open('nature-lens-v1');r.onsuccess=()=>resolve(r.result);});const count=await new Promise(resolve=>{const r=db.transaction('observations').objectStore('observations').count();r.onsuccess=()=>resolve(r.result);});db.close();return count;});expect(beforeSave).toBe(0);
- await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();await expect(page.locator('.m-species')).toHaveText('Danaus plexippus');
+ await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'내 기록 보기'}).click();await expect(page.locator('.m-species')).toHaveText('Danaus plexippus');
  await page.reload();await page.getByRole('button',{name:'내 기록',exact:true}).click();await page.getByRole('button',{name:'Danaus plexippus 기록 열기'}).click();
  await expect(page.locator('.nl-decision')).toContainText('Danaus plexippus');
  await page.getByRole('button',{name:'같은 대상 다시 관찰하기'}).click();
  await page.getByLabel('앨범 사진 선택').setInputFiles('.research/claude-workspace/reverse-engineering/naturelens-seek/.models/fixtures/monarch.jpg');
  await page.getByLabel('지난번과 같은 개체를 관찰했습니다').check();await page.getByLabel('이름 선택').fill('두 번째 관찰');
- await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();
+ await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'내 기록 보기'}).click();
  await expect(page.locator('.m-specimen')).toContainText('Danaus plexippus');await expect(page.locator('.nl-decision')).toHaveCount(0);
  await page.getByLabel('식별 처리 방식').selectOption('local');await page.getByLabel('찾을 생물').selectOption('insect');
  await page.getByLabel('인물과 개인정보가 없는 사진입니다').check();await page.getByLabel('이 Mac에서 사진을 분석하는 데 동의합니다').check();
@@ -47,7 +47,7 @@ try{
  const plantResponse=page.waitForResponse(r=>r.url()==='http://127.0.0.1:8788/identify'&&r.request().method()==='POST');
  await page.getByRole('button',{name:'이름 후보 찾기',exact:true}).click();const plant=await (await plantResponse).json();evidence.push(plant);
  await expect(page.getByText('아직 정확한 종은 알 수 없어요')).toBeVisible();expect(plant.decision.state).toBe('ancestor');
- await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'방금 기록 보기'}).click();await expect(page.locator('.m-species')).toContainText('나중에');
+ await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'내 기록 보기'}).click();await expect(page.locator('.m-species')).toContainText('나중에');
  await expect(page.getByText('아직 정확한 종은 알 수 없어요')).toBeVisible();
  expect(posts.every(url=>url==='http://127.0.0.1:8788/identify')).toBe(true);expect(errors).toEqual([]);
  await writeFile('docs/live-identification-20261016/browser-evidence.json',JSON.stringify({evidence,posts,errors,records},null,2));
