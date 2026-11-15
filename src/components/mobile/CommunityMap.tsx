@@ -20,6 +20,8 @@ export default function CommunityMap({onJoin}:{onJoin:()=>void}){
   const m=new lib.Map({container:container.current,center:[127.334,37.013],zoom:13,maxZoom:16,style:{version:8,sources:{osm:{type:'raster',tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],tileSize:256,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>'}},layers:[{id:'base',type:'raster',source:'osm'}]}});map.current=m;
   m.addControl(new lib.NavigationControl({showCompass:false}),'top-right');
   m.on('error',()=>setMapError(true));
+  // A later successful base tile means the map recovered from a transient tile failure.
+  m.on('sourcedata',e=>{if(e.sourceId==='osm'&&e.tile)setMapError(false);});
   m.on('style.load',()=>{m.addSource('observations',{type:'geojson',data:mapFeatures(pointsRef.current),cluster:true,clusterMaxZoom:14,clusterRadius:45});
    m.addLayer({id:'clusters',type:'circle',source:'observations',filter:['has','point_count'],paint:{'circle-color':'#416d4d','circle-radius':['step',['get','point_count'],19,20,24,100,30],'circle-stroke-color':'#fff','circle-stroke-width':2}});
    m.addLayer({id:'single',type:'circle',source:'observations',filter:['!', ['has','point_count']],paint:{'circle-color':'#416d4d','circle-radius':9,'circle-stroke-color':'#fff','circle-stroke-width':2}});

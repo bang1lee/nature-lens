@@ -32,3 +32,14 @@ test('a cluster containing distinct public areas zooms in',async({page})=>{
  await page.route('https://mock.supabase.co/**',async route=>route.fulfill({json:route.request().url().includes('community_map_points')?rows:[],headers:{'access-control-allow-origin':'*'}}));
  await page.setViewportSize({width:390,height:844});await page.goto('/mobile/');await page.getByRole('button',{name:'지도 열기'}).click();const map=page.locator('.community-map-canvas');await expect(map).toHaveAttribute('data-map-rendered-points',/^[1-9]/,{timeout:20000});const before=Number(await map.getAttribute('data-map-zoom'));await map.locator('canvas').click({position:{x:175,y:165}});await expect.poll(async()=>Number(await map.getAttribute('data-map-zoom')),{timeout:10000}).toBeGreaterThan(before);
 });
+
+
+test('a transient tile failure does not leave the map error message behind',async({page})=>{
+ let failTiles=true;
+ await page.route('https://tile.openstreetmap.org/**',route=>failTiles?route.abort():route.fallback());
+ await page.route('https://mock.supabase.co/**',route=>route.fulfill({json:[],headers:{'access-control-allow-origin':'*'}}));
+ await page.setViewportSize({width:390,height:844});await page.goto('/mobile/');await page.getByRole('button',{name:'지도 열기'}).click();
+ await expect(page.getByText('지도를 표시하지 못했어요.',{exact:false})).toBeVisible({timeout:20000});
+ failTiles=false;await page.getByRole('button',{name:'Zoom in'}).click();
+ await expect(page.getByText('지도를 표시하지 못했어요.',{exact:false})).toHaveCount(0,{timeout:20000});
+});

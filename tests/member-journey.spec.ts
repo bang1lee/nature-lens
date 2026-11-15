@@ -76,6 +76,8 @@ test('member prepares a captured and identified record, submits it, then reobser
 
   const cloud=page.locator('.m-cloud');
   await cloud.getByLabel('제출할 내 기록').selectOption({label:'오늘 만난 자연'});
+  await cloud.getByLabel('이 기록의 서버 전송·검수·승인 후 공개에 동의합니다').check();
+  await cloud.getByLabel('사진에 사람·개인정보가 없음을 확인했습니다').check();
   await cloud.getByRole('button',{name:'선택한 기록 수정',exact:true}).click();
   const editor=page.getByRole('dialog',{name:'관찰 기록 편집'});
   await expect(editor).toBeVisible();
@@ -94,6 +96,8 @@ test('member prepares a captured and identified record, submits it, then reobser
   expect(afterEdit).toHaveLength(1);
   expect(afterEdit[0]).toMatchObject({id:original.id,consent:true,noPeople:true,aiAssisted:true,aiIdentification:original.aiIdentification});
   await expect(cloud.getByLabel('제출할 내 기록')).toHaveValue(/.+/);
+  await expect(cloud.getByLabel('이 기록의 서버 전송·검수·승인 후 공개에 동의합니다')).not.toBeChecked();
+  await expect(cloud.getByLabel('사진에 사람·개인정보가 없음을 확인했습니다')).not.toBeChecked();
   await cloud.getByLabel('공개 구역').selectOption('test-area');
   await cloud.getByLabel('선택한 구역의 대표 지점에 이 기록을 공개하는 데 동의합니다').check();
   await cloud.getByLabel('이 기록의 서버 전송·검수·승인 후 공개에 동의합니다').check();
