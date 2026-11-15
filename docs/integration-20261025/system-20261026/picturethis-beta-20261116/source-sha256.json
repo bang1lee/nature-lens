@@ -1,0 +1,18 @@
+{
+  "appCommit": "48d3abcbab114ffac4d40ee07d298d86754fcbf1",
+  "pagesDeployment": "https://da054fe3.nature-lens-mvp.pages.dev",
+  "serverCommit": "e49fc740f02ea046b33095cc54b2da6259bbe62b",
+  "files": {
+    "src/components/mobile/QuickCapture.tsx": "32bc3bc70b3db50def07fb372ac96260c69e736710abfb549cee10d6b9ef2db6",
+    "src/components/mobile/IdentificationPanel.tsx": "19054f9ec834a5c9f9796c0aed97d9e05fdedf1917cf1167f5baab4c83d8a218",
+    "src/components/mobile/BetaPhotos.tsx": "57b724ea0def2e96b10546b456040048969135f5144803c4707382e6680f2312",
+    "src/components/mobile/MobileApp.tsx": "e3594cbc0f9fb4b24a10f35ca15c84b2acfcabe5430ec9092ab00b4c9ab6d7aa",
+    "src/components/mobile/PrivateLocationNote.tsx": "4aab8df752ae5e27182278af2dddb08661d21432136b9eb600f4c0f28b329017",
+    "src/lib/cloud/guest-session.ts": "833bec6cee399b4b549bf9a5188601fdaeb04aaffd2d4a45abf4f0c931a70bbe",
+    "src/lib/cloud/beta-public.ts": "44ba371f1e49f4006120568bd3ccde4425c086d352c57f193a9822fad0ea9b98",
+    "server/providers.mjs": "14ac20ca493381b0fe662e1b2018941c2abf87a9626293e284b9df43c931c54b",
+    "server/gateway.mjs": "5e74b98001bb3846fb33488a1ba42ddd510bb0b611ed8ec358c8c521cf02102b",
+    "supabase/migrations/20261116000000_member_community_rls.sql": "164d045fd7e82d17205c7292980df80a8b40c3d2f19448d0c7205194e03ea5a5",
+    "supabase/migrations/20261116010000_beta_finalize_staging.sql": "d7f39545bb2786b09add7b0ebb410efa539964e9991f76931f0716ddae20ff5a"
+  }
+}

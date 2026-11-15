@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-15T16:05:10.573Z",
+  "signupStatus": 200,
+  "userAnonymous": true,
+  "jwtAnonymous": true,
+  "memberProfileInsertStatus": 403,
+  "errorCode": "42501"
+}

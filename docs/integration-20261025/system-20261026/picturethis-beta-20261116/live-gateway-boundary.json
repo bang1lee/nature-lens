@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-15T16:08:33.804Z",
+  "kind": "real-deployed-auth-boundary",
+  "checks": [
+    {
+      "path": "/identify",
+      "status": 400
+    },
+    {
+      "path": "/discovery/list",
+      "status": 401
+    }
+  ]
+}
