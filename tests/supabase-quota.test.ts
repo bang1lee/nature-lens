@@ -13,7 +13,7 @@ it('sends only quota IDs to Supabase and fails closed on bad RPC replies',async(
 });
 it('gateway awaits durable quota before sending any provider request',async()=>{
  let release!:(value:string)=>void;const wait=new Promise<string>(resolve=>{release=resolve;});
- const provider=vi.fn();const gateway=createGateway({enabled:true,origins:['https://app.example'],keys:{plant:'test'},policyUrl:'https://app.example/policy'}, {authenticate:async()=> 'user',ledger:{reserve:()=>wait},sanitize:async()=>Buffer.from('photo'),provider});
+ const provider=vi.fn();const gateway=createGateway({enabled:true,origins:['https://app.example'],keys:{plant:'test'},policyUrl:'https://app.example/policy'}, {authenticate:async()=>({id:'user',isAnonymous:false}),ledger:{reserve:()=>wait},sanitize:async()=>Buffer.from('photo'),provider});
  const request=new Request('https://api.example/identify',{method:'POST',headers:{Origin:'https://app.example','Content-Type':'application/json',Authorization:'Bearer test'},body:JSON.stringify({requestId:crypto.randomUUID(),observationId:'record',photo:'data:image/jpeg;base64,YQ==',taxonGroup:'plant',transmissionConsent:true,noPeople:true})});
  const result=gateway(request);expect(provider).not.toHaveBeenCalled();release('quota');expect((await result).status).toBe(429);expect(provider).not.toHaveBeenCalled();
 });

@@ -21,8 +21,10 @@ export function createGateway(config,{authenticate,ledger,discovery=undefined,sa
   if(!available)return send(503,{error:'not-configured'});
   const token=request.headers.get('authorization');
   if(!token?.startsWith('Bearer '))return send(401,{error:'login-required'});
-  let user;try{user=await authenticate(token.slice(7));}catch{return send(401,{error:'login-required'});}
-  if(!user)return send(401,{error:'login-required'});
+  let identity;try{identity=await authenticate(token.slice(7));}catch{return send(401,{error:'login-required'});}
+  if(!identity||typeof identity.id!=='string'||!identity.id||typeof identity.isAnonymous!=='boolean')return send(401,{error:'login-required'});
+  if(identity.isAnonymous&&path.startsWith('/discovery/'))return send(401,{error:'login-required'});
+  const user=identity.id;
   if(!request.headers.get('content-type')?.startsWith('application/json'))return send(415,{error:'invalid-format'});
   let raw;
   try {
