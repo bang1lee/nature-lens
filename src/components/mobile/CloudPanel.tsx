@@ -42,8 +42,8 @@ export default function CloudPanel({records,onEditRecord}:{records:Observation[]
   if(id&&client.current)void loadCommunity(client.current,id,ticket);
  };
  void getSupabase().then(async c=>{if(!active)return;client.current=c;void loadFeed(c);void loadAreas(c);
- const {data}=c.auth.onAuthStateChange((_event,s)=>{if(active)changed(s?.user.id??null);});unsub=()=>data.subscription.unsubscribe();
- const {data:s,error:e}=await c.auth.getSession();if(e)throw e;if(active&&currentId===undefined)changed(s.session?.user.id??null);
+ const {data}=c.auth.onAuthStateChange((_event,s)=>{if(active)changed(s&&!s.user.is_anonymous?s.user.id:null);});unsub=()=>data.subscription.unsubscribe();
+ const {data:s,error:e}=await c.auth.getSession();if(e)throw e;if(active&&currentId===undefined)changed(s.session&&!s.session.user.is_anonymous?s.session.user.id:null);
  }).catch(e=>{if(active&&currentId===undefined){clearTimeout(timer);setAuthError(cloudErrorMessage(e));}});
  return()=>{active=false;alive.current=false;clearTimeout(timer);++epoch.current;++feedTicket.current;++areaTicket.current;unsub?.();client.current=null;};},[attempt]);
  async function action(work:(c:SupabaseClient,t:number)=>Promise<void>){if(lock.current||!client.current)return;lock.current=true;setBusy(true);setError('');setMessage('');const t=epoch.current;

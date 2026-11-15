@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import IdentificationPanel, {IdentificationChoice} from './IdentificationPanel';
+import IdentificationPanel, {IdentificationChoice,type IdentificationIntent} from './IdentificationPanel';
 import WebCamera from './WebCamera';
 import {reobservationContext} from '@/lib/reobservation';
 import { Camera, Check, ImagePlus, Leaf, LoaderCircle, X } from 'lucide-react';
@@ -45,6 +45,8 @@ export default function QuickCapture({ onClose, onSaved, reobserveFrom }: Props)
   const [error, setError] = useState('');
   const [locationError,setLocationError]=useState('');
   const [savedRecord,setSavedRecord]=useState<Observation|null>(null);
+  const [identifyConsent,setIdentifyConsent]=useState(false);
+  const [startIntent,setStartIntent]=useState<IdentificationIntent|undefined>();
   useEffect(()=>{if(savedRecord)continued.current?.focus();},[savedRecord?.id]);
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export default function QuickCapture({ onClose, onSaved, reobserveFrom }: Props)
   async function select(file?: File) {
     if (!file || busy || identifying) return;
     setBusy(true); setError('');
-    try { setPhoto(await preparePhoto(file)); if(aiAssisted)setName('');setAnalysis(undefined);setIdentificationTiming('now');setScientificName('');setAiAssisted(false);setPhotoRevision(v=>v+1); setSameSubject(false); setMatches(false); setKeepPrecise(false); }
+    try { setPhoto(await preparePhoto(file)); if(aiAssisted)setName('');setAnalysis(undefined);setIdentificationTiming('now');setScientificName('');setAiAssisted(false);setPhotoRevision(v=>v+1); setSameSubject(false); setMatches(false); setKeepPrecise(false); setIdentifyConsent(false); }
     catch (e) { setError(e instanceof Error ? e.message : '사진을 읽지 못했어요. 다른 사진을 선택해 주세요.'); }
     finally {
       setBusy(false);
@@ -74,12 +76,17 @@ export default function QuickCapture({ onClose, onSaved, reobserveFrom }: Props)
 
   async function save(continueFlow=false) {
     if (!photo || busy || locating || identifying) return;
+    if(continueFlow && identificationTiming==='now' && (!identifyConsent||taxonGroup==='other'))return;
     if(reobserveFrom && !sameSubject){setError('같은 개체를 다시 관찰한 것인지 확인해 주세요.');return;}
     setBusy(true); setError('');
     try {
       const record = { ...draftBase, identificationTiming, aiIdentification:analysis, scientificName, aiAssisted, ...(reobserveFrom ? reobservationContext(reobserveFrom) : {}), date:observedDate, photo, title: name.trim() || '오늘 만난 자연', species: name.trim(), notes: notes.trim(), taxonGroup, ...(region ? {region} : {}), ...(position && matches ? {publicGrid:coarsePoint(position.latitude, position.longitude)} : {}) };
       const stored = await saveObservation(record, null, position && matches && keepPrecise ? position : null);
-      if(continueFlow){setSavedRecord(stored);window.scrollTo(0,0);}else onSaved(stored);
+      if(continueFlow){
+        let available=identificationTiming==='now';
+        setStartIntent(available?{isPending:()=>available,cancel:()=>{available=false;},consume:()=>{if(!available)return false;available=false;return true;}}:undefined);
+        setSavedRecord(stored);window.scrollTo(0,0);
+      }else onSaved(stored);
     } catch (e) { setError(e instanceof Error ? e.message : '저장하지 못했어요. 사진을 유지한 채 다시 시도할 수 있어요.'); }
     finally { setBusy(false); }
   }
@@ -92,7 +99,7 @@ export default function QuickCapture({ onClose, onSaved, reobserveFrom }: Props)
     </header>
     <input ref={camera} hidden type="file" aria-label="카메라로 촬영" capture="environment" accept="image/jpeg,image/png,image/webp" onChange={e => void select(e.target.files?.[0])}/>
     <input ref={album} hidden type="file" aria-label="앨범 사진 선택" accept="image/jpeg,image/png,image/webp" onChange={e => void select(e.target.files?.[0])}/>
-    {savedRecord?<div ref={continued} tabIndex={-1} aria-label="사진 저장 후 이름 알아보기" className="m-quick-fields"><div className="m-photo-review"><img src={savedRecord.photo} alt="이름을 확인할 관찰 사진"/></div><IdentificationPanel record={savedRecord} onBusyChange={setIdentifying} onApplied={setSavedRecord}/><button className="m-secondary" disabled={identifying} onClick={()=>onSaved(savedRecord)}>공개 저장으로 계속</button></div>:!photo ? <>
+    {savedRecord?<div ref={continued} tabIndex={-1} aria-label="사진 저장 후 이름 알아보기" className="m-quick-fields"><div className="m-photo-review"><img src={savedRecord.photo} alt="이름을 확인할 관찰 사진"/></div><IdentificationPanel record={savedRecord} startIntent={startIntent} onBusyChange={setIdentifying} onApplied={setSavedRecord}/><button className="m-secondary" disabled={identifying} onClick={()=>onSaved(savedRecord)}>공개 저장으로 계속</button></div>:!photo ? <>
       <WebCamera onCapture={value=>{setPhoto(value);setSameSubject(false);setMatches(false);setKeepPrecise(false);}}/>
       {error && <p className="m-error" role="alert">{error}</p>}
       <div className="m-camera-fallback">
@@ -103,10 +110,13 @@ export default function QuickCapture({ onClose, onSaved, reobserveFrom }: Props)
     </> : <form onSubmit={e => { e.preventDefault(); void save(); }} className="m-quick-form">
       <div className="m-photo-review"><img src={photo} alt="방금 선택한 자연 사진"/><button type="button" onClick={() => album.current?.click()} disabled={busy||identifying}><ImagePlus size={16}/> 사진 바꾸기</button></div>
       <div className="m-quick-fields"><span className="m-muted">{new Date().toLocaleDateString('ko-KR')} · 위치는 선택 사항</span>
-        <h1>어떻게 알아볼까요?</h1><IdentificationChoice value={identificationTiming} onChange={setIdentificationTiming} disabled={busy||identifying}/>{reobserveFrom && <div className="m-private-note"><strong>다시 만난 {reobserveFrom.title}</strong><p>같은 종류가 아니라, 지난번에 만난 바로 그 개체의 변화를 기록해요.</p><label className="m-location-check"><input type="checkbox" checked={sameSubject} onChange={e=>setSameSubject(e.target.checked)}/>지난번과 같은 개체를 관찰했습니다</label></div>}<button type="button" className="m-primary" disabled={busy||locating||identifying} onClick={()=>void save(true)}>{busy?'사진 준비 중…':identificationTiming==='now'?'바로 확인하기':'다음날 확인하기'}</button><p className="m-muted">사진은 기기에 임시 보관해요. 로그인 후 이어갈 수 있어요.</p><details className="m-extra-fields"><summary>기록 더하기 <span>선택</span></summary><label>관찰 날짜<input type="date" required value={observedDate} onChange={e=>setObservedDate(e.target.value)} disabled={busy||identifying}/></label><p>이름을 몰라도 괜찮아요. 사진만 저장해도 돼요.</p>
+        <h1>어떻게 알아볼까요?</h1><IdentificationChoice value={identificationTiming} onChange={setIdentificationTiming} disabled={busy||identifying}/>{reobserveFrom && <div className="m-private-note"><strong>다시 만난 {reobserveFrom.title}</strong><p>같은 종류가 아니라, 지난번에 만난 바로 그 개체의 변화를 기록해요.</p><label className="m-location-check"><input type="checkbox" checked={sameSubject} onChange={e=>setSameSubject(e.target.checked)}/>지난번과 같은 개체를 관찰했습니다</label></div>}
+        {identificationTiming==='now'&&taxonGroup!=='other'&&<><p>사진을 {taxonGroup==='plant'?'Pl@ntNet':'Kindwise insect.id'}으로 보내 분석해요. 위치와 메모는 보내지 않아요. <a href={`${process.env.NEXT_PUBLIC_BASE_PATH||''}/identification-policy.html`} target="_blank" rel="noreferrer">사진 처리 안내</a></p><label className="m-identify-check"><input type="checkbox" checked={identifyConsent} disabled={busy||identifying} onChange={e=>setIdentifyConsent(e.target.checked)}/>인물과 개인정보가 없는 사진이며, 사진을 식별 서비스에 보내 분석하는 데 동의합니다</label></>}
+        {identificationTiming==='now'&&taxonGroup==='other'&&<p>기타 생명은 아직 이름 찾기를 지원하지 않아요. 사진을 기록에 저장할 수 있어요.</p>}
+        <button type="button" className="m-primary" disabled={busy||locating||identifying||(identificationTiming==='now'&&(!identifyConsent||taxonGroup==='other'))} onClick={()=>void save(true)}>{busy?'사진 준비 중…':identificationTiming==='now'?'가입 없이 바로 확인하기':'다음날 확인하기'}</button><p className="m-muted">사진은 이 기기에 저장해요. 공개 저장은 결과를 확인한 뒤 선택해요.</p><details className="m-extra-fields"><summary>기록 더하기 <span>선택</span></summary><label>관찰 날짜<input type="date" required value={observedDate} onChange={e=>setObservedDate(e.target.value)} disabled={busy||identifying}/></label><p>이름을 몰라도 괜찮아요. 사진만 저장해도 돼요.</p>
         <label>이름 <span>선택</span><input maxLength={100} value={name} onChange={e => {setName(e.target.value);setScientificName('');setAiAssisted(false);}} placeholder="어떤 자연을 만났나요?" disabled={busy||identifying}/></label>
         <label>한 줄 메모 <span>선택</span><textarea rows={3} maxLength={4000} value={notes} onChange={e => setNotes(e.target.value)} placeholder="색, 모양, 그때의 느낌을 자유롭게" disabled={busy||identifying}/></label>
-        <label>만난 생명<select aria-label="만난 생명" value={taxonGroup} disabled={identifying} onChange={e => {setTaxonGroup(e.target.value as typeof taxonGroup);setAnalysis(undefined);setIdentificationTiming('now');setScientificName('');if(aiAssisted)setName('');setAiAssisted(false);}}><option value="plant">식물</option><option value="insect">곤충</option><option value="other">기타 생명</option></select></label>
+        <label>만난 생명<select aria-label="만난 생명" value={taxonGroup} disabled={identifying} onChange={e => {setTaxonGroup(e.target.value as typeof taxonGroup);setAnalysis(undefined);setIdentificationTiming('now');setScientificName('');if(aiAssisted)setName('');setAiAssisted(false);setIdentifyConsent(false);}}><option value="plant">식물</option><option value="insect">곤충</option><option value="other">기타 생명</option></select></label>
         <label>관찰 지역 <span>선택</span><select aria-label="관찰 지역" value={region} onChange={e => setRegion(e.target.value as typeof region)}><option value="">지역 비공개</option>{REGIONS.map(r=><option key={r}>{r}</option>)}</select></label>
         <div className="m-location"><h2>어디에서 만났나요?</h2><p>위치는 선택이에요.</p><button type="button" className="m-secondary" onClick={locate} disabled={busy || locating || identifying}>{locating ? '위치를 찾는 중…' : '현재 GPS 위치 가져오기'}</button>
         {locationError&&<div><p className="m-error" role="alert">{locationError}</p><button type="button" className="m-text" onClick={()=>setLocationError('')}>위치 없이 계속</button></div>}{position && <><p>측정 정확도 약 {Math.round(position.accuracy)}m. 지금 있는 위치이며, 사진을 찍었던 장소와 다를 수 있어요.</p><label className="m-location-check"><input type="checkbox" checked={matches} onChange={e=>setMatches(e.target.checked)}/>이곳이 관찰한 장소입니다</label><label className="m-location-check"><input type="checkbox" checked={keepPrecise} onChange={e=>setKeepPrecise(e.target.checked)}/>정밀 좌표를 이 브라우저에만 보관</label><button type="button" className="m-text" onClick={()=>{setPosition(null);setMatches(false);setKeepPrecise(false);}}>GPS 사용 안 하기</button></>}

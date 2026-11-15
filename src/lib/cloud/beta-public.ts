@@ -31,8 +31,8 @@ async function network<T>(work:PromiseLike<T>):Promise<T>{
  finally{clearTimeout(timer);}
 }
 async function own(client:SupabaseClient,userId:string){
- if(!z.uuid().safeParse(userId).success)throw new Error('로그인 상태를 다시 확인해 주세요.');
- const {data,error}=await network(client.auth.getUser());if(error||data.user?.id!==userId)throw new Error('로그인 상태가 바뀌었어요. 다시 로그인한 뒤 확인해 주세요.');
+ if(!z.uuid().safeParse(userId).success)throw new Error('연결 상태를 다시 확인해 주세요.');
+ const {data,error}=await network(client.auth.getUser());if(error||data.user?.id!==userId)throw new Error('연결 상태가 바뀌었어요. 다시 확인해 주세요.');
 }
 async function photoBlob(observation:Observation):Promise<Blob>{
  const original=await (await fetch(observation.photo)).blob();
@@ -49,24 +49,28 @@ async function existing(client:SupabaseClient,userId:string,localId:string):Prom
 function compatible(row:Row,metadata:BetaMetadata,hash:string){
  if(row.photo_sha256!==hash||stable(row.record)!==stable(metadata))throw new Error('이 기록의 다른 버전이 이미 공개 저장되었어요. 수정한 내용은 새 기록으로 공개해 주세요.');
 }
-export async function publishBetaObservation(client:SupabaseClient,userId:string,record:Observation,confirm:BetaConfirmation):Promise<BetaPublishResult>{
+export async function publishBetaObservation(client:SupabaseClient,userId:string,record:Observation,confirm:BetaConfirmation,isCurrent:()=>boolean=()=>true):Promise<BetaPublishResult>{
+ const assertCurrent=()=>{if(!isCurrent())throw new Error('연결 상태가 바뀌었어요. 다시 확인해 주세요.');};
  requireBetaConsent(confirm);const metadata=betaMetadata(record);
  if(metadata.demo)throw new Error('예제 기록은 공개 저장할 수 없어요.');
- await own(client,userId);
+ assertCurrent();await own(client,userId);assertCurrent();
  const image=await photoBlob(record),hash=await sha(image);
+ assertCurrent();
  let row=await existing(client,userId,metadata.id);
  if(!row){
+  assertCurrent();
   const id=crypto.randomUUID(),photoPath=`${id}.jpg`;
   const {data,error}=await network(client.from('beta_public_observations').insert({id,owner_id:userId,local_id:metadata.id,photo_path:photoPath,photo_sha256:hash,record:metadata,public_consent:true,no_people:true}).select(RECORD_COLUMNS).single());
   if(error){row=await existing(client,userId,metadata.id);if(!row)throw new Error('공개 저장을 시작하지 못했어요. 연결 상태와 저장 용량을 확인해 주세요.');}
   else row=rowSchema.parse(data);
  }
+ assertCurrent();
  compatible(row,metadata,hash);
  if(row.state==='published')return {id:row.id,localId:row.local_id,photoUrl:link(client,row.photo_path),alreadyPublished:true};
- await own(client,userId);
+ await own(client,userId);assertCurrent();
  const bucket=client.storage.from(BUCKET),upload=await network(bucket.upload(row.photo_path,image,{contentType:'image/jpeg',upsert:false}));
  if(upload.error){const recovered=await network(bucket.download(row.photo_path));if(recovered.error||!recovered.data||await sha(recovered.data)!==hash)throw new Error('사진 전송을 완료하지 못했어요. 연결을 확인하고 다시 시도해 주세요.');}
- await own(client,userId);
+ assertCurrent();await own(client,userId);assertCurrent();
  const {data,error}=await network(client.from('beta_public_observations').update({state:'published'}).eq('id',row.id).eq('owner_id',userId).select(RECORD_COLUMNS).maybeSingle());
  if(error||!data){const latest=await existing(client,userId,metadata.id);if(latest?.state!=='published')throw new Error('공개 저장 결과를 확인하지 못했어요. 내 서버 기록을 확인한 뒤 다시 시도해 주세요.');compatible(latest,metadata,hash);return {id:latest.id,localId:latest.local_id,photoUrl:link(client,latest.photo_path),alreadyPublished:true};}
  const published=rowSchema.parse(data);return {id:published.id,localId:published.local_id,photoUrl:link(client,published.photo_path),alreadyPublished:false};
