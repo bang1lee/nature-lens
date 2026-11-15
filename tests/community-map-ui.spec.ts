@@ -10,11 +10,11 @@ test('synthetic map records, same-area detail and withdrawal refresh',async({pag
  await page.setViewportSize({width:390,height:844});await page.goto('/mobile/');await page.getByRole('button',{name:'지도 열기'}).click();
  await expect(page.getByRole('heading',{name:'함께 발견한 자연'})).toBeVisible();await expect(page.getByRole('button',{name:'시험 구역 · 2개'})).toBeVisible();
  expect(order).toBe('approved_at.desc,id.asc');await expect(page.locator('.maplibregl-ctrl-attrib a[href="https://www.openstreetmap.org/copyright"]')).toBeAttached();await expect(page.locator('.community-map-canvas')).toHaveAttribute('data-map-rendered-points',/^[1-9]/,{timeout:20000});await page.locator('.community-map-canvas canvas').click({position:{x:175,y:165}});await expect(page.getByRole('heading',{name:'시험 구역의 기록 2개'})).toBeVisible();await expect(page.getByText('모두 같은 대표 지점에 표시됩니다.')).toBeVisible();await page.getByRole('button',{name:'공개 기록 1 보기'}).click();await expect(page.getByRole('heading',{name:'합성 민들레'})).toBeVisible();
- await page.evaluate(()=>{(document.activeElement as HTMLElement)?.blur();window.scrollTo(0,0);});await page.screenshot({path:'/tmp/nature-lens-community-map-records.png',fullPage:true});
+ await page.evaluate(()=>{(document.activeElement as HTMLElement)?.blur();window.scrollTo(0,0);});await page.screenshot({path:'test-results/nature-lens-community-map-records.png',fullPage:true});
  rows=[];await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(page.getByRole('heading',{name:'합성 민들레'})).toHaveCount(0);await expect(page.getByText('아직 지도에 공개된 기록이 없어요.')).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  const violations=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa']).analyze()).violations;expect(violations).toEqual([]);
- await page.locator('.community-map-canvas').screenshot({path:'/tmp/nature-lens-cheongnyangsan-map.png'});await page.evaluate(()=>{(document.activeElement as HTMLElement)?.blur();window.scrollTo(0,0);});await page.screenshot({path:'/tmp/nature-lens-community-map.png',fullPage:true});
+ await page.locator('.community-map-canvas').screenshot({path:'test-results/nature-lens-cheongnyangsan-map.png'});await page.evaluate(()=>{(document.activeElement as HTMLElement)?.blur();window.scrollTo(0,0);});await page.screenshot({path:'test-results/nature-lens-community-map.png',fullPage:true});
 });
 
 

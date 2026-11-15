@@ -25,7 +25,7 @@
       "cache": false
     },
     "boundary": {
-      "command": "node --test tests/boundaries-check.test.mjs && node scripts/check-boundaries.mjs",
+      "command": "npm run test:boundary",
       "cache": false
     }
   }
