@@ -1,0 +1,18 @@
+import {createRequire} from 'node:module';
+process.loadEnvFile('.env.local');
+const require=createRequire(process.cwd()+'/package.json');
+const {createClient}=require('@supabase/supabase-js');
+const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+if(!url||!key)throw Error('missing public configuration');
+const clients=[0,1].map(()=>createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}));
+const headers={apikey:key,Authorization:`Bearer ${key}`};
+const fetchStatus=async path=>{const response=await fetch(`${url}/rest/v1/${path}`,{headers,signal:AbortSignal.timeout(12000)});let data;try{data=await response.json()}catch{data=null}return {status:response.status,data};};
+const results=await Promise.all([fetchStatus('map_areas?select=id,label,latitude,longitude,radius_m,active&id=eq.anseong-cheongnyangsan-area'),fetchStatus('community_map_points?select=id&limit=1'),fetchStatus('community_submissions?select=id&limit=1')]);
+const [areas,points,privateTable]=results;
+console.log(JSON.stringify({area_status:areas.status,area_verified:areas.status===200&&Array.isArray(areas.data)&&areas.data.some(x=>x.id==='anseong-cheongnyangsan-area'&&x.active===true&&x.latitude===37.013&&x.longitude===127.334&&x.radius_m===2000),points_status:points.status,points_sample_count:Array.isArray(points.data)?points.data.length:null,private_table_status:privateTable.status,private_access_denied:[401,403].includes(privateTable.status)}));
+const channels=clients.map((c,i)=>c.channel(`nature-map-readonly-${Date.now()}-${i}`));
+const subscribed=await Promise.all(channels.map(ch=>new Promise(resolve=>{let done=false;const finish=s=>{if(!done){done=true;clearTimeout(timer);resolve(s)}};const timer=setTimeout(()=>finish('TIMEOUT'),15000);ch.on('postgres_changes',{event:'*',schema:'public',table:'community_map_points'},()=>{}).subscribe(status=>{if(status==='SUBSCRIBED'||status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED')finish(status)});})));console.log(JSON.stringify({independent_channels:subscribed}));
+await Promise.all(channels.map((ch,i)=>Promise.race([clients[i].removeChannel(ch),new Promise(resolve=>setTimeout(resolve,3000))])));
+clients.forEach(c=>c.realtime.disconnect());
+if(!(areas.status===200&&Array.isArray(areas.data)&&areas.data.some(x=>x.id==='anseong-cheongnyangsan-area'&&x.active===true&&x.latitude===37.013&&x.longitude===127.334&&x.radius_m===2000)&&points.status===200&&[401,403].includes(privateTable.status)&&subscribed.every(x=>x==='SUBSCRIBED')))process.exit(1);
+process.exit(0);

@@ -12,7 +12,8 @@ export const submissionPayloadSchema = z.object({
   taxon_group: z.enum(['plant', 'insect', 'other']), region: regionLabelSchema.nullable(),
   protection: z.enum(['unknown', 'protected', 'common']), photo: observationSchema.shape.photo,
   consent_upload: z.literal(true), no_people: z.literal(true), ai_assisted: z.boolean(),
-}).strict();
+  map_area_id: z.string().regex(/^[a-z0-9_-]{1,80}$/).nullable().optional(), consent_map: z.boolean().optional(),
+}).strict().refine(v => !v.consent_map || !!v.map_area_id, '지도 구역을 선택해 주세요.');
 export type SubmissionPayload = z.infer<typeof submissionPayloadSchema>;
 
 export type SubmitConfirmation = { uploadConsent: boolean; noPeople: boolean };
@@ -37,6 +38,7 @@ export function buildSubmissionPayload(o: Observation, confirm: SubmitConfirmati
 export const mySubmissionSchema = z.object({
   id: z.uuid(), title: z.string().max(120), species: z.string().max(100), observed_on: z.string().max(10),
   status: z.enum(['pending', 'approved', 'rejected']), created_at: z.string().max(40), moderation_note: z.string().max(500).nullable(),
+  map_area_id: z.string().max(80).nullable().optional(), consent_map: z.boolean().optional(),
 });
 export type MySubmission = z.infer<typeof mySubmissionSchema>;
 
@@ -48,4 +50,4 @@ export const feedItemSchema = z.object({
 export type FeedItem = z.infer<typeof feedItemSchema>;
 
 export const FEED_COLUMNS = 'id,title,species,scientific_name,observed_on,notes,taxon_group,region,photo,author_alias,approved_at';
-export const MY_COLUMNS = 'id,title,species,observed_on,status,created_at,moderation_note';
+export const MY_COLUMNS = 'id,title,species,observed_on,status,created_at,moderation_note,map_area_id,consent_map';

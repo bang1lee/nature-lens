@@ -1,0 +1,44 @@
+{
+  "results": [
+    {
+      "path": "/capabilities",
+      "status": 200,
+      "body": {
+        "groups": [
+          "plant"
+        ],
+        "policyUrl": "https://nature-lens-mvp.pages.dev/identification-policy.html"
+      }
+    },
+    {
+      "path": "/discovery-capabilities",
+      "status": 200,
+      "body": {
+        "discovery": true
+      }
+    },
+    {
+      "path": "/discovery/read",
+      "status": 401,
+      "body": {
+        "error": "login-required"
+      }
+    },
+    {
+      "path": "/discovery/submit",
+      "status": 401,
+      "body": {
+        "error": "login-required"
+      }
+    },
+    {
+      "path": "/discovery-capabilities",
+      "status": 403,
+      "body": {
+        "error": "origin-denied"
+      }
+    }
+  ],
+  "realPhotoSent": false,
+  "realAwardTested": false
+}

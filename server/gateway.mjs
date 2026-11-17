@@ -1,7 +1,8 @@
 import {identificationRequestSchema,identificationResultSchema} from '../src/lib/ai/contract.ts';
+import {discoveryRequest,photoHash} from './discovery.mjs';
 import {sanitizePhoto} from './photo.mjs';
 import {identifyWithProvider} from './providers.mjs';
-export function createGateway(config,{authenticate,ledger,sanitize=sanitizePhoto,provider=identifyWithProvider}) {
+export function createGateway(config,{authenticate,ledger,discovery=undefined,sanitize=sanitizePhoto,provider=identifyWithProvider}) {
  return async request=>{
   const origin=request.headers.get('origin');
   const headers={'Content-Type':'application/json','Cache-Control':'no-store',Vary:'Origin'};
@@ -14,13 +15,16 @@ export function createGateway(config,{authenticate,ledger,sanitize=sanitizePhoto
   const policyOK=typeof config.policyUrl==='string'&&config.policyUrl.startsWith('https://');
   const available=Boolean(config.enabled&&policyOK);
   const groups=available?[...(config.keys.plant?['plant']:[]),...(config.keys.insect?['insect']:[])]:[];
+  if(path==='/discovery-capabilities'&&request.method==='GET')return send(200,{discovery:Boolean(discovery&&available&&groups.includes('plant'))});
   if(path==='/capabilities'&&request.method==='GET')return send(200,{groups,policyUrl:policyOK?config.policyUrl:null});
-  if(path!=='/identify'||request.method!=='POST')return send(404,{error:'not-found'});
+  if((path!=='/identify'&&!path.startsWith('/discovery/'))||request.method!=='POST')return send(404,{error:'not-found'});
   if(!available)return send(503,{error:'not-configured'});
   const token=request.headers.get('authorization');
   if(!token?.startsWith('Bearer '))return send(401,{error:'login-required'});
-  let user;try{user=await authenticate(token.slice(7));}catch{return send(401,{error:'login-required'});}
-  if(!user)return send(401,{error:'login-required'});
+  let identity;try{identity=await authenticate(token.slice(7));}catch{return send(401,{error:'login-required'});}
+  if(!identity||typeof identity.id!=='string'||!identity.id||typeof identity.isAnonymous!=='boolean')return send(401,{error:'login-required'});
+  if(identity.isAnonymous&&path.startsWith('/discovery/'))return send(401,{error:'login-required'});
+  const user=identity.id;
   if(!request.headers.get('content-type')?.startsWith('application/json'))return send(415,{error:'invalid-format'});
   let raw;
   try {
@@ -30,14 +34,16 @@ export function createGateway(config,{authenticate,ledger,sanitize=sanitizePhoto
    while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>5_650_000){await reader.cancel();return send(413,{error:'image-too-large'});}chunks.push(value);}
    raw=JSON.parse(Buffer.concat(chunks).toString('utf8'));
   }catch{return send(400,{error:'invalid-request'});}
+  if(path.startsWith('/discovery/')){if(!groups.includes('plant'))return send(503,{error:'not-configured'});try{return await discoveryRequest({path,raw,user,store:discovery,ledger,sanitize,provider,keys:config.keys,send});}catch{return send(503,{error:'temporarily-unavailable'});}}
   const parsed=identificationRequestSchema.safeParse(raw);
   if(!parsed.success)return send(400,{error:'invalid-request'});
   const data=parsed.data;
   if(!groups.includes(data.taxonGroup))return send(503,{error:'not-configured'});
   // Reserve before expensive decode or external work. Failures still consume one slot.
-  let reserved;try{reserved=ledger.reserve(user,data.requestId);}catch{return send(503,{error:'temporarily-unavailable'});}
+  let reserved;try{reserved=await ledger.reserve(user,data.requestId);}catch{return send(503,{error:'temporarily-unavailable'});}
   if(reserved!=='ok')return send(reserved==='duplicate'?409:429,{error:reserved});
   let jpeg;try{jpeg=await sanitize(data.photo);}catch{return send(400,{error:'invalid-image'});}
+  if(discovery){try{await discovery.action(user,'seen',{hash:photoHash(jpeg),observationId:data.observationId});}catch{return send(503,{error:'temporarily-unavailable'});}}
   try{return send(200,identificationResultSchema.parse(await provider(data.taxonGroup,jpeg,config.keys)));}
   catch{return send(502,{error:'provider-unavailable'});}
  };

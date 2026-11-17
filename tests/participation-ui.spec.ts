@@ -1,0 +1,20 @@
+import {test,expect} from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+test('member daily participation is explicit, private and refresh-safe',async({page})=>{
+ await page.addInitScript(()=>{localStorage.setItem('sb-mock-auth-token',JSON.stringify({access_token:`${btoa('{"alg":"none"}')}.${btoa(JSON.stringify({sub:'test-user',exp:Math.floor(Date.now()/1000)+3600}))}.test`,refresh_token:'test',expires_at:Math.floor(Date.now()/1000)+3600,token_type:'bearer',user:{id:'test-user',aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{}}}));});
+ let claimed=false,calls=0;
+ const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date());
+ const summary=()=>({dailyPoints:claimed?2:0,predictionPoints:20,totalPoints:claimed?22:20,tier:'sprout',todayClaimed:claimed,observationDays:claimed?1:0,serverDate:today,awarded:claimed?2:0});
+ await page.route('https://mock.supabase.co/**',r=>r.fulfill({json:[]}));
+ await page.route('**/rest/v1/profiles*',r=>r.fulfill({json:{alias:'숲친구'}}));
+ await page.route('**/rest/v1/rpc/participation_summary',r=>r.fulfill({json:summary()}));
+ await page.route('**/rest/v1/rpc/claim_daily_observation',r=>{calls++;const body=r.request().postDataJSON();expect(Object.keys(body).sort()).toEqual(['p_observation_id','p_observed_on']);expect(body.p_observed_on).toBe(today);claimed=true;return r.fulfill({json:summary()});});
+ await page.goto('/mobile/');await expect(page.getByRole('heading',{name:'숲친구 · 새싹 · 20점'})).toBeVisible();
+ expect(calls).toBe(0);await page.getByRole('button',{name:'촬영',exact:true}).click();await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
+ await page.getByText('기록 더하기',{exact:false}).click();await page.getByLabel('관찰 날짜').fill(today);
+ await page.getByRole('button',{name:'내 기록에 저장',exact:true}).click();await page.getByRole('button',{name:'홈으로',exact:true}).click();
+ await page.getByRole('button',{name:'오늘 관찰 참여하기 · +2점'}).dblclick();await expect(page.getByRole('heading',{name:'숲친구 · 새싹 · 22점'})).toBeVisible();expect(calls).toBe(1);
+ await page.reload();await expect(page.getByRole('button',{name:'오늘 관찰 참여하기 · +2점'})).toHaveCount(0);await expect(page.getByRole('heading',{name:'숲친구 · 새싹 · 22점'})).toBeVisible();
+ expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
+});
+test('guests cannot claim points and do not call rewards RPC',async({page})=>{let calls=0;await page.route('https://mock.supabase.co/**',r=>r.fulfill({json:[]}));await page.route('**/rest/v1/rpc/*',r=>{calls++;return r.abort();});await page.goto('/mobile/');await page.getByRole('button',{name:'설정',exact:true}).click();await expect(page.getByLabel('로그인 이메일')).toBeVisible();await expect(page.getByLabel('나의 관찰 활동')).toHaveCount(0);expect(calls).toBe(0);});

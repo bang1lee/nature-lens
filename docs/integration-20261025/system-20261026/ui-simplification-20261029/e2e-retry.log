@@ -1,0 +1,64 @@
+
+> nature-lens@0.1.0 test:e2e
+> playwright test --workers=1 tests/e2e/board-desktop.spec.ts tests/e2e/design-quality.spec.ts tests/e2e/integration.spec.ts tests/e2e/mobile.spec.ts
+
+[WebServer] (node:17287) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:17318) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:17319) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ⚠ Warning: Next.js ignored package-lock.json in /Users/light_one/.local/share/openrig-poc/nature-lens because it is outside the current Git repository (/Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+
+Running 18 tests using 1 worker
+
+(node:17322) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/e2e/board-desktop.spec.ts:4:36 › board workspace 1440: distinct empty states, reset, details and keyboard focus (6.5s)
+  ✓   2 tests/e2e/board-desktop.spec.ts:4:36 › board workspace 1280: distinct empty states, reset, details and keyboard focus (2.6s)
+  ✓   3 tests/e2e/board-desktop.spec.ts:4:36 › board workspace 390: distinct empty states, reset, details and keyboard focus (2.2s)
+  ✓   4 tests/e2e/board-desktop.spec.ts:18:1 › board filters reset together and unavailable transfer preserves local backup (3.7s)
+  ✓   5 tests/e2e/board-desktop.spec.ts:25:1 › record deletion starts on cancel and only removes the chosen record (3.2s)
+  ✓   6 tests/e2e/board-desktop.spec.ts:37:30 › board narrow layout 320 stays usable (1.2s)
+  ✓   7 tests/e2e/board-desktop.spec.ts:37:30 › board narrow layout 640 stays usable (1.0s)
+  ✓   8 tests/e2e/board-desktop.spec.ts:46:1 › keyboard shortcuts leave an open transfer confirmation intact (809ms)
+  ✓   9 tests/e2e/board-desktop.spec.ts:57:1 › deleting the last record restores focus to the persistent capture action (1.3s)
+  ✓  10 tests/e2e/design-quality.spec.ts:4:35 › forest navigation readable and usable at 360px (3.1s)
+  ✓  11 tests/e2e/design-quality.spec.ts:4:35 › forest navigation readable and usable at 390px (5.0s)
+  ✓  12 tests/e2e/design-quality.spec.ts:4:35 › forest navigation readable and usable at 1440px (7.0s)
+  ✓  13 tests/e2e/design-quality.spec.ts:13:1 › reduced motion keeps controls still and keyboard focus visible (2.9s)
+  ✘  14 tests/e2e/integration.spec.ts:4:1 › mobile backup roundtrip, invalid restore and unconfigured community (30.0s)
+(node:17638) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  15 tests/e2e/mobile.spec.ts:5:2 › mobile skeleton 390: photo, quick draft, library and persistence (14.3s)
+  ✓  16 tests/e2e/mobile.spec.ts:5:2 › mobile skeleton 412: photo, quick draft, library and persistence (27.5s)
+  ✓  17 tests/e2e/mobile.spec.ts:25:1 › invalid photo, retry, discard confirmation and all tabs (7.7s)
+  ✓  18 tests/e2e/mobile.spec.ts:36:1 › browser back warns before abandoning a captured draft (17.1s)
+
+
+  1) tests/e2e/integration.spec.ts:4:1 › mobile backup roundtrip, invalid restore and unconfigured community 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.setInputFiles: Test ended.
+    Call log:
+      - waiting for getByLabel('모바일 백업 파일')
+        33 × locator resolved to <input hidden="" type="file" aria-label="모바일 백업 파일" accept=".json,application/json"/>
+
+
+      12 |  await expect(page.locator('.m-error[role=alert]')).toContainText('올바른 Nature Lens');
+      13 |  const download=page.waitForEvent('download');await page.getByRole('button',{name:'전체 백업 내려받기'}).click();const file=await(await download).path();expect(file).toBeTruthy();
+    > 14 |  const context=await browser.newContext({viewport:{width:390,height:844}});const restored=await context.newPage();await gotoReady(restored,'http://127.0.0.1:3107/mobile/');await restored.getByRole('button',{name:'설정',exact:true}).click();await restored.getByLabel('모바일 백업 파일').setInputFiles(file!);
+         |                                                                                                                                                                                                                                               ^
+      15 |  const restoreStatus=restored.locator('.m-settings-note').filter({has:restored.getByRole('heading',{name:'기록을 안전하게 보관하기',exact:true})}).getByRole('status');
+      16 |  await expect(restoreStatus).toContainText('1건을 초안으로 복원');
+      17 |  await restored.getByLabel('모바일 백업 파일').setInputFiles(file!);await expect(restoreStatus).toContainText('0건을 초안으로 복원');
+        at /Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline/tests/e2e/integration.spec.ts:14:239
+
+    Error Context: test-results/integration-mobile-backup--aa4f4--and-unconfigured-community/error-context.md
+
+  1 failed
+    tests/e2e/integration.spec.ts:4:1 › mobile backup roundtrip, invalid restore and unconfigured community 
+  17 passed (2.3m)

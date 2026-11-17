@@ -1,0 +1,10 @@
+.nl-taxon{display:grid;gap:8px;margin-top:4px}
+.nl-taxon img{width:100%;height:170px;object-fit:cover;border-radius:10px;background:#e7edde}
+.nl-taxon p{margin:0;font-size:14px;line-height:1.7;color:#2c4435}
+.nl-taxon .nl-taxon-level{font-size:13px;color:#4a604c}
+.nl-taxon .nl-taxon-source{font-size:12px;line-height:1.6;color:#50604e}
+.nl-taxon a{display:inline-flex;align-items:center;gap:4px;color:#254f3b;text-decoration:underline;min-height:24px}
+.nl-taxon-card{margin:18px 0;padding:18px;border:1px solid #c7d2bd;border-radius:16px;background:#fffdf7;overflow-wrap:anywhere}
+.nl-taxon-card h2{margin:0 0 10px;font-size:18px;color:#263e30}
+.nl-top-candidate strong{font-size:22px;line-height:1.35}
+.nl-top-candidate .nl-strength{color:#3f5a45;font-weight:600}

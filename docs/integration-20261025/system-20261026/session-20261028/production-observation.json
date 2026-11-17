@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-27T16:33:05.180Z",
+  "url": "https://nature-lens-mvp.pages.dev/mobile/",
+  "passed": true,
+  "externalWritesBlocked": 0,
+  "scope": "Production client: album save, reobservation, reload persistence, monthly journal; no actual auth or identification",
+  "fixture": "public/icon-192.png in isolated browser"
+}

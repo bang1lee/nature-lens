@@ -1,0 +1,13 @@
+
+> nature-lens@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.2 /Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline
+
+
+ Test Files  21 passed (21)
+      Tests  86 passed (86)
+   Start at  04:51:24
+   Duration  1.35s (tests 50%, import 29%, transform 19%, worker 2%)
+

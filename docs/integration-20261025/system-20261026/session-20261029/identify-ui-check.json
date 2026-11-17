@@ -1,0 +1,8 @@
+{
+  "url": "https://nature-lens-mvp.pages.dev/mobile/",
+  "providerConsentVisible": true,
+  "unauthenticatedButtonDisabled": true,
+  "externalWrites": 0,
+  "scope": "Production client readiness; no photo sent",
+  "priorProbe": "failed because details panel was not expanded; corrected user sequence, no app code changed"
+}

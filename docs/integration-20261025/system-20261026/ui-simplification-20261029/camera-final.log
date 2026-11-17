@@ -1,0 +1,23 @@
+
+> nature-lens@0.1.0 test:app
+> playwright test -c app.playwright.config.ts --workers=1 --grep web board: camera|denied camera|camera tracks
+
+[WebServer] (node:17353) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:17382) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:17383) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ⚠ Warning: Next.js ignored package-lock.json in /Users/light_one/.local/share/openrig-poc/nature-lens because it is outside the current Git repository (/Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+
+Running 3 tests using 1 worker
+
+(node:17385) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/web-camera.spec.ts:8:1 › web board: camera starts only on demand, captures and persists a card (4.5s)
+  ✓  2 tests/web-camera.spec.ts:23:1 › denied camera still permits photo upload and closed preview releases stream (1.1s)
+  ✓  3 tests/web-camera.spec.ts:29:1 › camera tracks stop on explicit off and closing the capture screen (1.2s)
+
+  3 passed (8.7s)

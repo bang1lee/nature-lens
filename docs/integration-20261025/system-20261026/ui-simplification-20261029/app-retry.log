@@ -1,0 +1,111 @@
+
+> nature-lens@0.1.0 test:app
+> playwright test -c app.playwright.config.ts --workers=1 --grep error does not|discovery persists|web board: camera|denied camera|camera tracks
+
+[WebServer] (node:17088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:17116) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:17117) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ⚠ Warning: Next.js ignored package-lock.json in /Users/light_one/.local/share/openrig-poc/nature-lens because it is outside the current Git repository (/Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+
+Running 5 tests using 1 worker
+
+(node:17120) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/app-platform.spec.ts:35:1 › error does not overwrite and cancellation ignores late result (5.2s)
+  ✓  2 tests/app-platform.spec.ts:165:1 › discovery persists private round, reveals server result and score without another photo upload (6.2s)
+(node:17138) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 tests/web-camera.spec.ts:8:1 › web board: camera starts only on demand, captures and persists a card (5.9s)
+(node:17154) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  4 tests/web-camera.spec.ts:23:1 › denied camera still permits photo upload and closed preview releases stream (5.6s)
+(node:17163) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  5 tests/web-camera.spec.ts:29:1 › camera tracks stop on explicit off and closing the capture screen (7.6s)
+
+
+  1) tests/web-camera.spec.ts:8:1 › web board: camera starts only on demand, captures and persists a card 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('main[data-ready=true]')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('main[data-ready=true]') with timeout 5000ms
+      - waiting for locator('main[data-ready=true]')
+
+
+       7 | });
+       8 | test('web board: camera starts only on demand, captures and persists a card',async({page})=>{
+    >  9 |  await page.goto('/board/',{waitUntil:'domcontentloaded'});await expect(page.locator('main[data-ready=true]')).toBeVisible();await expect(page.getByRole('heading',{name:'내 관찰 보드',exact:false})).toBeVisible();
+         |                                                                                                                ^
+      10 |  await page.getByRole('button',{name:'관찰 추가',exact:true}).click();
+      11 |  await expect(page.getByRole('button',{name:'카메라 켜기',exact:true})).toBeVisible();
+      12 |  await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();
+        at /Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline/tests/web-camera.spec.ts:9:112
+
+    Error Context: test-results/web-camera-web-board-camer-92e52-aptures-and-persists-a-card/error-context.md
+
+  2) tests/web-camera.spec.ts:23:1 › denied camera still permits photo upload and closed preview releases stream 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('main[data-ready=true]')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('main[data-ready=true]') with timeout 5000ms
+      - waiting for locator('main[data-ready=true]')
+
+
+      23 | test('denied camera still permits photo upload and closed preview releases stream',async({page})=>{
+      24 |  await page.addInitScript(()=>{navigator.mediaDevices.getUserMedia=async()=>{throw new DOMException('denied','NotAllowedError');};});
+    > 25 |  await page.goto('/board/',{waitUntil:'domcontentloaded'});await expect(page.locator('main[data-ready=true]')).toBeVisible();await page.getByRole('button',{name:'관찰 추가',exact:true}).click();await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();
+         |                                                                                                                ^
+      26 |  await expect(page.locator('.m-web-camera [role=alert]')).toContainText('권한');
+      27 |  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');await expect(page.getByRole('button',{name:'내 기록에 저장'})).toBeVisible();
+      28 | });
+        at /Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline/tests/web-camera.spec.ts:25:112
+
+    Error Context: test-results/web-camera-denied-camera-s-7a763-sed-preview-releases-stream/error-context.md
+
+  3) tests/web-camera.spec.ts:29:1 › camera tracks stop on explicit off and closing the capture screen 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('main[data-ready=true]')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('main[data-ready=true]') with timeout 5000ms
+      - waiting for locator('main[data-ready=true]')
+
+
+      29 | test('camera tracks stop on explicit off and closing the capture screen',async({page})=>{
+      30 |  await page.addInitScript(()=>{const original=navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);navigator.mediaDevices.getUserMedia=async c=>{const s=await original(c);(window as unknown as {cameraStream:MediaStream}).cameraStream=s;return s;};});
+    > 31 |  await page.goto('/board/',{waitUntil:'domcontentloaded'});await expect(page.locator('main[data-ready=true]')).toBeVisible();await page.getByRole('button',{name:'관찰 추가',exact:true}).click();await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();await expect(page.getByRole('button',{name:'사진 촬영하기',exact:true})).toBeEnabled();await page.getByRole('button',{name:'카메라 끄기',exact:true}).click();
+         |                                                                                                                ^
+      32 |  expect(await page.evaluate(()=>(window as unknown as {cameraStream:MediaStream}).cameraStream.getTracks().every(t=>t.readyState==='ended'))).toBe(true);
+      33 |  await page.getByRole('button',{name:'카메라 켜기',exact:true}).click();await expect(page.getByRole('button',{name:'사진 촬영하기',exact:true})).toBeEnabled();await page.getByRole('button',{name:'촬영 닫기'}).click();
+      34 |  expect(await page.evaluate(()=>(window as unknown as {cameraStream:MediaStream}).cameraStream.getTracks().every(t=>t.readyState==='ended'))).toBe(true);
+        at /Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline/tests/web-camera.spec.ts:31:112
+
+    Error Context: test-results/web-camera-camera-tracks-s-3f1d0--closing-the-capture-screen/error-context.md
+
+  3 failed
+    tests/web-camera.spec.ts:8:1 › web board: camera starts only on demand, captures and persists a card 
+    tests/web-camera.spec.ts:23:1 › denied camera still permits photo upload and closed preview releases stream 
+    tests/web-camera.spec.ts:29:1 › camera tracks stop on explicit off and closing the capture screen 
+  2 passed (34.9s)

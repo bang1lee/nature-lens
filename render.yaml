@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: nature-lens-identify
+    runtime: node
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: npm run identify:server
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.2
+      - key: IDENTIFY_HOST
+        value: 0.0.0.0
+      - key: IDENTIFY_ENABLED
+        value: "false"
+      - key: DISCOVERY_ENABLED
+        value: "false"
+      - key: IDENTIFY_LEDGER_BACKEND
+        value: supabase
+      - key: IDENTIFY_ALLOWED_ORIGINS
+        value: https://nature-lens-mvp.pages.dev
+      - key: IDENTIFY_POLICY_URL
+        value: https://nature-lens-mvp.pages.dev/identification-policy.html
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: PLANTNET_API_KEY
+        sync: false

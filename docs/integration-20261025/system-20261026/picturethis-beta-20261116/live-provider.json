@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-15T16:10:50.562Z",
+  "fixture": "LorelMan CC0 dandelion; not a local ecological observation",
+  "status": 200,
+  "elapsedMs": 3214,
+  "result": {
+    "state": "not_plant",
+    "provider": "plantnet",
+    "modelVersion": "not-reported",
+    "candidates": [],
+    "needsHumanReview": true
+  }
+}

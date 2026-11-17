@@ -1,0 +1,179 @@
+
+> nature-lens@0.1.0 test:e2e
+> playwright test --workers=1
+
+[WebServer] (node:15806) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15834) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15835) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ⚠ Warning: Next.js ignored package-lock.json in /Users/light_one/.local/share/openrig-poc/nature-lens because it is outside the current Git repository (/Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+
+Running 41 tests using 1 worker
+
+(node:15838) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/e2e/board-desktop.spec.ts:3:36 › board workspace 1440: distinct empty states, reset, details and keyboard focus (19.9s)
+  ✘   2 tests/e2e/board-desktop.spec.ts:3:36 › board workspace 1280: distinct empty states, reset, details and keyboard focus (30.0s)
+(node:15904) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   3 tests/e2e/board-desktop.spec.ts:3:36 › board workspace 390: distinct empty states, reset, details and keyboard focus (30.1s)
+(node:15947) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   4 tests/e2e/board-desktop.spec.ts:17:1 › board filters reset together and unavailable transfer preserves local backup (6.5s)
+  ✓   5 tests/e2e/board-desktop.spec.ts:24:1 › record deletion starts on cancel and only removes the chosen record (1.7s)
+  ✓   6 tests/e2e/board-desktop.spec.ts:36:30 › board narrow layout 320 stays usable (1.8s)
+  ✓   7 tests/e2e/board-desktop.spec.ts:36:30 › board narrow layout 640 stays usable (1.4s)
+  ✓   8 tests/e2e/board-desktop.spec.ts:45:1 › keyboard shortcuts leave an open transfer confirmation intact (1.2s)
+  ✓   9 tests/e2e/board-desktop.spec.ts:56:1 › deleting the last record restores focus to the persistent capture action (2.3s)
+  ✓  10 tests/e2e/board-journey.spec.ts:7:1 › board preserves explicit reobservation, the selected month and detail caller focus (1.3s)
+  ✓  11 tests/e2e/community.spec.ts:4:1 › community ranking, local reactions, filters and monthly journal (8.4s)
+  ✓  12 tests/e2e/community.spec.ts:20:1 › GPS only on request; precise coordinates separate from observation export (2.3s)
+  ✓  13 tests/e2e/community.spec.ts:30:1 › denied GPS still permits photo-only draft (4.9s)
+  ✓  14 tests/e2e/design-quality.spec.ts:3:35 › forest navigation readable and usable at 360px (14.9s)
+  ✓  15 tests/e2e/design-quality.spec.ts:3:35 › forest navigation readable and usable at 390px (16.9s)
+  ✓  16 tests/e2e/design-quality.spec.ts:3:35 › forest navigation readable and usable at 1440px (15.0s)
+  ✘  17 tests/e2e/design-quality.spec.ts:12:1 › reduced motion keeps controls still and keyboard focus visible (30.0s)
+(node:16202) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  18 tests/e2e/integration.spec.ts:4:1 › mobile backup roundtrip, invalid restore and unconfigured community (30.0s)
+(node:16258) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  19 tests/e2e/journey.spec.ts:4:1 › forest entry connects private capture to the selected month and back (9.8s)
+  ✓  20 tests/e2e/journey.spec.ts:27:1 › nameplate sample stays separate and returns to the working app (5.6s)
+  ✓  21 tests/e2e/mobile.spec.ts:5:2 › mobile skeleton 390: photo, quick draft, library and persistence (22.3s)
+  ✘  22 tests/e2e/mobile.spec.ts:5:2 › mobile skeleton 412: photo, quick draft, library and persistence (30.0s)
+(node:16437) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  23 tests/e2e/mobile.spec.ts:25:1 › invalid photo, retry, discard confirmation and all tabs (15.6s)
+  ✓  24 tests/e2e/mobile.spec.ts:36:1 › browser back warns before abandoning a captured draft (24.3s)
+  ✓  25 tests/e2e/personal-print.spec.ts:4:1 › personal print excludes other months, public examples and navigation (28.6s)
+  ✓  26 tests/e2e/reobservation.spec.ts:4:1 › same specimen confirmation, persisted timeline, private month and unrelated capture (19.7s)
+  ✓  27 tests/e2e/review-preview.spec.ts:4:1 › review examples remain isolated from saved observations (11.0s)
+  ✓  28 tests/e2e/studio.spec.ts:3:1 › full local publication flow, persistence, edit invalidation, backup and safe restore (12.8s)
+  ✓  29 tests/e2e/studio.spec.ts:17:1 › real upload, search, collections, keyboard modal and mobile accessibility (3.5s)
+  ✓  30 tests/e2e/studio.spec.ts:27:1 › desktop capture and accessibility (7.1s)
+  ✓  31 tests/e2e/studio.spec.ts:28:1 › backup round trip restores photos as drafts and duplicate import is idempotent (11.0s)
+  ✓  32 tests/e2e/transfer.spec.ts:59:1 › encrypted transfer uses separate browsers, previews before restore, preserves duplicates and deletes (1.5s)
+  ✓  33 tests/e2e/transfer.spec.ts:73:1 › wrong key or altered ciphertext cannot reach restore; fragment is removed immediately (291ms)
+  ✓  34 tests/e2e/transfer.spec.ts:79:1 › deleting an older transfer preserves the current one-time secret link (609ms)
+  ✓  35 tests/e2e/transfer.spec.ts:86:1 › successful upload still exposes its link when local deletion-list storage fails (607ms)
+[WebServer] [browser] Couldn't load preload assets:  [object ProgressEvent] (../../../../../../../..:311:30)
+  ✓  36 tests/e2e/transfer.spec.ts:93:1 › receive preview makes no writes until consent and restores real photos safely (867ms)
+  ✓  37 tests/e2e/transfer.spec.ts:106:1 › oversized encrypted backup is rejected locally without an upload (732ms)
+  ✓  38 tests/e2e/transfer.spec.ts:116:1 › a pending photo restore marks its own transfer without replacing a newly opened preview (556ms)
+  ✓  39 tests/e2e/transfer.spec.ts:133:1 › production transfer CSP permits local photo decoding but blocks external connections (73ms)
+  ✓  40 tests/e2e/transfer.spec.ts:144:1 › transfer preparation waits for explicit consent and uploads encrypted photo and notes only (800ms)
+  ✓  41 tests/e2e/transfer.spec.ts:169:1 › failed upload waits for a manual retry and a pending double click creates only one transfer (777ms)
+
+
+  1) tests/e2e/board-desktop.spec.ts:3:36 › board workspace 1280: distinct empty states, reset, details and keyboard focus 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.goto: Test timeout of 30000ms exceeded.
+    Call log:
+      - navigating to "http://127.0.0.1:3107/board/", waiting until "load"
+
+
+      2 | import AxeBuilder from '@axe-core/playwright';
+      3 | for(const width of [1440,1280,390])test(`board workspace ${width}: distinct empty states, reset, details and keyboard focus`,async({page})=>{
+    > 4 |  await page.setViewportSize({width,height:1000});await page.goto('/board/');
+        |                                                             ^
+      5 |  await expect(page.getByRole('heading',{name:'사진 한 장, 발견 하나'})).toBeVisible();
+      6 |  await page.getByRole('button',{name:'예제 불러오기',exact:false}).click();
+      7 |  await expect(page.getByRole('button',{name:'겹겹이 펼쳐진 초록 기록 열기'})).toBeVisible();
+        at /Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline/tests/e2e/board-desktop.spec.ts:4:61
+
+    Error Context: test-results/board-desktop-board-worksp-d9bba--details-and-keyboard-focus/error-context.md
+
+  2) tests/e2e/board-desktop.spec.ts:3:36 › board workspace 390: distinct empty states, reset, details and keyboard focus 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.goto: Test timeout of 30000ms exceeded.
+    Call log:
+      - navigating to "http://127.0.0.1:3107/board/", waiting until "load"
+
+
+      2 | import AxeBuilder from '@axe-core/playwright';
+      3 | for(const width of [1440,1280,390])test(`board workspace ${width}: distinct empty states, reset, details and keyboard focus`,async({page})=>{
+    > 4 |  await page.setViewportSize({width,height:1000});await page.goto('/board/');
+        |                                                             ^
+      5 |  await expect(page.getByRole('heading',{name:'사진 한 장, 발견 하나'})).toBeVisible();
+      6 |  await page.getByRole('button',{name:'예제 불러오기',exact:false}).click();
+      7 |  await expect(page.getByRole('button',{name:'겹겹이 펼쳐진 초록 기록 열기'})).toBeVisible();
+        at /Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline/tests/e2e/board-desktop.spec.ts:4:61
+
+    Error Context: test-results/board-desktop-board-worksp-85b3c--details-and-keyboard-focus/error-context.md
+
+  3) tests/e2e/design-quality.spec.ts:12:1 › reduced motion keeps controls still and keyboard focus visible 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.goto: Test timeout of 30000ms exceeded.
+    Call log:
+      - navigating to "http://127.0.0.1:3107/mobile/", waiting until "load"
+
+
+      11 | });
+      12 | test('reduced motion keeps controls still and keyboard focus visible',async({page})=>{
+    > 13 |  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/mobile/');
+         |                                                               ^
+      14 |  const button=page.getByRole('button',{name:'오늘의 자연 기록하기'});await button.focus();
+      15 |  expect(await button.evaluate(el=>getComputedStyle(el).outlineStyle)).not.toBe('none');
+      16 |  expect(await button.evaluate(el=>getComputedStyle(el).transitionDuration)).toBe('0s');
+        at /Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline/tests/e2e/design-quality.spec.ts:13:63
+
+    Error Context: test-results/design-quality-reduced-mot-27f2b--and-keyboard-focus-visible/error-context.md
+
+  4) tests/e2e/integration.spec.ts:4:1 › mobile backup roundtrip, invalid restore and unconfigured community 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.goto: Test timeout of 30000ms exceeded.
+    Call log:
+      - navigating to "http://127.0.0.1:3107/mobile/", waiting until "load"
+
+
+      3 | import AxeBuilder from '@axe-core/playwright';
+      4 | test('mobile backup roundtrip, invalid restore and unconfigured community',async({page,browser})=>{
+    > 5 |  await page.setViewportSize({width:390,height:844});await page.goto('/mobile/');
+        |                                                                ^
+      6 |  await page.getByRole('button',{name:'촬영',exact:true}).click();await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
+      7 |  await openRecordDetails(page);await page.getByLabel('한 줄 메모').fill('백업 복원 검증');await page.getByRole('button',{name:'내 기록에 저장'}).click();await page.getByRole('button',{name:'홈으로',exact:true}).click();
+      8 |  await page.getByRole('button',{name:'설정',exact:true}).click();
+        at /Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline/tests/e2e/integration.spec.ts:5:64
+
+    Error Context: test-results/integration-mobile-backup--aa4f4--and-unconfigured-community/error-context.md
+
+  5) tests/e2e/mobile.spec.ts:5:2 › mobile skeleton 412: photo, quick draft, library and persistence 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.goto: Test timeout of 30000ms exceeded.
+    Call log:
+      - navigating to "http://127.0.0.1:3107/mobile/", waiting until "load"
+
+
+      4 | for (const width of [390, 412]) {
+      5 |  test(`mobile skeleton ${width}: photo, quick draft, library and persistence`, async ({page}) => {
+    > 6 |   await page.setViewportSize({width,height:844}); await page.goto('/mobile/');
+        |                                                              ^
+      7 |   await expect(page.getByRole('heading',{name:'이름을 알면, 다시 만나고 싶어져요.'})).toBeVisible();
+      8 |   await page.getByRole('button',{name:'촬영',exact:true}).click();
+      9 |   await expect(page.getByLabel('카메라로 촬영')).toHaveAttribute('capture','environment');
+        at /Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline/tests/e2e/mobile.spec.ts:6:62
+
+    Error Context: test-results/mobile-mobile-skeleton-412-eeaf9-aft-library-and-persistence/error-context.md
+
+  5 failed
+    tests/e2e/board-desktop.spec.ts:3:36 › board workspace 1280: distinct empty states, reset, details and keyboard focus 
+    tests/e2e/board-desktop.spec.ts:3:36 › board workspace 390: distinct empty states, reset, details and keyboard focus 
+    tests/e2e/design-quality.spec.ts:12:1 › reduced motion keeps controls still and keyboard focus visible 
+    tests/e2e/integration.spec.ts:4:1 › mobile backup roundtrip, invalid restore and unconfigured community 
+    tests/e2e/mobile.spec.ts:5:2 › mobile skeleton 412: photo, quick draft, library and persistence 
+  36 passed (7.2m)

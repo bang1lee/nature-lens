@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-29",
+  "scope": "anonymous read-only metadata check; no row contents or credentials recorded",
+  "results": [
+    {
+      "table": "community_feed",
+      "status": 200,
+      "code": null,
+      "empty": true
+    },
+    {
+      "table": "profiles",
+      "status": 401,
+      "code": "42501",
+      "empty": false
+    },
+    {
+      "table": "community_submissions",
+      "status": 401,
+      "code": "42501",
+      "empty": false
+    }
+  ]
+}

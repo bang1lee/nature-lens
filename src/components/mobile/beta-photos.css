@@ -1,0 +1,29 @@
+.beta-publish,.beta-mine,.beta-feed{overflow-wrap:anywhere;text-align:left}
+.beta-publish,.beta-mine{padding:20px;border:1px solid #c5cfba;border-radius:16px;background:#fcfbf6}
+.beta-publish{width:100%;margin:22px 0 0}
+.beta-mine{margin:28px 0}
+.beta-feed{margin:26px 24px}
+.beta-heading{display:flex;align-items:center;gap:9px;color:#365d36}
+.beta-heading h2{margin:0;font-size:16px;color:#203c30}
+.beta-publish p,.beta-mine p,.beta-feed>p{font-size:13px;line-height:1.65;color:#455842}
+.beta-publish summary{font-size:13px;color:#365d36;cursor:pointer}
+.beta-publish form{display:grid;gap:10px;margin:15px 0}
+.beta-publish form label{font-size:13px}
+.beta-publish form input:not([type=checkbox]){width:100%;min-height:44px;border:1px solid #879b8e;border-radius:12px;padding:12px;background:#fff;color:#203a2e;font:inherit}
+.beta-check{display:flex;align-items:flex-start;gap:10px;margin:13px 0;font-size:13px;line-height:1.55}
+.beta-check input{width:20px;height:20px;flex:0 0 20px;accent-color:#254f3b}
+.beta-publish button:disabled,.beta-mine button:disabled{opacity:.55}
+.beta-publish .beta-success{display:flex;align-items:center;gap:8px;color:#254f3b;font-weight:600}
+.beta-feed-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.beta-feed-grid article{min-width:0;overflow:hidden;background:#fcfbf6;border:1px solid #d6ddce;border-radius:12px}
+.beta-feed-grid img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#e8eddf}
+.beta-feed-grid article>div{display:grid;gap:5px;padding:12px}
+.beta-feed-grid small,.beta-feed-grid span,.beta-mine-item small{font-size:11px;color:#53634f}
+.beta-feed-grid article summary{font-size:12px;color:#365d36;cursor:pointer}
+.beta-feed-grid article p{white-space:pre-wrap;font-size:12px;line-height:1.5;margin:6px 0}
+.beta-mine-item{display:flex;align-items:center;gap:12px;padding:15px 0;border-top:1px solid #d6ddce}
+.beta-mine-item>div{display:grid;gap:4px;flex:1;min-width:0}
+.beta-mine-item>span{font-size:12px;color:#53634f}
+.beta-mine-item button{width:auto;min-height:44px;padding:8px 12px;font-size:12px}
+@media(min-width:1024px){.beta-feed{max-width:900px;margin:30px auto}}
+@media(max-width:350px){.beta-feed-grid{grid-template-columns:1fr}.beta-mine-item{align-items:flex-start;flex-direction:column}}

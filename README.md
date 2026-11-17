@@ -25,6 +25,8 @@
 ## 개발
 Node.js 22 이상.
 
+앱 작업 그래프, 로컬 검증과 Python 연구 환경의 경계는 [작업 그래프 1단계](docs/integration-20261025/system-20261026/monorepo-20261102/README.md)를 참고하세요.
+
 ```sh
 npm ci
 npm run dev

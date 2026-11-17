@@ -28,3 +28,14 @@ release/
 .dev.vars.*
 
 .next-frontend/
+
+# Local experiments, credentials and build outputs
+.research/
+.next-*/
+.wrangler/
+.dev.vars*
+*.bak
+__pycache__/
+
+# Local Nx task graph and cache
+.nx/

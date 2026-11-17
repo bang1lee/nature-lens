@@ -1,0 +1,15 @@
+{
+  "anonymous": {
+    "status": 401,
+    "body": {
+      "error": "login-required"
+    }
+  },
+  "foreignOrigin": {
+    "status": 403,
+    "body": {
+      "error": "origin-denied"
+    }
+  },
+  "photoSent": false
+}

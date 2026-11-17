@@ -1,0 +1,31 @@
+{
+  "sourceCommit": "4f8978fa301f429c8e9b82a267322930cdb5a5ec",
+  "app": "https://nature-lens-mvp.pages.dev/mobile/",
+  "immutableDeployment": "https://f6bc8401.nature-lens-mvp.pages.dev",
+  "cloudflare": "deployed",
+  "githubPush": true,
+  "merged": false,
+  "supabaseMigration": "20261029010000_participation.sql",
+  "migrationAppliedVia": "SQL Editor success (migration history not reconciled)",
+  "anonymousRPCs": {
+    "participation_summary": 401,
+    "claim_daily_observation": 401
+  },
+  "localChecks": {
+    "unit": 86,
+    "participationSQL": 25,
+    "discoverySQL": 13,
+    "appScenariosCovered": 26,
+    "auth": 4,
+    "baselineE2EScenariosCovered": 41,
+    "offlineProduction": "passed"
+  },
+  "liveJourney": "passed (isolated icon fixture; no user photo transmission)",
+  "realProviderIdentification": "not tested",
+  "realMemberAward": "not tested",
+  "expectCLI": "blocked: Claude authentication",
+  "githubCI": {
+    "run": 40760507879,
+    "statusAtCheck": "in_progress"
+  }
+}

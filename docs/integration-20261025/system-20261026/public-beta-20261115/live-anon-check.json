@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-15T06:17:28.506Z",
+  "results": [
+    {
+      "name": "beta_public_feed",
+      "status": 200,
+      "rows": 0
+    },
+    {
+      "name": "beta_public_observations",
+      "status": 401,
+      "rows": null,
+      "code": "42501"
+    }
+  ]
+}

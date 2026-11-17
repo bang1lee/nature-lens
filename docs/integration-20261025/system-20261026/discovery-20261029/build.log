@@ -1,0 +1,39 @@
+
+> nature-lens@0.1.0 build:cloudflare
+> NEXT_PUBLIC_BASE_PATH= npm run build
+
+
+> nature-lens@0.1.0 build
+> next build && node scripts/build-offline.mjs
+
+▲ Next.js 16.3.8 (Turbopack)
+- Environments: .env.local
+⚠ Warning: Next.js ignored package-lock.json in /Users/light_one/.local/share/openrig-poc/nature-lens because it is outside the current Git repository (/Users/light_one/.local/share/openrig-poc/nature-lens/.research/app-baseline).
+ To use this directory, set `turbopack.root` in your Next.js config.
+
+✓ Running next.config.ts took 37ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 527ms
+  Running TypeScript ...
+  Finished TypeScript in 567ms ...
+  Collecting page data using 8 workers ...
+  Generating static pages using 8 workers (0/7) ...
+  Generating static pages using 8 workers (1/7) 
+  Generating static pages using 8 workers (3/7) 
+  Generating static pages using 8 workers (5/7) 
+✓ Generating static pages using 8 workers (7/7) in 408ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /board
+├ ○ /mobile
+├ ○ /plants/demo-tree-001
+└ ○ /transfer
+
+
+○  (Static)  prerendered as static content
+
+Offline shell: 51 assets, e61593f5039a

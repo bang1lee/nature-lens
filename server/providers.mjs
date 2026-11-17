@@ -11,7 +11,7 @@ function normalized(provider,version,candidates) {
 }
 export function normalizePlant(raw) {
  const p=plantSchema.parse(raw);
- return normalized('plantnet',p.version,p.results.map(c=>({scientificName:c.species.scientificNameWithoutAuthor,commonName:(c.species.commonNames?.find(n=>/[가-힣]/.test(n))||'').slice(0,100),score:c.score})));
+ return normalized('plantnet',p.version,p.results.map(c=>({scientificName:c.species.scientificNameWithoutAuthor,commonName:(c.species.commonNames?.find(n=>/[가-힣]/.test(n))||c.species.commonNames?.find(n=>n.trim())||'').slice(0,100),score:c.score})));
 }
 export function normalizeInsect(raw) {
  const p=insectSchema.parse(raw);
@@ -22,10 +22,15 @@ export async function identifyWithProvider(group,jpeg,keys,fetcher=fetch) {
  let response;
  if(group==='plant') {
   const url=new URL('https://my-api.plantnet.org/v2/identify/all');
-  url.search=new URLSearchParams({'api-key':keys.plant,'nb-results':'3','no-reject':'false',lang:'ko'}).toString();
+  url.search=new URLSearchParams({'api-key':keys.plant,'nb-results':'3','no-reject':'false'}).toString();
   const body=new FormData();body.append('images',new Blob([jpeg],{type:'image/jpeg'}),'observation.jpg');body.append('organs','auto');
   response=await fetcher(url,{method:'POST',body,signal});
-  if(response.status===404)return {state:'not_plant',provider:'plantnet',modelVersion:'not-reported',candidates:[],needsHumanReview:true};
+  if(response.status===404){
+   let error;try{error=await response.json();}catch{throw new Error('provider-unavailable');}
+   // A 404 can also be an unsupported language or route, not an image judgment.
+   if(typeof error?.message==='string'&&error.message.trim().toLowerCase()==='species not found')return {state:'uncertain',provider:'plantnet',modelVersion:'not-reported',candidates:[],needsHumanReview:true};
+   throw new Error('provider-unavailable');
+  }
  } else {
   response=await fetcher('https://insect.kindwise.com/api/v1/identification?details=common_names',{method:'POST',headers:{'Content-Type':'application/json','Api-Key':keys.insect},body:JSON.stringify({images:[jpeg.toString('base64')],similar_images:false}),signal});
  }

@@ -1,0 +1,10 @@
+.nl-review-preview{margin:24px 0;background:#f0eee3;border:1px solid #b9c3b1;border-radius:8px;color:#263e31}
+.nl-review-preview summary{min-height:48px;padding:16px;font-size:14px;font-weight:600;cursor:pointer}
+.nl-review-content{padding:0 18px 18px}.nl-review-content p{font-size:13px;line-height:1.85}
+.nl-review-options{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+.nl-review-options button{min-height:44px;padding:10px 12px;border:1px solid #70846c;border-radius:6px;color:#2a4131;background:#fffdf6;font:inherit;font-size:12px}
+.nl-review-options button[aria-pressed=true]{color:#fffdf6;background:#2d4637}
+.nl-review-content article{padding:16px;background:#fffdf6;border-left:3px solid #6d825f}
+.nl-review-content article>span{font-size:11px;color:#50634b}.nl-review-content h3{font-size:17px}
+.nl-review-footnote{color:#52634e}.nl-review-preview summary:focus-visible{outline:3px solid #436a45;outline-offset:3px}
+.nl-privacy-list{margin:16px 0}.nl-privacy-list dt{font-weight:600;font-size:14px;margin-top:18px}.nl-privacy-list dd{margin:6px 0 0;font-size:13px;line-height:1.8}

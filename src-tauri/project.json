@@ -1,0 +1,13 @@
+{
+  "name": "native",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "src-tauri",
+  "tags": ["runtime:native"],
+  "implicitDependencies": ["web"],
+  "targets": {
+    "doctor": { "command": "npm run native:doctor", "cache": false },
+    "web-build": { "command": "npm run native:web:build", "cache": false },
+    "mac-build": { "command": "npm run native:mac:build", "cache": false }
+  }
+}

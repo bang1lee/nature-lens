@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-28",
+  "project_ref": "ivmbwbmxebbseowgqcjc",
+  "site_url_observed": "https://nature-lens-mvp.pages.dev/mobile/",
+  "redirect_urls_observed": [
+    "https://nature-lens-mvp.pages.dev/mobile/"
+  ],
+  "auth_settings": {
+    "http_status": 200,
+    "email_enabled": true
+  },
+  "read_only_rest_probes": {
+    "profiles": {
+      "status": 404,
+      "code": "PGRST205",
+      "limit": 0
+    },
+    "community_submissions": {
+      "status": 404,
+      "code": "PGRST205",
+      "limit": 0
+    },
+    "community_feed": {
+      "status": 404,
+      "code": "PGRST205",
+      "limit": 0
+    }
+  },
+  "inference_limit": "API schema cache does not expose required community tables; not proof of empty DB or RLS pass. No writes or photos sent.",
+  "actual_email_roundtrip": "not_run",
+  "db_rls": "not_verified",
+  "plant_identification_provider": "not_connected"
+}

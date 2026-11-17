@@ -1,0 +1,26 @@
+{
+  "at": "2026-11-15T16:26:30.724Z",
+  "recordId": "1fda7eb8-66fb-4385-bff1-7e7cc80f9681",
+  "metadataStatus": 200,
+  "state": "published",
+  "publicPhotoStatus": 200,
+  "photoBytes": 137397,
+  "photoHashMatches": true,
+  "otherGuestReadStatus": 200,
+  "otherGuestRows": 0,
+  "repeatFinalizationStatus": 200,
+  "repeatFinalizationChanged": false,
+  "publishedNotesUnchanged": true,
+  "publicFeedStatus": 200,
+  "publicFeedRows": 1,
+  "publicFields": [
+    "id",
+    "title",
+    "species",
+    "observed_on",
+    "notes",
+    "photo_path",
+    "published_at"
+  ],
+  "testLabelInNotes": true
+}

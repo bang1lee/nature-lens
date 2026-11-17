@@ -1,0 +1,22 @@
+{
+  "startedAt": "2026-11-15T16:25:38.665Z",
+  "type": "real-service-public-CC0-fixture",
+  "steps": [
+    "guest-public-upload-ui-success",
+    "fresh-local-database-restored-from-server"
+  ],
+  "identification": {
+    "status": 200,
+    "elapsedMs": 6036,
+    "state": "candidates",
+    "provider": "plantnet",
+    "candidates": [
+      {
+        "scientificName": "Taraxacum sect. Taraxacum",
+        "commonName": "Common dandelion",
+        "score": 0.21307
+      }
+    ]
+  },
+  "completedAt": "2026-11-15T16:25:53.875Z"
+}

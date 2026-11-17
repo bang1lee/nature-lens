@@ -21,9 +21,17 @@ jobs:
       - run: npm ci
       - run: npm run test
       - run: npm run typecheck
+      - run: npm run typecheck:worker
+      - run: npm run test:boundary
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: npm run test:app
+      - run: npm run test:cloud-auth
+      - run: npm run test:guest
+      - run: npm run test:beta
+      - run: npm run test:otp
+      - run: npm run test:member
+      - run: npm run test:map
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /nature-lens

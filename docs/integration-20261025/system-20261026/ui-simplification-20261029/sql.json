@@ -1,0 +1,32 @@
+{
+  "passed": 25,
+  "checks": [
+    "anonymous role cannot read summary or claim",
+    "missing authenticated identity rejected",
+    "anonymous Supabase user rejected despite authenticated role",
+    "new member has zero score and server KST day",
+    "null record and past/future/null observation date rejected",
+    "first daily claim earns two points",
+    "duplicate retry idempotent",
+    "different record cannot claim same day twice",
+    "overlapping duplicate requests do not increase points",
+    "authenticated client cannot read, insert, edit or delete ledger",
+    "other account cannot read first account score",
+    "other account has its own daily allowance",
+    "database uniqueness independently enforces day and lifetime record limits",
+    "old observation UUID cannot earn again on new day",
+    "new day and new record accumulate",
+    "session timezone cannot alter participation day",
+    "summary combines prediction and daily points for sprout tier",
+    "100 combined points reaches tree tier",
+    "other account aggregate excludes all first-account prediction points",
+    "account deletion cascades new participation ledger",
+    "18 points remains seed",
+    "20 points becomes sprout",
+    "98 points remains sprout",
+    "100 points becomes tree exactly",
+    "RPC offers no caller-supplied user ID"
+  ],
+  "scope": "isolated PGlite SQL with simulated auth JWT; not live service",
+  "limitation": "Self-reported date and record ID do not establish photo quality or prevent multi-account farming."
+}

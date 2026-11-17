@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {ArrowUpRight,Check,Copy,LockKeyhole,Trash2,LoaderCircle} from 'lucide-react';
 import {buildTransferEnvelope,uploadTransfer,formatTransferLink,fetchServiceCapabilities,deleteTransfer,readSentTransfers,writeSentTransfers,transferErrorMessage} from '@/lib/transfer';
 import '../transfer.css';
@@ -10,12 +10,16 @@ export default function TransferPanel(){
  const [available,setAvailable]=useState(false),[checking,setChecking]=useState(true),[prepared,setPrepared]=useState<Prepared|null>(null),[consent,setConsent]=useState(false);
  const [busy,setBusy]=useState(''),[error,setError]=useState(''),[message,setMessage]=useState(''),[link,setLink]=useState(''),[sent,setSent]=useState<SentTransferRecord[]>([]),[now,setNow]=useState(0),[confirm,setConfirm]=useState<SentTransferRecord|null>(null);
  const lock=useRef(false),input=useRef<HTMLInputElement>(null),panel=useRef<HTMLElement>(null),prepareButton=useRef<HTMLButtonElement>(null),dialog=useRef<HTMLDialogElement>(null),cancel=useRef<HTMLButtonElement>(null),caller=useRef<HTMLElement|null>(null);
+ const restoreFocus=useRef(false);
  useEffect(()=>{const c=new AbortController();setSent(readSentTransfers());setNow(Date.now());void fetchServiceCapabilities(c.signal).then(v=>{if(!c.signal.aborted){setAvailable(v.transfer.available&&Boolean(crypto.subtle)&&typeof CompressionStream!=='undefined');setChecking(false);}});const timer=setInterval(()=>setNow(Date.now()),60000);return()=>{c.abort();clearInterval(timer);};},[]);
  useEffect(()=>{if(confirm){dialog.current?.showModal();cancel.current?.focus();}},[confirm]);
- function close(){dialog.current?.close();setConfirm(null);requestAnimationFrame(()=>{
+ useLayoutEffect(()=>{
+  if(!restoreFocus.current||confirm||busy)return;
+  restoreFocus.current=false;
   const candidates=[caller.current,input.current,prepareButton.current,panel.current?.querySelector<HTMLElement>('.transfer-list button:not(:disabled)'),panel.current?.querySelector<HTMLElement>('summary')];
   candidates.find(target=>target?.isConnected&&!target.matches(':disabled'))?.focus();
- });}
+ });
+ function close(){dialog.current?.close();restoreFocus.current=true;setConfirm(null);}
  async function prepare(){if(lock.current)return;lock.current=true;setBusy('암호화하는 중…');setError('');setMessage('');setLink('');setPrepared(null);setConsent(false);
   try{setPrepared(await buildTransferEnvelope());}catch(e){setError(transferErrorMessage(e));}finally{lock.current=false;setBusy('');}}
  async function send(){if(lock.current||!prepared||!consent)return;lock.current=true;setBusy('보내는 중…');setError('');
