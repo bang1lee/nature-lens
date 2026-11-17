@@ -55,6 +55,8 @@ function ImmediateIdentification({record,onApplied,draft=false,onBusyChange,onRe
   if(!ready||!consent||!noPeople||flight.current)return;
   if(mode==='external'&&!navigator.onLine){setMessage('오프라인이에요. 연결 후 다시 시도해 주세요.');return;}
   flight.current=true;onBusyChange?.(true);const c=new AbortController();controller.current=c;setBusy(true);setMessage('');setDecision(null);
+  // The free identification host sleeps when idle; say so instead of looking stuck.
+  const slow=setTimeout(()=>{if(mounted.current&&controller.current===c)setMessage('처음 연결은 30초쯤 걸릴 수 있어요. 사진은 그대로예요.');},8000);
   try{
    let token='';
    if(mode==='external'){const client=await getSupabase();const {session}=await getOrCreateGuestSession(client);token=session.access_token;}
@@ -77,7 +79,7 @@ function ImmediateIdentification({record,onApplied,draft=false,onBusyChange,onRe
     if(!c.signal.aborted&&mounted.current&&latest){onApplied(latest);setMessage(local?`이 Mac에서 분석했어요 · ${local.metrics.elapsedMs}ms · 외부 API 비용 $0 (기기 비용 제외)`:'분석 결과를 기록에 보관했어요.');}
    }
   }catch(error){if(mounted.current&&!c.signal.aborted){setDecision({state:'unavailable',reason:error instanceof Error&&error.name==='TimeoutError'?'timeout':error instanceof Error&&error.message.includes('로그인')?'unauthorized':error instanceof Error&&error.message.includes('한도')?'quota':error instanceof Error&&error.message.includes('준비되지')?'not_configured':error instanceof Error&&error.name==='ZodError'?'invalid_response':'network',retryable:true,needsHumanReview:true});setMessage(error instanceof Error&&error.name==='TimeoutError'?'응답 시간이 길어 중단했어요. 수동 기록을 계속할 수 있어요.':error instanceof Error&&error.message.includes('로그인')?'식별 연결을 확인하지 못했어요. 다시 시도해 주세요.':error instanceof Error?error.message:'연결하지 못했어요.');}}
-  finally{if(controller.current===c){flight.current=false;onBusyChange?.(false);if(mounted.current)setBusy(false);}}
+  finally{clearTimeout(slow);if(controller.current===c){flight.current=false;onBusyChange?.(false);if(mounted.current)setBusy(false);}}
  }
  const identifyRef=useRef(identify);identifyRef.current=identify;
  useEffect(()=>{if(mode==='external'&&ready&&consent&&noPeople&&startIntent?.consume())void identifyRef.current();},[mode,ready,consent,noPeople,startIntent]);
@@ -106,7 +108,7 @@ function ImmediateIdentification({record,onApplied,draft=false,onBusyChange,onRe
  return <section className="m-identify" aria-labelledby="identify-title">
   <h2 id="identify-title"><Sparkles size={20} aria-hidden="true"/> 바로 확인하기</h2>
   <p>AI가 찾은 이름 후보예요. 확정된 이름은 아니에요.</p>
-  {decision&&<div ref={resultRegion} tabIndex={-1} role="region" aria-label="식별 결과"><DecisionResult decision={decision} saving={saving||busy} onRetake={onRetake} onCandidate={index=>{const taxon=decision.state==='candidates'?decision.candidates[index]:null;if(taxon)void apply({scientificName:taxon.scientificName,commonName:taxon.koreanName||taxon.displayName||'',score:taxon.score});}}/></div>}
+  {decision&&<div ref={resultRegion} tabIndex={-1} role="region" aria-label="식별 결과"><DecisionResult decision={decision} saving={saving||busy} onRetake={onRetake} onCandidate={(index,koreanName)=>{const taxon=decision.state==='candidates'?decision.candidates[index]:null;if(taxon)void apply({scientificName:taxon.scientificName,commonName:(koreanName||taxon.koreanName||taxon.displayName||'').slice(0,100),score:taxon.score});}}/></div>}
   <p role="status" aria-live="polite">{message}</p>
   {decision?<details><summary>다시 식별하기</summary>{controls}</details>:controls}
   {record.aiAssisted&&<p className="m-private-note">AI 후보를 반영한 미확정 기록입니다.</p>}

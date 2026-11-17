@@ -269,3 +269,48 @@ test('identified member photo can be publicly saved after separate consent and r
   await page.getByRole('button',{name:'내 기록 보기',exact:true}).click();
   await expect(page.getByRole('button',{name:'같은 대상 다시 관찰하기',exact:true})).toBeVisible();
 });
+
+test('a result shows the Korean name, description and reference photo, and records the Korean name',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  // Synthetic photo and services. The encyclopedia lookup receives only the scientific name.
+  const lookups:string[]=[];
+  const headers={'access-control-allow-origin':'*','access-control-allow-headers':'*','access-control-allow-methods':'GET,POST,OPTIONS'};
+  const pixel=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=','base64');
+  await page.route('**/*',async route=>{
+    const request=route.request();const url=new URL(request.url());
+    if(url.hostname==='127.0.0.1'&&url.port==='3113')return route.continue();
+    if(request.method()==='OPTIONS')return route.fulfill({status:204,headers});
+    if(url.hostname==='127.0.0.1'&&url.port==='8787'){
+      if(url.pathname==='/capabilities')return route.fulfill({json:{groups:['plant'],policyUrl:'https://example.org/privacy'},headers});
+      if(url.pathname==='/identify')return route.fulfill({json:{state:'candidates',provider:'plantnet',modelVersion:'test',candidates:[{scientificName:'Pinus densiflora',commonName:'Japanese red pine',score:.72}],needsHumanReview:true},headers});
+      return route.fulfill({status:200,headers,body:'{"status":"ok"}'});
+    }
+    if(url.hostname==='mock.supabase.co'){
+      if(url.pathname==='/auth/v1/signup'){const expires=Math.floor(Date.now()/1000)+3600;return route.fulfill({json:{access_token:`${Buffer.from('{"alg":"none"}').toString('base64')}.${Buffer.from(JSON.stringify({sub:'guest-user',exp:expires,is_anonymous:true})).toString('base64')}.test`,refresh_token:'guest',expires_at:expires,expires_in:3600,token_type:'bearer',user:{id:'guest-user',aud:'authenticated',role:'authenticated',is_anonymous:true,app_metadata:{},user_metadata:{},created_at:'2026-01-01T00:00:00Z'}},headers});}
+      return route.fulfill({json:[],headers});
+    }
+    if(url.hostname==='www.wikidata.org'){lookups.push(url.searchParams.get('titles')??'');return route.fulfill({json:{entities:{Q1:{sitelinks:{kowiki:{title:'소나무'}},labels:{ko:{value:'소나무'}}}}},headers});}
+    if(url.hostname==='ko.wikipedia.org')return route.fulfill({json:{extract:'소나무(학명: Pinus densiflora)는 구과목 소나무과의 식물이다. 대한민국, 일본이 원산이다.',thumbnail:{source:'https://upload.wikimedia.org/reference.png'},content_urls:{mobile:{page:'https://ko.m.wikipedia.org/wiki/소나무'}}},headers});
+    if(url.hostname==='upload.wikimedia.org')return route.fulfill({contentType:'image/png',body:pixel});
+    return route.abort();
+  });
+  await page.goto('/mobile/');
+  await page.getByRole('button',{name:'촬영',exact:true}).click();
+  await page.getByLabel('앨범 사진 선택').setInputFiles('public/icon-192.png');
+  await page.getByLabel('인물과 개인정보가 없는 사진이며, 사진을 식별 서비스에 보내 분석하는 데 동의합니다').check();
+  await page.getByRole('button',{name:'가입 없이 바로 확인하기',exact:true}).click();
+  const result=page.getByRole('region',{name:'식별 결과'});
+  await expect(result.getByText('소나무',{exact:true}).first()).toBeVisible();
+  await expect(result.getByText('Pinus densiflora',{exact:true}).first()).toBeVisible();
+  await expect(result.getByText('소나무는 구과목 소나무과의 식물이다. 대한민국, 일본이 원산이다.')).toBeVisible();
+  await expect(result.getByRole('img',{name:'소나무 참고 사진'})).toBeVisible();
+  await expect(result.getByText('출처: 위키백과',{exact:false})).toBeVisible();
+  await expect(result.getByText('사진과 많이 닮았어요')).toBeVisible();
+  await expect(result.getByText('Japanese red pine')).toHaveCount(0);
+  expect(lookups).toEqual(['Pinus densiflora']);
+  expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await result.getByRole('button',{name:'소나무 이름을 미확정 초안에 반영'}).click();
+  await expect.poll(async()=>(await storedRecords(page))[0]?.species).toBe('소나무');
+  expect((await storedRecords(page))[0]).toMatchObject({scientificName:'Pinus densiflora',aiAssisted:true});
+});

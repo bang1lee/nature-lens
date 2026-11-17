@@ -12,6 +12,8 @@ const CloudPanel = dynamic(() => import('./CloudPanel'), {loading: () => <p clas
 const QuickCapture = dynamic(() => import('./QuickCapture'), {loading: () => <p className="m-loading" role="status">화면을 준비하고 있어요…</p>});
 const Editor = dynamic(() => import('../Editor'), {loading: () => <p className="m-loading" role="status">편집 화면을 준비하고 있어요…</p>});
 import {useIdentificationReturn} from './useIdentificationReturn';
+import {identificationEndpoint} from '@/lib/ai/client';
+import TaxonCard from './TaxonCard';
 import SpecimenPanel from './SpecimenPanel';
 import CommunityHome from './CommunityHome';
 const CommunityMap = dynamic(() => import('./CommunityMap'), {ssr:false, loading:()=> <p>지도를 준비하고 있어요.</p>});
@@ -59,6 +61,8 @@ export default function MobileApp({webBoard=false}:{webBoard?:boolean}) {
   useEffect(() => {
     setToday(new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }));
     void load().catch(() => setError('기록을 불러오지 못했어요. 브라우저의 저장 권한을 확인해 주세요.')).finally(() => setLoading(false));
+    // Wake the idle identification host early. No photo or account data is sent.
+    if (identificationEndpoint && navigator.onLine) void fetch(`${identificationEndpoint}/health`, {mode:'no-cors',cache:'no-store',credentials:'omit'}).catch(() => {});
     const online = () => setOffline(!navigator.onLine);
     online(); window.addEventListener('online', online); window.addEventListener('offline', online);
     const refresh = () => { if (document.visibilityState === 'visible') void load().catch(() => setError('기록을 새로 불러오지 못했어요.')); };
@@ -124,7 +128,7 @@ export default function MobileApp({webBoard=false}:{webBoard?:boolean}) {
       </section> : detail ? <section className="m-detail">
         <header className="m-header"><button className="m-icon" aria-label="목록으로" disabled={detailBusy||!!editing} onClick={() => { setDetail(null); setTab('records'); }}><ArrowLeft/></button><span>나의 관찰</span><span className="m-draft-chip">{detail.status === 'reviewed' ? '내 확인 완료' : '초안'}</span></header>
         <img className="m-detail-photo" src={detail.photo} alt={detail.title}/>
-        <div className="m-detail-copy"><span className="m-muted">{detail.date} · {detail.region || '지역 비공개'}</span><h1>{detail.title}</h1><p className="m-species">{detail.species || '생물 이름은 나중에 확인해도 돼요'}</p>
+        <div className="m-detail-copy"><span className="m-muted">{detail.date} · {detail.region || '지역 비공개'}</span><h1>{detail.title}</h1><p className="m-species">{detail.species || '생물 이름은 나중에 확인해도 돼요'}</p>{detail.scientificName&&!detail.demo&&<TaxonCard key={`taxon-${detail.scientificName}`} scientificName={detail.scientificName}/>}
           <fieldset className="m-identification-group" disabled={detailPublishing||detailLocationBusy||!!editing}><legend className="m-visually-hidden">이름 확인</legend><IdentificationPanel key={`${detail.id}-${detail.updatedAt}`} record={detail} onBusyChange={setDetailIdentifying} onRetake={()=>{setReobserveFrom(detail);setSaved(null);setCapture(true);window.scrollTo(0,0);}} onApplied={record=>{setDetail(record);void load().catch(()=>setError('목록을 다시 열어 주세요.'));}}/></fieldset>
           <BetaPublish key={`public-${detail.id}`} record={detail} disabled={detailIdentifying||detailLocationBusy||!!editing} onBusyChange={setDetailPublishing}/>
           <fieldset className="m-identification-group" disabled={detailBusy||!!editing}><legend className="m-visually-hidden">기록 관리</legend>

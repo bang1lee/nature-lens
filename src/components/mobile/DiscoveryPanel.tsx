@@ -57,9 +57,9 @@ export default function DiscoveryPanel({record,draft=false,onApplied,onBusyChang
   finally{flight.current=false;if(active.current){setBusy(false);onBusyChange?.(false);}}
  }
  useEffect(()=>{setRound(null);setError('');if(access==='signed-in'&&record.discoveryId)void run('read');else controller.current?.abort();},[access,record.discoveryId]);
- async function apply(index:number){
+ async function apply(index:number,koreanName?:string){
   if(flight.current||!round?.result||access!=='signed-in')return;flight.current=true;setBusy(true);onBusyChange?.(true);
-  try{const result=round.result;const updated=candidateDraft(record,result.candidates[index]);const saved=await saveObservation(updated,record.updatedAt);if(active.current)onApplied(saved);}
+  try{const result=round.result;const updated=candidateDraft(record,{...result.candidates[index],...(koreanName?{commonName:koreanName.slice(0,100)}:{})});const saved=await saveObservation(updated,record.updatedAt);if(active.current)onApplied(saved);}
   catch{if(active.current)setError('기록에 반영하지 못했어요. 다시 열어 주세요.');}
   finally{flight.current=false;if(active.current){setBusy(false);onBusyChange?.(false);}}
  }

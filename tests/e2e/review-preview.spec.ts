@@ -24,5 +24,5 @@ test('review examples remain isolated from saved observations',async({page})=>{
  await page.getByRole('button',{name:'검수되지 않은 기록 기록 열기'}).click();
  await expect(page.locator('.m-detail .m-draft-chip')).toHaveText('초안');
  await page.reload();await page.getByRole('button',{name:'내 기록',exact:true}).click();
- await expect(page.getByRole('button',{name:'검수되지 않은 기록 기록 열기'})).toContainText('나만 보는 초안');
+ await expect(page.getByRole('button',{name:'검수되지 않은 기록 기록 열기'})).toContainText('기기 기록 · 초안');
 });
