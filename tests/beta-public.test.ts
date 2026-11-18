@@ -10,7 +10,7 @@ describe('public beta boundary',()=>{
  });
  it('omits photo and both location fields without changing the local record',()=>{
   const record={...newObservation(),id:'local',title:'합성',photo:'data:image/jpeg;base64,YQ==',region:'경기 안성' as const,publicGrid:{latitude:37.1,longitude:127.3},noPeople:false};
-  const metadata=betaMetadata(record);expect(metadata).not.toHaveProperty('photo');expect(metadata).not.toHaveProperty('publicGrid');expect(metadata).not.toHaveProperty('region');expect(metadata.noPeople).toBe(false);expect(record.photo).toContain('data:');expect(record.publicGrid.latitude).toBe(37.1);
+  const metadata=betaMetadata({...record,symptoms:"비공개 관찰",symptomPhotos:[record.photo],photoLight:"shade",phenophase:"flower"});expect(metadata).not.toHaveProperty("symptoms");expect(metadata).not.toHaveProperty("symptomPhotos");expect(metadata).not.toHaveProperty("photoLight");expect(metadata).not.toHaveProperty("phenophase");expect(metadata).not.toHaveProperty('photo');expect(metadata).not.toHaveProperty('publicGrid');expect(metadata).not.toHaveProperty('region');expect(metadata.noPeople).toBe(false);expect(record.photo).toContain('data:');expect(record.publicGrid.latitude).toBe(37.1);
  });
  it('strips owner and non-public metadata from a feed item',()=>{
   const item=betaPublicItemSchema.parse({id:'11111111-1111-4111-8111-111111111111',title:'합성',species:'이름 후보',observed_on:'2026-11-15',notes:'합성 메모',photo_path:'11111111-1111-4111-8111-111111111111.jpg',published_at:'2026-11-15T00:00:00Z',owner_id:'private',record:{x:1}});

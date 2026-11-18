@@ -9,12 +9,13 @@ export type TaxonInfo = {
   koreanName: string | null;
   description: string | null;
   image: string | null;
+  imageCredit: {author:string; license:string; licenseUrl:string; sourceUrl:string} | null;
   url: string | null;
 };
 
 export const taxonInfoEnabled = process.env.NEXT_PUBLIC_TAXON_INFO !== 'off';
 
-const CACHE_KEY = 'nature-lens-taxon-info-v1';
+const CACHE_KEY = 'nature-lens-taxon-info-v2';
 const FOUND_TTL = 30 * 24 * 60 * 60 * 1000;
 const MISSING_TTL = 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 200;
@@ -88,14 +89,52 @@ async function queryWikidata(fetcher: Fetcher, name: string, signal?: AbortSigna
   return null;
 }
 
+// Commons metadata contains HTML. Extract text only; never insert metadata markup into the DOM.
+function metadataText(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const plain = value.replace(/<[^>]*>/g, ' ').replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (_, n: string) => {
+    const code = n[0].toLowerCase() === 'x' ? parseInt(n.slice(1), 16) : parseInt(n, 10);
+    return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : '';
+  }).replace(/&amp;/gi, '&').replace(/&quot;/gi, '"').replace(/&#39;|&apos;/gi, "'").replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
+  return plain && plain.length <= 500 ? plain : null;
+}
+function safeHttps(value: unknown, hosts: Set<string>): string | null {
+  const input = text(value);
+  try { const url = new URL(input ?? ''); return url.protocol === 'https:' && !url.username && !url.password && hosts.has(url.hostname) ? url.href : null; } catch { return null; }
+}
+async function commonsCredit(fetcher: Fetcher, thumbnail: string, signal?: AbortSignal): Promise<TaxonInfo['imageCredit']> {
+  const url = new URL(thumbnail);
+  // Wikimedia thumbnail paths contain the original Commons filename before the size component.
+  const match = url.pathname.match(/^\/wikipedia\/commons\/thumb\/([0-9a-f])\/([0-9a-f]{2})\/([^/]+)\/[^/]+$/i);
+  if (!match) return null;
+  let filename: string;
+  try { filename = decodeURIComponent(match[3]); } catch { return null; }
+  if (!filename || filename.includes('/') || filename.includes('\\')) return null;
+  const api = `https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url%7Cextmetadata&titles=${encodeURIComponent(`File:${filename}`)}&format=json&origin=*`;
+  const raw = await getJson(fetcher, api, signal) as {query?:{pages?:Record<string,{missing?:unknown;imageinfo?:{url?:unknown;descriptionurl?:unknown;extmetadata?:Record<string,{value?:unknown}>}[]}>}};
+  const page = Object.values(raw.query?.pages ?? {})[0];
+  const info = page && !('missing' in page) ? page.imageinfo?.[0] : undefined;
+  const original = safeHttps(info?.url, IMAGE_HOSTS);
+  const expectedPath = `/wikipedia/commons/${match[1]}/${match[2]}/${match[3]}`;
+  if (!original || new URL(original).pathname !== expectedPath) return null;
+  const sourceUrl = safeHttps(info?.descriptionurl, new Set(['commons.wikimedia.org']));
+  const author = metadataText(info?.extmetadata?.Artist?.value);
+  const license = metadataText(info?.extmetadata?.LicenseShortName?.value);
+  const licenseUrl = safeHttps(info?.extmetadata?.LicenseUrl?.value, new Set(['creativecommons.org']));
+  if (!sourceUrl || !author || !license || !licenseUrl || !/^https:\/\/creativecommons\.org\/(licenses|publicdomain)\//.test(licenseUrl)) return null;
+  return {author, license, licenseUrl, sourceUrl};
+}
 async function wikipediaSummary(fetcher: Fetcher, title: string, signal?: AbortSignal) {
   const raw = await getJson(fetcher, `https://ko.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`, signal) as { extract?: unknown; thumbnail?: { source?: unknown }; content_urls?: { mobile?: { page?: unknown } } };
-  let image = text(raw?.thumbnail?.source);
-  try { if (image && !IMAGE_HOSTS.has(new URL(image).hostname)) image = null; } catch { image = null; }
+  let image = safeHttps(raw?.thumbnail?.source, IMAGE_HOSTS);
+  let imageCredit:TaxonInfo['imageCredit'] = null;
+  if (image) { try { imageCredit = await commonsCredit(fetcher, image, signal); } catch { /* Text and name remain available. */ } }
+  if (!imageCredit) image = null;
   let url = text(raw?.content_urls?.mobile?.page);
-  try { if (url && !new URL(url).hostname.endsWith('.wikipedia.org')) url = null; } catch { url = null; }
+  try { const parsed = new URL(url ?? ''); if (parsed.protocol !== 'https:' || !['ko.wikipedia.org','ko.m.wikipedia.org'].includes(parsed.hostname)) url = null; } catch { url = null; }
   const extract = text(raw?.extract);
-  return { description: extract ? shortDescription(extract) : null, image, url };
+  // A reused extract needs its attribution link; never show uncredited text.
+  return { description: extract && url ? shortDescription(extract) : null, image, imageCredit, url };
 }
 
 /** Network lookup without caching. Returns null when nothing usable is found. */
@@ -105,7 +144,7 @@ export async function fetchTaxonInfo(scientificName: string, fetcher: Fetcher = 
     if (!hit) continue;
     const title = hit.title && HANGUL.test(hit.title) ? hit.title : null;
     const koreanName = (title ?? (hit.label && HANGUL.test(hit.label) ? hit.label : null))?.replace(/\s*\([^)]*\)$/, '') ?? null;
-    let summary: Awaited<ReturnType<typeof wikipediaSummary>> = { description: null, image: null, url: null };
+    let summary: Awaited<ReturnType<typeof wikipediaSummary>> = { description: null, image: null, imageCredit: null, url: null };
     if (title) { try { summary = await wikipediaSummary(fetcher, title, signal); } catch { /* The name alone is still useful. */ } }
     if (!koreanName && !summary.description) continue;
     return { scientificName, matchedName: candidate.name, level: candidate.level, koreanName, ...summary };

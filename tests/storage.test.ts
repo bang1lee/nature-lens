@@ -46,3 +46,13 @@ it('keeps analysis across reload but removes it when the photograph changes',asy
  const changed=await saveObservation({...saved,photo:'data:image/jpeg;base64,Yg=='},saved.updatedAt);
  expect(changed.aiIdentification).toBeUndefined();await deleteObservation(changed.id);
 });
+
+it('persists field notes on reload and clears photo brightness when the photo changes',async()=>{
+ const item={...record,id:'field-notes',symptoms:'잎 가장자리가 갈색',photoLight:'shade' as const};
+ const saved=await saveObservation(item,null);
+ const loaded=(await readLibrary()).observations.find(o=>o.id===item.id)!;
+ expect(loaded).toMatchObject({symptoms:item.symptoms,photoLight:'shade'});
+ const changed=await saveObservation({...loaded,photo:'data:image/jpeg;base64,Yg=='},saved.updatedAt);
+ expect(changed.symptoms).toBe(item.symptoms);expect(changed.photoLight).toBeUndefined();
+ await deleteObservation(item.id);
+});

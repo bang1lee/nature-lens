@@ -1,4 +1,7 @@
 import {describe,it,expect} from 'vitest';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {TaxonDetails} from '../src/components/mobile/TaxonCard';
 import {fetchTaxonInfo,nameCandidates,shortDescription} from '../src/lib/taxon-info';
 
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
@@ -21,12 +24,34 @@ describe('encyclopedia lookup for a scientific name',()=>{
   const calls:string[]=[];
   const info=await fetchTaxonInfo('Pinus densiflora',async url=>{calls.push(url);
    if(url.startsWith('https://www.wikidata.org/'))return json(entity('소나무','소나무'));
-   return json({extract:'소나무(학명: Pinus densiflora)는 구과목 소나무과의 식물이다.',thumbnail:{source:'https://upload.wikimedia.org/a.jpg'},content_urls:{mobile:{page:'https://ko.m.wikipedia.org/wiki/소나무'}}});
+   if(url.startsWith('https://commons.wikimedia.org/'))return json({query:{pages:{'1':{imageinfo:[{url:'https://upload.wikimedia.org/wikipedia/commons/a/ab/Pine.jpg',descriptionurl:'https://commons.wikimedia.org/wiki/File:Pine.jpg',extmetadata:{Artist:{value:'<a href="/wiki/User:A">Author &amp; Co</a>'},LicenseShortName:{value:'CC BY-SA 4.0'},LicenseUrl:{value:'https://creativecommons.org/licenses/by-sa/4.0/'}}}]}}}});
+   return json({extract:'소나무(학명: Pinus densiflora)는 구과목 소나무과의 식물이다.',thumbnail:{source:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Pine.jpg/320px-Pine.jpg'},content_urls:{mobile:{page:'https://ko.m.wikipedia.org/wiki/소나무'}}});
   });
-  expect(info).toMatchObject({koreanName:'소나무',level:'species',matchedName:'Pinus densiflora',image:'https://upload.wikimedia.org/a.jpg',url:'https://ko.m.wikipedia.org/wiki/소나무'});
+  expect(info).toMatchObject({koreanName:'소나무',level:'species',matchedName:'Pinus densiflora',image:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Pine.jpg/320px-Pine.jpg',url:'https://ko.m.wikipedia.org/wiki/소나무'});
   expect(info?.description).toBe('소나무는 구과목 소나무과의 식물이다.');
-  expect(calls).toHaveLength(2);
+  expect(calls).toHaveLength(3);
+  expect(info?.imageCredit).toMatchObject({author:'Author & Co',license:'CC BY-SA 4.0',sourceUrl:'https://commons.wikimedia.org/wiki/File:Pine.jpg'});
   expect(decodeURIComponent(calls[0])).toContain('sites=specieswiki&titles=Pinus densiflora');
+ });
+ it('hides photos without verified Commons license, author, or matching original while keeping attributed text',async()=>{
+  for(const fields of [
+   {Artist:{value:'Author'},LicenseShortName:{value:'CC BY 4.0'}},
+   {LicenseShortName:{value:'CC BY 4.0'},LicenseUrl:{value:'https://creativecommons.org/licenses/by/4.0/'}},
+   {Artist:{value:'Author'},LicenseShortName:{value:'CC BY 4.0'},LicenseUrl:{value:'https://evil.example/license'}},
+  ]) {
+   const info=await fetchTaxonInfo('Pinus densiflora',async url=>url.startsWith('https://www.wikidata.org/')?json(entity('소나무')):url.startsWith('https://commons.wikimedia.org/')?json({query:{pages:{'1':{imageinfo:[{url:'https://upload.wikimedia.org/wikipedia/commons/a/ab/Pine.jpg',descriptionurl:'https://commons.wikimedia.org/wiki/File:Pine.jpg',extmetadata:fields}]}}}}):json({extract:'소나무 설명입니다.',thumbnail:{source:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Pine.jpg/320px-Pine.jpg'},content_urls:{mobile:{page:'https://ko.m.wikipedia.org/wiki/소나무'}}}));
+   expect(info).toMatchObject({image:null,imageCredit:null,description:'소나무 설명입니다.'});
+  }
+ });
+ it('does not reuse text without a valid article attribution link',async()=>{
+  const info=await fetchTaxonInfo('Pinus densiflora',async url=>url.startsWith('https://www.wikidata.org/')?json(entity('소나무')):json({extract:'설명입니다.',content_urls:{mobile:{page:'https://fake.wikipedia.org/wiki/x'}}}));
+  expect(info).toMatchObject({koreanName:'소나무',description:null,url:null});
+ });
+ it('renders credits as text and never interprets metadata as markup',()=>{
+  const html=renderToStaticMarkup(createElement(TaxonDetails,{lookup:{state:'done',info:{scientificName:'Pinus densiflora',matchedName:'Pinus densiflora',level:'species',koreanName:'소나무',description:'설명',image:'https://upload.wikimedia.org/test.jpg',imageCredit:{author:'<img src=x onerror=alert(1)>',license:'CC BY 4.0',licenseUrl:'https://creativecommons.org/licenses/by/4.0/',sourceUrl:'https://commons.wikimedia.org/wiki/File:Test.jpg'},url:'https://ko.wikipedia.org/wiki/소나무'}}}));
+  expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
+  expect(html).toContain('CC BY-SA 4.0');
+  expect(html).toContain('원문 일부를 짧게 편집');
  });
  it('falls back to the genus and marks it, and drops images or links from other hosts',async()=>{
   const info=await fetchTaxonInfo('Taraxacum sect. Taraxacum',async url=>url.startsWith('https://www.wikidata.org/')?json(entity('민들레 (식물)')):json({extract:'민들레는 여러해살이풀이다.',thumbnail:{source:'https://evil.example/a.jpg'},content_urls:{mobile:{page:'https://evil.example/x'}}}));

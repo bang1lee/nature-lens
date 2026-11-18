@@ -290,7 +290,12 @@ test('a result shows the Korean name, description and reference photo, and recor
       return route.fulfill({json:[],headers});
     }
     if(url.hostname==='www.wikidata.org'){lookups.push(url.searchParams.get('titles')??'');return route.fulfill({json:{entities:{Q1:{sitelinks:{kowiki:{title:'소나무'}},labels:{ko:{value:'소나무'}}}}},headers});}
-    if(url.hostname==='ko.wikipedia.org')return route.fulfill({json:{extract:'소나무(학명: Pinus densiflora)는 구과목 소나무과의 식물이다. 대한민국, 일본이 원산이다.',thumbnail:{source:'https://upload.wikimedia.org/reference.png'},content_urls:{mobile:{page:'https://ko.m.wikipedia.org/wiki/소나무'}}},headers});
+    if(url.hostname==='ko.wikipedia.org')return route.fulfill({json:{extract:'소나무(학명: Pinus densiflora)는 구과목 소나무과의 식물이다. 대한민국, 일본이 원산이다.',thumbnail:{source:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Pine.png/320px-Pine.png'},content_urls:{mobile:{page:'https://ko.m.wikipedia.org/wiki/소나무'}}},headers});
+    if(url.hostname==='commons.wikimedia.org')return route.fulfill({headers,json:{query:{pages:{'1':{imageinfo:[{
+      url:'https://upload.wikimedia.org/wikipedia/commons/a/ab/Pine.png',
+      descriptionurl:'https://commons.wikimedia.org/wiki/File:Pine.png',
+      extmetadata:{Artist:{value:'테스트 사진가'},LicenseShortName:{value:'CC BY 4.0'},LicenseUrl:{value:'https://creativecommons.org/licenses/by/4.0/'}}
+    }]}}}}});
     if(url.hostname==='upload.wikimedia.org')return route.fulfill({contentType:'image/png',body:pixel});
     return route.abort();
   });
@@ -304,7 +309,8 @@ test('a result shows the Korean name, description and reference photo, and recor
   await expect(result.getByText('Pinus densiflora',{exact:true}).first()).toBeVisible();
   await expect(result.getByText('소나무는 구과목 소나무과의 식물이다. 대한민국, 일본이 원산이다.')).toBeVisible();
   await expect(result.getByRole('img',{name:'소나무 참고 사진'})).toBeVisible();
-  await expect(result.getByText('출처: 위키백과',{exact:false})).toBeVisible();
+  await expect(result.getByText('테스트 사진가',{exact:false})).toBeVisible();
+  await expect(result.getByRole('link',{name:'CC BY 4.0',exact:true})).toBeVisible();
   await expect(result.getByText('사진과 많이 닮았어요')).toBeVisible();
   await expect(result.getByText('Japanese red pine')).toHaveCount(0);
   expect(lookups).toEqual(['Pinus densiflora']);

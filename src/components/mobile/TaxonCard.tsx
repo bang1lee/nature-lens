@@ -24,10 +24,10 @@ export function TaxonDetails({lookup}:{lookup:TaxonLookup}){
  const info=lookup.info;
  if(!info)return null;
  return <div className="nl-taxon">
-  {info.image&&<img src={info.image} alt={`${info.koreanName??info.matchedName} 참고 사진`} loading="lazy" decoding="async" referrerPolicy="no-referrer"/>}
+  {info.image&&info.imageCredit&&<figure><img src={info.image} alt={`${info.koreanName??info.matchedName} 참고 사진`} loading="lazy" decoding="async" referrerPolicy="no-referrer"/><figcaption>사진: {info.imageCredit.author} · <a href={info.imageCredit.licenseUrl} target="_blank" rel="noreferrer">{info.imageCredit.license}</a> · <a href={info.imageCredit.sourceUrl} target="_blank" rel="noreferrer">원본과 이용 조건</a></figcaption></figure>}
   {info.level==='genus'&&<p className="nl-taxon-level">종까지는 찾지 못해 <i>{info.matchedName}</i> 속(屬) 정보를 보여드려요.</p>}
   {info.description&&<p>{info.description}</p>}
-  <p className="nl-taxon-source">참고 사진·이름·설명 출처: 위키백과. 내 사진과 다른 개체이며 표준 식물명과 다를 수 있어요.{info.url&&<> <a href={info.url} target="_blank" rel="noreferrer"><BookOpen size={14} aria-hidden="true"/> 더 읽기</a></>}</p>
+  <p className="nl-taxon-source">이름·설명은 위키백과와 위키데이터를 참고했어요. 표준 식물명과 다를 수 있어요.{info.description&&<> 설명은 원문 일부를 짧게 편집했으며 <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>으로 제공돼요.</>}{info.image&&<> 참고 사진은 내 사진과 다른 개체예요.</>}{info.url&&<> <a href={info.url} target="_blank" rel="noreferrer"><BookOpen size={14} aria-hidden="true"/> 더 읽기</a></>}</p>
  </div>;
 }
 

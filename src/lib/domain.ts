@@ -6,15 +6,18 @@ const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>{const d=new Date
 export const collectionSchema=z.object({id:text(100).min(1),name:text(80).min(1)}).strict();
 // Validate new edits without making legacy backups or stored collections unreadable.
 export const collectionWriteSchema=collectionSchema.extend({name:z.string().trim().min(1,'컬렉션 이름을 입력해 주세요.').max(80)});
+const photoSchema=z.string().max(6_000_000).regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/);
 export const observationSchema=z.object({
  discoveryId:z.uuid().optional(), identificationTiming:z.enum(['now','tomorrow']).optional(),
  aiIdentification:z.object({decision:decisionSchema,analyzedAt:z.iso.datetime(),elapsedMs:z.number().nonnegative()}).strict().optional(),
  specimenId:text(100).min(1).optional(),previousObservationId:text(100).min(1).optional(),
+ phenophase:z.enum(['bud','flower','fruit']).optional(),
+ symptoms:text(1000).optional(),symptomPhotos:z.array(photoSchema).max(3).optional(),photoLight:z.enum(['shade','partial','sun']).optional(),
  taxonGroup:z.enum(['plant','insect','other']).optional(),region:regionLabelSchema.optional(),publicGrid:publicGridSchema.optional(),
  id:text(100).min(1),title:text(120).min(1),species:text(100),scientificName:text(140),date,
  notes:text(4000),habitat:text(150),protection:z.enum(['unknown','protected','common']),
  consent:z.boolean(),noPeople:z.boolean(),aiAssisted:z.boolean(),status:z.enum(['draft','reviewed']),
- sessionId:text(100).nullable(),photo:z.string().max(6_000_000).regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/),demo:z.boolean(),updatedAt:z.iso.datetime(),
+ sessionId:text(100).nullable(),photo:photoSchema,demo:z.boolean(),updatedAt:z.iso.datetime(),
 }).strict();
 export type Observation=z.infer<typeof observationSchema>;
 export type Collection=z.infer<typeof collectionSchema>;

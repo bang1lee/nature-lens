@@ -6,7 +6,7 @@ import {preparePhoto} from '../image';
 const BUCKET='nature-lens-beta-public';
 const RECORD_COLUMNS='id,local_id,photo_path,photo_sha256,record,state,published_at';
 const FEED_COLUMNS='id,title,species,observed_on,notes,photo_path,published_at';
-const betaRecordSchema=observationSchema.omit({photo:true,region:true,publicGrid:true});
+const betaRecordSchema=observationSchema.omit({photo:true,region:true,publicGrid:true,symptoms:true,symptomPhotos:true,photoLight:true,phenophase:true});
 export type BetaMetadata=z.infer<typeof betaRecordSchema>;
 export type BetaOwnedObservation={id:string;localId:string;record:BetaMetadata;photoPath:string};
 export type BetaFeedItem={id:string;title:string;species:string;observedOn:string;notes:string;photoUrl:string};
@@ -17,7 +17,7 @@ export function requireBetaConsent(confirm:unknown):asserts confirm is BetaConfi
  if(!confirmSchema.safeParse(confirm).success)throw new Error('공개 저장과 사진에 사람·개인정보가 없다는 확인이 모두 필요해요.');
 }
 export function betaMetadata(observation:Observation):BetaMetadata {
- const {photo:_photo,region:_region,publicGrid:_grid,...metadata}=observationSchema.parse(observation);
+ const {photo:_photo,region:_region,publicGrid:_grid,symptoms:_symptoms,symptomPhotos:_symptomPhotos,photoLight:_photoLight,phenophase:_phenophase,...metadata}=observationSchema.parse(observation);
  return betaRecordSchema.parse(metadata);
 }
 const rowSchema=z.object({id:z.uuid(),local_id:z.string().min(1).max(100),photo_path:z.string().regex(/^[0-9a-f-]{36}\.jpg$/),photo_sha256:z.string().regex(/^[0-9a-f]{64}$/),record:betaRecordSchema,state:z.enum(['staging','published']),published_at:z.string().nullable()});

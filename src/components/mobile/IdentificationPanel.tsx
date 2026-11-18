@@ -15,10 +15,11 @@ import type {Observation} from '@/lib/domain';
 import {readLibrary,saveObservation} from '@/lib/storage';
 import DiscoveryPanel from './DiscoveryPanel';
 import {preparePhoto} from '@/lib/image';
+import ExpertRequest from './ExpertRequest';
 
 export type IdentificationIntent={consume:()=>boolean;cancel:()=>void;isPending:()=>boolean};
-type Props={draft?:boolean;hideChoice?:boolean;onRetake?:()=>void;onBusyChange?:(busy:boolean)=>void;record:Observation;onApplied:(record:Observation)=>void;startIntent?:IdentificationIntent};
-function ImmediateIdentification({record,onApplied,draft=false,onBusyChange,onRetake,startIntent}:Props) {
+type Props={draft?:boolean;hideChoice?:boolean;hideExpertRequest?:boolean;onRetake?:()=>void;onBusyChange?:(busy:boolean)=>void;record:Observation;onApplied:(record:Observation)=>void;startIntent?:IdentificationIntent};
+function ImmediateIdentification({record,onApplied,draft=false,onBusyChange,onRetake,startIntent,hideExpertRequest=false}:Props) {
  const [mode,setMode]=useState<'local'|'external'>('external');
  const [localReady,setLocalReady]=useState(false);const [localApp,setLocalApp]=useState(false);
  const [group,setGroup]=useState<'plant'|'insect'>(record.taxonGroup==='insect'?'insect':'plant');
@@ -109,6 +110,7 @@ function ImmediateIdentification({record,onApplied,draft=false,onBusyChange,onRe
   <h2 id="identify-title"><Sparkles size={20} aria-hidden="true"/> 바로 확인하기</h2>
   <p>AI가 찾은 이름 후보예요. 확정된 이름은 아니에요.</p>
   {decision&&<div ref={resultRegion} tabIndex={-1} role="region" aria-label="식별 결과"><DecisionResult decision={decision} saving={saving||busy} onRetake={onRetake} onCandidate={(index,koreanName)=>{const taxon=decision.state==='candidates'?decision.candidates[index]:null;if(taxon)void apply({scientificName:taxon.scientificName,commonName:(koreanName||taxon.koreanName||taxon.displayName||'').slice(0,100),score:taxon.score});}}/></div>}
+  {decision&&!hideExpertRequest&&<ExpertRequest observationId={record.id} demo={record.demo||draft}/>}
   <p role="status" aria-live="polite">{message}</p>
   {decision?<details><summary>다시 식별하기</summary>{controls}</details>:controls}
   {record.aiAssisted&&<p className="m-private-note">AI 후보를 반영한 미확정 기록입니다.</p>}

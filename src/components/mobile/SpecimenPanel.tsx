@@ -1,10 +1,12 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, useRef } from 'react';
 import { Camera, ChevronRight, Leaf } from 'lucide-react';
 import type { Observation } from '@/lib/domain';
 import { observationTimeline } from '@/lib/reobservation';
 import './specimen.css';
+import FieldNotes, {type FieldNotesHandle} from './FieldNotes';
+import SeasonalTrend from './SeasonalTrend';
 
 export interface SpecimenPanelProps {
   record: Observation;
@@ -21,6 +23,8 @@ function observationDate(date: string) {
 /** Only explicit specimen links belong here; a species name is not an identity. */
 export default function SpecimenPanel({ record, records, onReobserve, onOpen }: SpecimenPanelProps) {
   const headingId = useId();
+  const fieldNotes = useRef<FieldNotesHandle>(null);
+  async function transition(action:()=>void) { if (await fieldNotes.current?.save()) action(); }
   const timeline = observationTimeline(records, record);
   const missingPrevious = Boolean(record.previousObservationId && !records.some(item => item.id === record.previousObservationId));
 
@@ -41,7 +45,7 @@ export default function SpecimenPanel({ record, records, onReobserve, onOpen }: 
           return (
             <li key={item.id} className={current ? 'is-current' : undefined}>
               <span className="m-specimen-dot" aria-hidden="true" />
-              <button type="button" className="m-specimen-entry" onClick={() => onOpen(item)} aria-current={current ? 'true' : undefined} aria-label={`${observationDate(item.date)}, ${item.title || '이름 없는 관찰'}${current ? ', 보고 있는 기록' : ', 기록 열기'}`}>
+              <button type="button" className="m-specimen-entry" onClick={() => { if (!current) void transition(() => onOpen(item)); }} aria-current={current ? 'true' : undefined} aria-label={`${observationDate(item.date)}, ${item.title || '이름 없는 관찰'}${current ? ', 보고 있는 기록' : ', 기록 열기'}`}>
                 {item.photo ? <img src={item.photo} alt="" width={58} height={68} loading="lazy" /> : <span className="m-specimen-no-photo"><Leaf size={23} aria-hidden="true" /></span>}
                 <span className="m-specimen-entry-copy">
                   <time dateTime={item.date}>{observationDate(item.date)}</time>
@@ -55,7 +59,9 @@ export default function SpecimenPanel({ record, records, onReobserve, onOpen }: 
         })}
       </ol>
       {timeline.length === 1 && <p className="m-specimen-invitation">다음에 만날 때 새 사진을 남겨 주세요. 작은 변화가 이곳에 쌓여요.</p>}
-      <button type="button" className="m-specimen-reobserve" onClick={onReobserve}><Camera size={18} aria-hidden="true" />같은 대상 다시 관찰하기</button>
+      <button type="button" className="m-specimen-reobserve" onClick={() => void transition(onReobserve)}><Camera size={18} aria-hidden="true" />같은 대상 다시 관찰하기</button>
+      <FieldNotes ref={fieldNotes} key={record.id} record={record} onSaved={onOpen} onReobserve={onReobserve} />
+      <SeasonalTrend records={records} scientificName={record.scientificName} />
       <p className="m-specimen-footnote">같은 종이어도 다른 개체라면 새 기록으로 남겨 주세요.</p>
     </section>
   );
