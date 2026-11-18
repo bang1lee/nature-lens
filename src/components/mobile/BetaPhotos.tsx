@@ -162,7 +162,7 @@ export function BetaPublish({record,disabled=false,onBusyChange}:{record:Observa
   </section>;
 }
 
-export function BetaFeed() {
+export function BetaFeed({showUnavailable=false}:{showUnavailable?:boolean} = {}) {
   const [items,setItems]=useState<BetaFeedItem[]>([]);
   const [state,setState]=useState<'loading'|'ready'|'error'>('loading');
   const [attempt,setAttempt]=useState(0);
@@ -173,7 +173,7 @@ export function BetaFeed() {
     void getSupabase().then(c=>bounded(listBetaFeed(c))).then(rows=>{if(active){setItems(rows);setState('ready');}}).catch(()=>{if(active){setItems([]);setState('error');}});
     return()=>{active=false;};
   },[attempt]);
-  if(!cloudConfig.enabled)return null;
+  if(!cloudConfig.enabled)return showUnavailable?<section className="beta-feed" aria-labelledby="beta-feed-heading"><div className="beta-heading"><Images size={20} aria-hidden="true"/><h2 id="beta-feed-heading">함께 남긴 사진</h2></div><p role="status">지금은 공개 사진을 불러올 수 없어요. 나의 관찰은 사진으로 기록할 수 있어요.</p></section>:null;
   return <section className="beta-feed" aria-labelledby="beta-feed-heading">
     <div className="beta-heading"><Images size={20} aria-hidden="true"/><h2 id="beta-feed-heading">함께 남긴 사진</h2></div>
     <p>베타 참여자가 공개한 최근 기록이에요.</p>

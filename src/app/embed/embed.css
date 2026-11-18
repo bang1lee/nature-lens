@@ -1,0 +1,41 @@
+/* Embed uses the observation app's existing colors and components in the available frame. */
+.m-embed.m-stage{display:block;min-height:100dvh;padding:0;background:#f5f2e9}
+.m-embed .m-preview-note{display:none}
+.m-embed .m-app{width:100%;max-width:none;min-height:100dvh;margin:0;border:0;border-radius:0;box-shadow:none}
+.m-embed .m-content{min-height:100dvh}
+.m-embed .e-top-link{display:flex;justify-content:flex-end;padding:8px 24px 0}
+.m-embed .e-top-link a{display:inline-flex;align-items:center;gap:5px;min-height:36px;color:#456048;font-size:12px;text-decoration:none}
+.m-embed .e-top-link a:hover{text-decoration:underline}
+.m-embed .m-header{min-height:60px;padding-top:8px;padding-bottom:12px}
+.m-embed .e-intro{position:relative;isolation:isolate;min-height:180px;margin:0 16px;border-radius:20px 20px 6px 6px;overflow:hidden;display:flex;align-items:flex-end;color:#fffdf0;background:#243c2b}
+.m-embed .e-intro:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#10291be8 0%,#10291b9c 60%,#10291b55 100%)}
+.m-embed .e-intro>img{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover}
+.m-embed .e-intro-copy{padding:22px 22px 24px}
+.m-embed .e-intro-copy>span{font-size:11px;color:#e5ebdb}
+.m-embed .e-intro h1{font-family:var(--serif),serif;font-size:27px;font-weight:500;line-height:1.35;letter-spacing:-1px;margin:8px 0}
+.m-embed .e-intro p{font-size:12px;line-height:1.6;margin:0;color:#f1f4e5}
+.m-embed .e-intro>small{position:absolute;right:12px;bottom:9px;color:#e5ebdb;font-size:9px}
+.m-embed .e-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 16px 24px}
+.m-embed .e-actions button{position:relative;min-width:0;min-height:132px;padding:16px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:12px;text-align:left;color:#203c30;background:#fbfaf4;border:1px solid #b8c8b1;border-radius:12px}
+.m-embed .e-actions button:hover{background:#e7eee1}
+.m-embed .e-actions button>svg:last-child{position:absolute;right:15px;top:18px}
+.m-embed .e-actions button span{display:flex;flex-direction:column;gap:5px;min-width:0}
+.m-embed .e-actions strong{font-size:14px;line-height:1.4;word-break:keep-all}
+.m-embed .e-actions small{color:#53634f;font-size:11px;line-height:1.4;word-break:keep-all}
+.m-embed .e-discover{padding:4px 24px 28px}
+.m-embed .e-back{gap:8px;font-size:13px}
+.m-embed .e-discover h1{font-family:var(--serif),serif;font-weight:500;margin:16px 0}
+.m-embed .e-discover .beta-feed{margin-top:12px}
+@media(max-width:1023px){
+ .m-embed .m-content{padding-bottom:120px}
+ .m-embed .m-tabbar{left:50%;bottom:max(12px,env(safe-area-inset-bottom));width:calc(100% - 24px);max-width:480px;margin-left:0;transform:translateX(-50%)}
+ .m-embed .m-in-capture .m-content{padding-bottom:0}
+}
+@media(min-width:1024px){
+ .m-embed .e-top-link,.m-embed .m-header,.m-embed .e-intro,.m-embed .e-actions,.m-embed .e-discover{max-width:900px;margin-left:auto;margin-right:auto}
+ .m-embed .e-intro{min-height:260px}
+ .m-embed .e-intro-copy{padding:36px}
+ .m-embed .e-intro h1{font-size:38px}
+ .m-embed .e-actions{gap:16px}
+ .m-embed .e-actions button{min-height:140px;padding:20px}
+}
